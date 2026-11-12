@@ -1,0 +1,85 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R /F2 6 0 R >> >> >>
+endobj
+4 0 obj
+<< /Length 1270 >>
+stream
+0.83 0.63 0.29 rg
+0 760 612 32 re f
+0.93 0.90 0.84 rg
+0 0 612 48 re f
+BT
+1 1 1 rg
+/F2 10 Tf
+36 771 Td
+(ASSET HAWK   ORBITAL OCCUPANCY INTELLIGENCE) Tj
+0.07 0.08 0.10 rg
+/F2 18 Tf
+0 -48 Td
+(Site Imagery Pack) Tj
+/F1 10 Tf
+0.15 0.16 0.18 rg
+-20 Td
+(Four nadir tiles tasked over the selected London multifamily. Footage is) Tj
+-14 Td
+(demonstration-grade aerial loops \(Pexels, transcoded 720p\) standing in for a VHR strip.) Tj
+-14 Td
+() Tj
+-14 Td
+(Tile Z-N  North courtyard   /videos/zone-a.mp4   Pexels 31210490) Tj
+-14 Td
+(Tile Z-E  East street grid  /videos/zone-b.mp4   Pexels 31061104) Tj
+-14 Td
+(Tile Z-W  West terrace      /videos/zone-c.mp4   Pexels 5597032) Tj
+-14 Td
+(Tile Z-S  South car park    /videos/zone-d.mp4   Pexels 36721611) Tj
+-14 Td
+() Tj
+-14 Td
+(VLM overlay classes: house \(gold\), car \(cyan\), person \(signal red\).) Tj
+-14 Td
+(House footprints are stable \(detector + heuristic\). Cars and people are tracked per frame) Tj
+-14 Td
+(with interpolation.) Tj
+-14 Td
+() Tj
+-14 Td
+(This pack is timestamped to the collection. It is not seller marketing imagery. Revisit) Tj
+-14 Td
+(windows: next SSO morning pass + weekend evening.) Tj
+ET
+0.07 0.08 0.10 rg
+BT
+/F1 8 Tf
+36 28 Td
+(DEMO / UNCLASSIFIED    p. 1/1    Independent of seller data room) Tj
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Times-Roman >>
+endobj
+6 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Times-Bold >>
+endobj
+xref
+0 7
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000251 00000 n 
+0000001573 00000 n 
+0000001645 00000 n 
+trailer
+<< /Size 7 /Root 1 0 R >>
+startxref
+1716
+%%EOF

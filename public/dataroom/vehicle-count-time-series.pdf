@@ -1,0 +1,93 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R /F2 6 0 R >> >> >>
+endobj
+4 0 obj
+<< /Length 1403 >>
+stream
+0.83 0.63 0.29 rg
+0 760 612 32 re f
+0.93 0.90 0.84 rg
+0 0 612 48 re f
+BT
+1 1 1 rg
+/F2 10 Tf
+36 771 Td
+(ASSET HAWK   ORBITAL OCCUPANCY INTELLIGENCE) Tj
+0.07 0.08 0.10 rg
+/F2 18 Tf
+0 -48 Td
+(Vehicle Count Time Series) Tj
+/F1 10 Tf
+0.15 0.16 0.18 rg
+-20 Td
+(Sampling  5 Hz overlay, interpolated display, loops 20-24 s) Tj
+-14 Td
+() Tj
+-14 Td
+(t\(s\)   Z-N cars  Z-E cars  Z-W cars  Z-S cars  region) Tj
+-14 Td
+(0.0    9         11        7         8         35) Tj
+-14 Td
+(4.0    9         11        7         8         35) Tj
+-14 Td
+(8.0    8         12        7         7         34) Tj
+-14 Td
+(12.0   9         11        6         8         34) Tj
+-14 Td
+(16.0   9         11        7         8         35) Tj
+-14 Td
+(20.0   9         10        7         8         34) Tj
+-14 Td
+(24.0   9         11        7         8         35) Tj
+-14 Td
+() Tj
+-14 Td
+(Median regional parked cars: 34) Tj
+-14 Td
+(Through-traffic excluded \(tracks with speed > 4 m/s\): 3 vehicles, not in occupancy.) Tj
+-14 Td
+() Tj
+-14 Td
+(Notes) Tj
+-14 Td
+(Counts are stable. That stability is the point: a one-off delivery van does not create a) Tj
+-14 Td
+(22pt occupancy miss. The kerbside stock is consistently below what a 95% occupied 142-unit) Tj
+-14 Td
+(block should show at 0.7-0.9 cars per occupied unit.) Tj
+ET
+0.07 0.08 0.10 rg
+BT
+/F1 8 Tf
+36 28 Td
+(DEMO / UNCLASSIFIED    p. 1/1    Independent of seller data room) Tj
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Times-Roman >>
+endobj
+6 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Times-Bold >>
+endobj
+xref
+0 7
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000251 00000 n 
+0000001706 00000 n 
+0000001778 00000 n 
+trailer
+<< /Size 7 /Root 1 0 R >>
+startxref
+1849
+%%EOF
