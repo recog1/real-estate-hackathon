@@ -8,7 +8,7 @@ Asset Hawk is orbital occupancy intelligence for real estate: it uses satellite 
 - **pnpm 10** (the repo pins `packageManager`: `pnpm@10.14.0`; Corepack can activate it with `corepack enable`)
 - A browser and a network connection for Esri map/imagery tiles and the Inter font
 
-No API keys are required for the main demo.
+No API keys are required for the main demo. Integrations (MSCI RCA comps, satellite tasking) run on bundled sample data unless keys are set.
 
 ## Quick start
 
