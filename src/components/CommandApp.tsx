@@ -18,12 +18,13 @@ declare global {
 }
 
 const TASK_STEPS = [
-  "Uplink established",
-  "Tasking window locked",
-  "Slewing payload",
-  "Acquisition",
-  "Ka-band downlink",
-  "VLM inference",
+  "Ka-band downlink, Esri World Imagery z19",
+  "Detection run, YOLO11m-OBB + OWLv2",
+  "167 vehicles in the car park (154 cars, 13 vans)",
+  "Bay estimate ~917 (marked area / 30 m²)",
+  "Observed fill 18%",
+  "V7 Go: documents report 11% utilisation (~100 cars at midday)",
+  "Traffic understated: 18% observed vs 11% reported",
 ];
 
 export function CommandApp() {
@@ -135,7 +136,7 @@ export function CommandApp() {
             onPickSatellite={pickSat}
             onNadirLocked={() => {
               if (phaseRef.current === "orbit" || phaseRef.current === "confirm") {
-                setPhase("intel");
+                setPhase("tasking");
               }
             }}
           />
@@ -168,10 +169,6 @@ export function CommandApp() {
             <div className="m-auto max-w-[17rem] px-6 text-center">
               <div className="font-sans text-[15px] leading-snug text-[var(--ink)]">
                 Click an asset on the map to watch it
-              </div>
-              <div className="mt-2 font-sans text-[11px] leading-relaxed text-[var(--muted)]">
-                Select a supermarket, office, or car park. Clicks near ASDA Leyton Mills open the
-                occupancy file.
               </div>
             </div>
           </aside>
