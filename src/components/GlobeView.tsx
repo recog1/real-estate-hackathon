@@ -77,10 +77,10 @@ function launchOrbit(
   viewer.entities.add({
     id: "active-parcel",
     polygon: {
-      hierarchy: Cesium.Cartesian3.fromDegreesArray(parcelRing(site.lat, site.lon, 200)),
-      material: Cesium.Color.fromCssColorString("#d4a04a").withAlpha(0.45),
+      hierarchy: Cesium.Cartesian3.fromDegreesArray(parcelRing(site.lat, site.lon)),
+      material: Cesium.Color.fromCssColorString("#22c55e").withAlpha(0.15),
       outline: true,
-      outlineColor: Cesium.Color.fromCssColorString("#f0d9a0"),
+      outlineColor: Cesium.Color.fromCssColorString("#22c55e"),
       height: 1,
       extrudedHeight: 36,
     },

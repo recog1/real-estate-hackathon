@@ -95,7 +95,7 @@ function AerialTile({
         ))}
       </svg>
       <div className="pointer-events-none absolute inset-x-0 top-0 bg-gradient-to-b from-black/70 to-transparent px-2 pb-6 pt-2">
-        <div className="flex items-center gap-2 font-sans text-[10px] tracking-[0.16em] text-[var(--gold)]">
+        <div className="flex items-center gap-2 font-sans text-[10px] tracking-[0.16em] text-[var(--accent)]">
           <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--cyan)]" />
           {code} · {label}
         </div>
@@ -120,7 +120,7 @@ export function AerialGrid() {
   return (
     <div data-aerial-grid="1" className="flex min-h-0 flex-1 flex-col">
       <div className="flex shrink-0 items-center justify-between border-b border-[var(--line)] bg-[var(--panel)] px-3 py-1.5">
-        <div className="font-sans text-[10px] tracking-[0.16em] text-[var(--gold)]">
+        <div className="font-sans text-[10px] tracking-[0.16em] text-[var(--accent)]">
           ILLUSTRATIVE DETECTION RUN (REAL MODEL OUTPUT, SAMPLE IMAGERY)
         </div>
         <div className="font-sans text-[9px] text-[var(--muted)]">

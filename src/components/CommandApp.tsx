@@ -138,13 +138,20 @@ export function CommandApp() {
           />
         </div>
         {phase === "survey" && !site && (
-          <div className="pointer-events-none absolute bottom-5 left-1/2 z-20 -translate-x-1/2 border border-[var(--gold)]/40 bg-black/60 px-3 py-1 font-sans text-[10px] tracking-[0.18em] text-[var(--gold)]">
+          <div className="pointer-events-none absolute bottom-5 left-1/2 z-20 -translate-x-1/2 border border-[var(--accent)]/40 bg-black/60 px-3 py-1 font-sans text-[10px] tracking-[0.18em] text-[var(--accent)]">
             SCROLL · ZOOM · CLICK ANYWHERE TO SELECT A SITE
           </div>
         )}
-        {phase === "survey" && site && !departing && (
-          <div className="pointer-events-none absolute bottom-5 left-1/2 z-20 -translate-x-1/2 border border-[var(--gold)]/40 bg-black/60 px-3 py-1 font-sans text-[10px] tracking-[0.18em] text-[var(--gold)]">
-            ASSET LOCKED · TASK SATELLITE TO LEAVE THE STREET
+        {phase === "survey" && site && (
+          <div className="absolute bottom-5 left-1/2 z-30 -translate-x-1/2">
+            <button
+              type="button"
+              disabled={departing}
+              onClick={beginAscent}
+              className="bg-[var(--accent)] px-4 py-2 font-sans text-[11px] tracking-[0.18em] text-black shadow-[0_8px_24px_rgba(0,0,0,0.45)] disabled:opacity-60"
+            >
+              {departing ? "ASCENDING…" : "TASK SATELLITE"}
+            </button>
           </div>
         )}
         {phase === "orbit" && (
@@ -153,8 +160,8 @@ export function CommandApp() {
           </div>
         )}
         {confirmOpen && sat && site && (
-          <div className={`absolute right-[18.5rem] top-20 z-40 w-80 p-4 ${floatPanel} border-[var(--gold)]`}>
-            <div className="font-sans text-[11px] tracking-[0.22em] text-[var(--gold)]">
+          <div className={`absolute right-[18.5rem] top-20 z-40 w-80 p-4 ${floatPanel} border-[var(--accent)]`}>
+            <div className="font-sans text-[11px] tracking-[0.22em] text-[var(--accent)]">
               TASK CONFIRM
             </div>
             <div className="mt-1 text-lg">{sat.name}</div>
@@ -194,7 +201,7 @@ export function CommandApp() {
               <button
                 type="button"
                 onClick={() => setPhase("tasking")}
-                className="flex-1 bg-[var(--gold)] py-2 font-sans text-[12px] tracking-[0.2em] text-black"
+                className="flex-1 bg-[var(--accent)] py-2 font-sans text-[12px] tracking-[0.2em] text-black"
               >
                 TASK SATELLITE
               </button>
@@ -223,7 +230,7 @@ export function CommandApp() {
                     <span
                       className={
                         i < taskStep
-                          ? "text-[var(--gold)]"
+                          ? "text-[var(--accent)]"
                           : i === taskStep
                             ? "text-[var(--cyan)]"
                             : "text-[var(--muted)]"
@@ -259,7 +266,7 @@ export function CommandApp() {
           <div className="flex items-center gap-3">
             <HawkMark className="h-8 w-8" />
             <div>
-              <div className="font-sans text-xl leading-none tracking-[0.18em] text-[var(--gold)]">
+              <div className="font-sans text-xl leading-none tracking-[0.18em] text-[var(--accent)]">
                 ASSET HAWK
               </div>
               <div className="font-sans text-[10px] tracking-[0.22em] text-[var(--muted)]">
@@ -270,53 +277,9 @@ export function CommandApp() {
         </div>
       </header>
 
-      {phase !== "intel" && (
-        <aside className={`absolute bottom-3 left-3 top-16 z-30 flex w-[280px] flex-col ${floatPanel}`}>
-          <div className="border-b border-[var(--line)] px-3 py-3">
-            <div className="font-sans text-[11px] tracking-[0.22em] text-[var(--gold)]">
-              BRIEF
-            </div>
-            <p className="mt-2 text-xs leading-relaxed text-[var(--ink)]">
-              Sellers claim occupancy. Asset Hawk counts cars outside a
-              multifamily from orbit and estimates true occupancy — so you
-              underwrite the deal independently.
-            </p>
-            <p className="mt-2 font-sans text-[10px] leading-relaxed text-[var(--muted)]">
-              Pan and zoom London. Click anywhere on the map to pin a site.
-              Task a satellite when you are ready to leave the street and
-              collect from orbit.
-            </p>
-          </div>
-          {site && (
-            <div className="border-t border-[var(--line)] px-3 py-3">
-              <div className="font-sans text-[11px] tracking-[0.22em] text-[var(--gold)]">
-                SELECTED
-              </div>
-              <div className="mt-1 text-sm">{site.name}</div>
-              <div className="font-sans text-[10px] text-[var(--muted)]">
-                {site.lat.toFixed(4)}N {site.lon.toFixed(4)}E
-                <br />
-                {site.units} units · claimed {Math.round(site.sellerOccupancy * 100)}% ·{" "}
-                {site.claimedRentRoll}
-              </div>
-              {phase === "survey" && (
-                <button
-                  type="button"
-                  disabled={departing}
-                  onClick={beginAscent}
-                  className="mt-3 w-full bg-[var(--gold)] py-2 font-sans text-[12px] tracking-[0.2em] text-black disabled:opacity-60"
-                >
-                  {departing ? "ASCENDING…" : "TASK SATELLITE"}
-                </button>
-              )}
-            </div>
-          )}
-        </aside>
-      )}
-
       {space && (
         <aside className={`absolute bottom-3 right-3 top-16 z-30 w-[260px] overflow-y-auto ${floatPanel}`}>
-          <div className="px-3 py-3 font-sans text-[11px] tracking-[0.22em] text-[var(--gold)]">
+          <div className="px-3 py-3 font-sans text-[11px] tracking-[0.22em] text-[var(--accent)]">
             CONSTELLATION
           </div>
           {SATELLITES.map((s) => {

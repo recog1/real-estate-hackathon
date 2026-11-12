@@ -5,9 +5,10 @@
   --panel: #0d1017;
   --panel-2: #12161f;
   --line: #1c2433;
-  --ink: #e8e4d9;
+  --ink: #f4f4f5;
   --muted: #8b93a7;
-  --gold: #d4a04a;
+  --accent: #f4f4f5;
+  --site: #22c55e;
   --cyan: #7ee0d6;
   --danger: #ff6b4a;
   --background: var(--bg);
@@ -95,7 +96,7 @@ body::before {
 }
 
 .street-map-host .maplibregl-ctrl-attrib a {
-  color: #c8c3b6;
+  color: #c4c4c8;
 }
 
 .map-sat-toggle {
@@ -105,32 +106,24 @@ body::before {
   z-index: 3;
   border: 1px solid var(--line);
   background: rgba(13, 16, 23, 0.88);
-  color: var(--gold);
+  color: var(--accent);
   font-family: var(--font-sans);
   font-size: 10px;
   letter-spacing: 0.18em;
   padding: 6px 10px;
 }
 
-.site-pulse {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: #d4a04a;
-  box-shadow: 0 0 0 0 rgba(212, 160, 74, 0.55);
-  animation: hawk-pulse 1.4s ease-out infinite;
+.site-pin {
+  width: 22px;
+  height: 32px;
+  pointer-events: none;
 }
 
-@keyframes hawk-pulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(212, 160, 74, 0.55);
-  }
-  70% {
-    box-shadow: 0 0 0 18px rgba(212, 160, 74, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(212, 160, 74, 0);
-  }
+.site-pin svg {
+  display: block;
+  width: 22px;
+  height: 32px;
+  overflow: visible;
 }
 
 .globe-host .cesium-viewer,
