@@ -150,6 +150,20 @@ body::before {
   display: none !important;
 }
 
+@keyframes hawk-infer {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.hawk-det {
+  opacity: 0;
+  animation: hawk-infer 180ms ease-out forwards;
+}
+
 button {
   cursor: pointer;
 }
