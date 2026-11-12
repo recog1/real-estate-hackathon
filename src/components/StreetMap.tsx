@@ -25,7 +25,24 @@ const START = {
 
 type Props = {
   site: Site | null;
+  departing?: boolean;
+  followSite?: boolean;
   onPickSite: (lat: number, lon: number) => void;
+  onDeparted?: () => void;
+};
+
+const SITE_VIEW = {
+  zoom: 16.6,
+  pitch: 45,
+  bearing: -18,
+  duration: 1500,
+};
+
+const ASCENT_VIEW = {
+  zoom: 10.35,
+  pitch: 16,
+  bearing: -10,
+  duration: 1400,
 };
 
 function ringPolygon(lat: number, lon: number): number[][] {
@@ -48,6 +65,50 @@ function parcelsGeoJSON() {
       },
     })),
   };
+}
+
+function applySiteOnMap(
+  map: MapLibreMap,
+  markerRef: { current: Marker | null },
+  site: Site,
+  animate: boolean,
+) {
+  const source = map.getSource("hawk-site");
+  if (source && "setData" in source) {
+    (source as { setData: (data: ReturnType<typeof selectedGeoJSON>) => void }).setData(
+      selectedGeoJSON(site),
+    );
+  }
+  markerRef.current?.remove();
+  const el = document.createElement("div");
+  el.className = "site-pulse";
+  el.title = site.name;
+  markerRef.current = new Marker({ element: el, anchor: "center" })
+    .setLngLat([site.lon, site.lat])
+    .addTo(map);
+  const view = {
+    center: [site.lon, site.lat] as [number, number],
+    zoom: SITE_VIEW.zoom,
+    pitch: SITE_VIEW.pitch,
+    bearing: SITE_VIEW.bearing,
+  };
+  if (animate) {
+    map.stop();
+    map.easeTo({ ...view, duration: SITE_VIEW.duration, essential: true });
+  } else {
+    map.jumpTo(view);
+  }
+}
+
+function clearSiteOnMap(map: MapLibreMap, markerRef: { current: Marker | null }) {
+  const source = map.getSource("hawk-site");
+  if (source && "setData" in source) {
+    (source as { setData: (data: ReturnType<typeof emptySiteGeoJSON>) => void }).setData(
+      emptySiteGeoJSON(),
+    );
+  }
+  markerRef.current?.remove();
+  markerRef.current = null;
 }
 
 function styleBuildings(map: MapLibreMap) {
@@ -73,7 +134,14 @@ function styleBuildings(map: MapLibreMap) {
 function applySatelliteMode(map: MapLibreMap, on: boolean) {
   if (!map.getLayer("esri-sat")) return;
   map.setLayoutProperty("esri-sat", "visibility", on ? "visible" : "none");
-  const keep = new Set(["esri-sat", "building-3d", "hawk-parcels-fill", "hawk-parcels-line"]);
+  const keep = new Set([
+    "esri-sat",
+    "building-3d",
+    "hawk-parcels-fill",
+    "hawk-parcels-line",
+    "hawk-site-fill",
+    "hawk-site-line",
+  ]);
   for (const layer of map.getStyle().layers ?? []) {
     if (keep.has(layer.id) || layer.type === "symbol") continue;
     if (layer.type === "background") {
@@ -115,6 +183,28 @@ function addOverlays(map: MapLibreMap, satelliteOn: boolean) {
       "line-width": 1.6,
     },
   });
+  map.addSource("hawk-site", {
+    type: "geojson",
+    data: { type: "FeatureCollection", features: [] },
+  });
+  map.addLayer({
+    id: "hawk-site-fill",
+    type: "fill",
+    source: "hawk-site",
+    paint: {
+      "fill-color": "#d4a04a",
+      "fill-opacity": 0.38,
+    },
+  });
+  map.addLayer({
+    id: "hawk-site-line",
+    type: "line",
+    source: "hawk-site",
+    paint: {
+      "line-color": "#f0d9a0",
+      "line-width": 2.6,
+    },
+  });
   map.addSource("esri-sat", {
     type: "raster",
     tiles: [ESRI_IMAGERY],
@@ -149,21 +239,54 @@ declare global {
         bearing?: number;
       }) => void;
       getZoom: () => number;
+      getPitch: () => number;
+      getCenter: () => { lng: number; lat: number };
       loaded: () => boolean;
       idle: () => boolean;
     };
   }
 }
 
-export function StreetMap({ site, onPickSite }: Props) {
+function selectedGeoJSON(site: Site) {
+  return {
+    type: "FeatureCollection" as const,
+    features: [
+      {
+        type: "Feature" as const,
+        properties: { id: site.id, name: site.name },
+        geometry: {
+          type: "Polygon" as const,
+          coordinates: [ringPolygon(site.lat, site.lon)],
+        },
+      },
+    ],
+  };
+}
+
+function emptySiteGeoJSON() {
+  return { type: "FeatureCollection" as const, features: [] };
+}
+
+export function StreetMap({
+  site,
+  departing = false,
+  followSite = true,
+  onPickSite,
+  onDeparted,
+}: Props) {
   const hostRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
   const markerRef = useRef<Marker | null>(null);
   const pickRef = useRef(onPickSite);
-  const locked = useRef(false);
+  const departedRef = useRef(onDeparted);
+  const siteRef = useRef(site);
+  const departingRef = useRef(departing);
   const [satellite, setSatellite] = useState(false);
   const satRef = useRef(false);
   pickRef.current = onPickSite;
+  departedRef.current = onDeparted;
+  siteRef.current = site;
+  departingRef.current = departing;
   satRef.current = satellite;
 
   useEffect(() => {
@@ -233,6 +356,10 @@ export function StreetMap({ site, onPickSite }: Props) {
       ml.on("load", () => {
         if (cancelled) return;
         addOverlays(ml, satRef.current);
+        const current = siteRef.current;
+        if (current && !departingRef.current) {
+          applySiteOnMap(ml, markerRef, current, false);
+        }
         host.setAttribute("data-map-ready", "1");
       });
       ml.on("idle", () => {
@@ -243,7 +370,7 @@ export function StreetMap({ site, onPickSite }: Props) {
         idle = false;
       });
       ml.on("click", (e) => {
-        if (locked.current) return;
+        if (departingRef.current) return;
         pickRef.current(e.lngLat.lat, e.lngLat.lng);
       });
 
@@ -257,6 +384,8 @@ export function StreetMap({ site, onPickSite }: Props) {
           });
         },
         getZoom: () => ml.getZoom(),
+        getPitch: () => ml.getPitch(),
+        getCenter: () => ml.getCenter(),
         loaded: () => ml.loaded(),
         idle: () => idle && ml.loaded(),
       };
@@ -286,26 +415,54 @@ export function StreetMap({ site, onPickSite }: Props) {
 
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !site) return;
-    locked.current = true;
-    markerRef.current?.remove();
-    const el = document.createElement("div");
-    el.className = "site-pulse";
-    el.title = site.name;
-    markerRef.current = new Marker({ element: el, anchor: "center" })
-      .setLngLat([site.lon, site.lat])
-      .addTo(map);
+    if (!map) return;
+    if (!site) {
+      clearSiteOnMap(map, markerRef);
+      return;
+    }
+    if (!followSite || departing) return;
+    applySiteOnMap(map, markerRef, site, true);
+  }, [site, departing, followSite]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !departing) return;
+    const origin = site ?? {
+      lon: map.getCenter().lng,
+      lat: map.getCenter().lat,
+    };
+    map.stop();
+    hostRef.current?.setAttribute("data-departing", "1");
+    const started = performance.now();
     map.easeTo({
-      center: [site.lon, site.lat],
-      zoom: Math.max(map.getZoom(), 15.4),
-      pitch: 58,
-      duration: 700,
+      center: [origin.lon, origin.lat],
+      zoom: ASCENT_VIEW.zoom,
+      pitch: ASCENT_VIEW.pitch,
+      bearing: ASCENT_VIEW.bearing,
+      duration: ASCENT_VIEW.duration,
+      essential: true,
     });
-  }, [site]);
+    let done = false;
+    const finish = () => {
+      if (done) return;
+      const pulledBack = map.getZoom() <= 11.8;
+      const waited = performance.now() - started >= ASCENT_VIEW.duration - 80;
+      if (!pulledBack && !waited) return;
+      done = true;
+      departedRef.current?.();
+    };
+    map.on("moveend", finish);
+    const fallback = window.setTimeout(finish, ASCENT_VIEW.duration + 220);
+    return () => {
+      map.off("moveend", finish);
+      window.clearTimeout(fallback);
+    };
+  }, [departing, site]);
 
   return (
     <div
       className="street-map-host"
+      data-departing={departing ? "1" : "0"}
       style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
     >
       <div

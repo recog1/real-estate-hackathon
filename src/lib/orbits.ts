@@ -17,7 +17,7 @@ export function satrecOf(spec: SatelliteSpec) {
 export function geodeticAt(spec: SatelliteSpec, date: Date) {
   const rec = satrecOf(spec);
   const pv = propagate(rec, date);
-  if (!pv.position) return null;
+  if (!pv?.position) return null;
   const gd = eciToGeodetic(pv.position, gstime(date));
   return {
     lat: degreesLat(gd.latitude),
@@ -48,7 +48,7 @@ export function nextPass(
   for (let t = 0; t <= 24 * 3600 * 1000; t += stepMs) {
     const date = new Date(from.getTime() + t);
     const pv = propagate(rec, date);
-    if (!pv.position) continue;
+    if (!pv?.position) continue;
     const look = ecfToLookAngles(observer, eciToEcf(pv.position, gstime(date)));
     if (look.elevation > horizon) {
       inPass = true;

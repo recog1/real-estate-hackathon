@@ -1,0 +1,97 @@
+{
+  "source": "V7 Go",
+  "workflow": {
+    "name": "Asset Hawk – Data Room Occupancy Check",
+    "slug": "asset_hawk__data_room_occupancy_check",
+    "workflow_id": "01a1d190-5781-73b7-b5bd-da0574c116fd",
+    "workspace_id": "01a1ca22-d3b8-7a84-903e-fc33d57e24bd",
+    "url": "https://go.v7labs.com/?intent=workflow&workspace_id=01a1ca22-d3b8-7a84-903e-fc33d57e24bd&workflow_id=01a1d190-5781-73b7-b5bd-da0574c116fd",
+    "model_tool": "auto_llm",
+    "run_at": "2026-11-12T21:10:00Z"
+  },
+  "summary": {
+    "seller_claimed_occupancy_pct": 95,
+    "observed_occupancy_pct": 73,
+    "observed_range_pct": [
+      71,
+      75
+    ],
+    "gap_pts": -22,
+    "flag": "Material overstatement",
+    "docs_flagging_overstatement": 4,
+    "docs_total": 5,
+    "answer": "No. Across the data room, V7 Go extracted a seller-claimed occupancy of 95% vs 73% observed from orbital parked-car counts (71–75% range; 34 cars over 48 dwellings, 0.71 cars/dwelling, stable across loops). That is a 22-point material overstatement: ~27% physical vacancy vs 5% claimed, the £3.42m TTM rent is unsupported, and the Underwriting Memo puts unsupported value at £10–13m (in-place income ~-23%). Recommendation: bid off 73% with a 150 bps vacancy reserve.",
+    "note": "Summary composed from the five V7 Go row outputs (4 of 5 documents flagged 'Material overstatement'; the Site Imagery Pack has no figures and is 'Insufficient data')."
+  },
+  "context_graph": {
+    "available": false,
+    "reason": "Workspace has no Context Graphs (list_context_graphs returned []) and the V7 Go MCP has no tool to create one, so run_context_graph_ingestion could not be used."
+  },
+  "documents": [
+    {
+      "file": "seller-claims-vs-observed.pdf",
+      "app_path": "/dataroom/seller-claims-vs-observed.pdf",
+      "v7_entity_id": "01a1d190-f7f0-7338-863b-de4b6c4fea37",
+      "document_type": "Seller claims vs observed",
+      "seller_claimed_occupancy_pct": 95.0,
+      "observed_occupancy_pct": 73.0,
+      "unit_count": "- Seller pack: 142 units\n- Asset Hawk observed: 48 dwellings in the four tiles (subset of massing)",
+      "rent_value_figures": "TTM rent: £3.42m (seller pack; unsupported at claimed occupancy)",
+      "key_dates_ids": null,
+      "discrepancy_flag": "Material overstatement",
+      "underwriting_finding": "According to the \"Seller Claims vs Observed\" document, the seller's claimed occupancy of 95% is materially overstated by 22 percentage points compared to the Asset Hawk observed occupancy of 73% (71–75% range). Orbital analysis shows a parked-car density of 0.71 cars per dwelling and an estimated ~27% physical vacancy proxy versus the seller's claimed 5% vacancy. Consequently, the reported 3.42m GBP TTM rent is unsupported at claimed occupancy, warranting a \"MATERIAL OVERSTATEMENT\" flag and requiring the underwriting team to reprice the occupancy gap."
+    },
+    {
+      "file": "occupancy-analysis-report.pdf",
+      "app_path": "/dataroom/occupancy-analysis-report.pdf",
+      "v7_entity_id": "01a1d190-dd42-75c1-b329-0848c67f4ddc",
+      "document_type": "Occupancy analysis report",
+      "seller_claimed_occupancy_pct": 95.0,
+      "observed_occupancy_pct": 73.0,
+      "unit_count": "- Total dwellings counted: 48\n- Occupied dwellings (car-at-kerb): 34\n- Z-N North courtyard dwellings/houses: 12\n- Z-E East street grid dwellings/houses: 12\n- Z-W West terrace dwellings/houses: 12\n- Z-S South car park dwellings/houses: 12",
+      "rent_value_figures": "Seller-claimed occupancy: 95% (rent roll reference only; no rent amount provided)",
+      "key_dates_ids": "- Collection ID: AH-2026-1112-LHR-CUBITT\n- Sensor: WorldView-3, 31 cm PAN, off-nadir 18.4°\n- Revisit/observation window: 4 nadir loops, 20–24 seconds\n- Recommended follow-up timing: night-time and weekend revisits",
+      "discrepancy_flag": "Material overstatement",
+      "underwriting_finding": "According to the Occupancy Analysis Report, the seller's claimed occupancy of 95% is materially overstated by 22 percentage points compared to the observed orbital occupancy of 73% (71–75% range). Satellite observation identified a median of 34 parked cars across 48 counted dwellings, reflecting 0.71 cars per dwelling and a 34/48 car-at-kerb occupancy driven down by the West terrace (67%) and South car park (71%) tiles. Because parked-car detections remained stable across nadir loops, the data reflects structural vacancy rather than day-to-day variance, confirming a material overstatement of the rent roll that impacts underwriting valuation."
+    },
+    {
+      "file": "underwriting-memo.pdf",
+      "app_path": "/dataroom/underwriting-memo.pdf",
+      "v7_entity_id": "01a1d191-02c1-715f-b81f-4c66f5d06604",
+      "document_type": "Underwriting memo",
+      "seller_claimed_occupancy_pct": 95.0,
+      "observed_occupancy_pct": 73.0,
+      "unit_count": null,
+      "rent_value_figures": "- Ask implied value: 48–55m GBP\n- Cap rate: ~5.25% (on claimed NOI; asking cap noted as 20–25% too tight)\n- Unsupported value: 10–13m GBP\n- In-place income: approx -23% haircut (due to 95% to 73% occupancy haircut)",
+      "key_dates_ids": "- Collection ID: AH-2026-1112\n- Time reference: “before the seller opens a data room”",
+      "discrepancy_flag": "Material overstatement",
+      "underwriting_finding": "According to the Underwriting Memo, the seller's claimed occupancy of 95% is materially overstated by 22 percentage points compared to the observed physical occupancy of 73.0%. This haircut equates to approximately -23% in-place income, exposing £10–13m in unsupported value against the illustrative ask-implied valuation of £48–55m at a ~5.25% cap. Consequently, the memo recommends bidding off the 73% physical occupancy rate with an additional 150 bps vacancy reserve and treating the asking cap rate as 20–25% too tight until tenancy is proven."
+    },
+    {
+      "file": "vehicle-count-time-series.pdf",
+      "app_path": "/dataroom/vehicle-count-time-series.pdf",
+      "v7_entity_id": "01a1d191-08e3-79dc-b636-6c99dc242e75",
+      "document_type": "Vehicle count time series",
+      "seller_claimed_occupancy_pct": 95.0,
+      "observed_occupancy_pct": 73.0,
+      "unit_count": "142 units (block)",
+      "rent_value_figures": null,
+      "key_dates_ids": "- Sampling: 5 Hz  \n- Display loop: 20–24 seconds  \n- Time references: 0.0, 4.0, 8.0, 12.0, 16.0, 20.0, and 24.0 seconds  \n- Sensor/revisit window: 20–24 seconds",
+      "discrepancy_flag": "Material overstatement",
+      "underwriting_finding": "The seller's claimed occupancy of 95% is materially overstated by 22 percentage points compared to the observed occupancy of 73%. According to the \"Vehicle Count Time Series,\" the property recorded a stable median of 34 regional parked cars (with 3 through-traffic vehicles excluded), remaining consistently below the baseline of 0.7–0.9 cars per occupied unit expected for a 95% occupied 142-unit block. This document provides vital supporting evidence by establishing temporal stability in vehicle counts, verifying that transient traffic or one-off deliveries do not account for the 22-point occupancy deficit."
+    },
+    {
+      "file": "site-imagery-pack.pdf",
+      "app_path": "/dataroom/site-imagery-pack.pdf",
+      "v7_entity_id": "01a1d190-fe7d-7e1e-9b2c-0fceeec57958",
+      "document_type": "Site imagery pack",
+      "seller_claimed_occupancy_pct": null,
+      "observed_occupancy_pct": null,
+      "unit_count": null,
+      "rent_value_figures": null,
+      "key_dates_ids": "- **Revisit windows / time references:** next SSO morning pass + weekend evening\n- **Collection / Tile IDs:**\n  - Tile Z-N (Pexels 31210490)\n  - Tile Z-E (Pexels 31061104)\n  - Tile Z-W (Pexels 5597032)\n  - Tile Z-S (Pexels 36721611)\n- **Key dates:** None specified (noted only as \"timestamped to the collection\")",
+      "discrepancy_flag": "Insufficient data",
+      "underwriting_finding": "As flagged by the insufficient data status, the Site Imagery Pack does not provide numerical figures for seller-claimed or observed occupancy, precluding a determination of whether occupancy is overstated or by how many percentage points. Instead, the document provides supporting methodological evidence by capturing four tasked nadir tiles—Tile Z-N North courtyard, Tile Z-E East street grid, Tile Z-W West terrace, and Tile Z-S South car park—independent of the seller's data room. It contributes to the occupancy case by establishing VLM overlay tracking for house footprints (gold), cars (cyan), and people (signal red) per frame with interpolation to support forthcoming orbital vehicle and activity counts."
+    }
+  ]
+}
