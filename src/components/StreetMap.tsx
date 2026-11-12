@@ -7,7 +7,7 @@ import {
   Marker,
   setWorkerUrl,
 } from "maplibre-gl";
-import { FITZROVIA, SAMPLE_PARCELS, parcelRing } from "@/lib/sites";
+import { FITZROVIA, parcelRing } from "@/lib/sites";
 import type { Site } from "@/lib/types";
 
 setWorkerUrl("/maplibre-gl-worker.mjs");
@@ -19,8 +19,8 @@ const ESRI_IMAGERY =
 const START = {
   center: [FITZROVIA.lon, FITZROVIA.lat] as [number, number],
   zoom: 14.05,
-  pitch: 56,
-  bearing: -22,
+  pitch: 0,
+  bearing: 0,
 };
 
 type Props = {
@@ -33,15 +33,15 @@ type Props = {
 
 const SITE_VIEW = {
   zoom: 16.6,
-  pitch: 45,
-  bearing: -18,
+  pitch: 0,
+  bearing: 0,
   duration: 1500,
 };
 
 const ASCENT_VIEW = {
   zoom: 10.35,
-  pitch: 16,
-  bearing: -10,
+  pitch: 0,
+  bearing: 0,
   duration: 1400,
 };
 
@@ -51,20 +51,6 @@ function ringPolygon(lat: number, lon: number): number[][] {
   for (let i = 0; i < flat.length; i += 2) coords.push([flat[i], flat[i + 1]]);
   coords.push(coords[0]);
   return coords;
-}
-
-function parcelsGeoJSON() {
-  return {
-    type: "FeatureCollection" as const,
-    features: SAMPLE_PARCELS.map((p) => ({
-      type: "Feature" as const,
-      properties: { id: p.id, name: p.name },
-      geometry: {
-        type: "Polygon" as const,
-        coordinates: [ringPolygon(p.lat, p.lon)],
-      },
-    })),
-  };
 }
 
 function applySiteOnMap(
@@ -137,8 +123,6 @@ function applySatelliteMode(map: MapLibreMap, on: boolean) {
   const keep = new Set([
     "esri-sat",
     "building-3d",
-    "hawk-parcels-fill",
-    "hawk-parcels-line",
     "hawk-site-fill",
     "hawk-site-line",
   ]);
@@ -160,29 +144,7 @@ function applySatelliteMode(map: MapLibreMap, on: boolean) {
 }
 
 function addOverlays(map: MapLibreMap, satelliteOn: boolean) {
-  if (map.getSource("hawk-parcels")) return;
-  map.addSource("hawk-parcels", {
-    type: "geojson",
-    data: parcelsGeoJSON(),
-  });
-  map.addLayer({
-    id: "hawk-parcels-fill",
-    type: "fill",
-    source: "hawk-parcels",
-    paint: {
-      "fill-color": "#d4a04a",
-      "fill-opacity": 0.22,
-    },
-  });
-  map.addLayer({
-    id: "hawk-parcels-line",
-    type: "line",
-    source: "hawk-parcels",
-    paint: {
-      "line-color": "#d4a04a",
-      "line-width": 1.6,
-    },
-  });
+  if (map.getSource("hawk-site")) return;
   map.addSource("hawk-site", {
     type: "geojson",
     data: { type: "FeatureCollection", features: [] },
@@ -379,8 +341,8 @@ export function StreetMap({
           ml.jumpTo({
             center: opts.center,
             zoom: opts.zoom,
-            pitch: opts.pitch ?? 56,
-            bearing: opts.bearing ?? -22,
+            pitch: opts.pitch ?? 0,
+            bearing: opts.bearing ?? 0,
           });
         },
         getZoom: () => ml.getZoom(),

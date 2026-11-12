@@ -68,37 +68,23 @@ export const SAMPLE_PARCELS: Site[] = [
   },
 ];
 
-function haversineKm(aLat: number, aLon: number, bLat: number, bLon: number) {
-  const R = 6371;
-  const dLat = ((bLat - aLat) * Math.PI) / 180;
-  const dLon = ((bLon - aLon) * Math.PI) / 180;
-  const s =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos((aLat * Math.PI) / 180) *
-      Math.cos((bLat * Math.PI) / 180) *
-      Math.sin(dLon / 2) ** 2;
-  return 2 * R * Math.asin(Math.sqrt(s));
-}
+export const DEMO_INTEL = {
+  borough: "London",
+  units: 142,
+  sellerOccupancy: 0.95,
+  claimedRentRoll: "£3.42m TTM",
+} as const;
 
 export function siteFromClick(lat: number, lon: number): Site {
-  let nearest = SAMPLE_PARCELS[0];
-  let best = Infinity;
-  for (const p of SAMPLE_PARCELS) {
-    const d = haversineKm(lat, lon, p.lat, p.lon);
-    if (d < best) {
-      best = d;
-      nearest = p;
-    }
-  }
-  // Any click becomes a collectible parcel. Snap to a named asset if the
-  // click is close; otherwise mint a site at the click using that template.
-  if (best < 0.35) return nearest;
   return {
-    ...nearest,
     id: `site-${lat.toFixed(4)}-${lon.toFixed(4)}`,
-    name: `${nearest.borough} multifamily`,
+    name: "Selected site",
+    borough: DEMO_INTEL.borough,
     lat,
     lon,
+    units: DEMO_INTEL.units,
+    sellerOccupancy: DEMO_INTEL.sellerOccupancy,
+    claimedRentRoll: DEMO_INTEL.claimedRentRoll,
   };
 }
 
