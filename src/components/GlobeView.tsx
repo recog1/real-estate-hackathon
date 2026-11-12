@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import type { Viewer } from "cesium";
 import { SATELLITES } from "@/lib/satellites";
-import { LONDON, parcelRing } from "@/lib/sites";
+import { LONDON, parcelRingForSite } from "@/lib/sites";
 import { demoOrbitSamples, demoSatOverSite } from "@/lib/orbits";
 import type { Phase, SatelliteId, Site } from "@/lib/types";
 
@@ -46,7 +46,7 @@ function applySiteEntities(
   viewer.entities.add({
     id: "active-parcel",
     polygon: {
-      hierarchy: Cesium.Cartesian3.fromDegreesArray(parcelRing(site.lat, site.lon)),
+      hierarchy: Cesium.Cartesian3.fromDegreesArray(parcelRingForSite(site)),
       material: Cesium.Color.fromCssColorString("#22c55e").withAlpha(0.15),
       outline: true,
       outlineColor: Cesium.Color.fromCssColorString("#22c55e"),

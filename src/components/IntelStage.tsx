@@ -8,7 +8,7 @@ import { AerialGrid } from "@/components/AerialGrid";
 import { CompetitorCapture } from "@/components/CompetitorCapture";
 import { CompetitorPanel } from "@/components/CompetitorPanel";
 import { CompsPanel } from "@/components/CompsPanel";
-import { buildLogScript } from "@/lib/terminal";
+import { buildCompetitorLog, buildLogScript } from "@/lib/terminal";
 import { AERIAL_MODEL_LINE, aerialTotals } from "@/lib/aerial";
 import { useCompetitorSite } from "@/lib/competitor";
 import type { WatchMode } from "@/lib/watch";
@@ -138,51 +138,66 @@ export function IntelStage({
   mode,
   focusStep,
   onFocusStep,
+  onRunCapture,
 }: {
   site: Site;
   sat: SatelliteSpec;
   mode: WatchMode;
   focusStep?: string | null;
   onFocusStep?: (id: string | null) => void;
+  onRunCapture?: () => void;
 }) {
-  const logs = useMemo(() => buildLogScript(site, sat), [site, sat]);
   const [visible, setVisible] = useState(1);
   const [doc, setDoc] = useState<DataDoc | null>(null);
   const [roomTab, setRoomTab] = useState<"v7" | "files" | "comps">("v7");
   const totals = useMemo(() => aerialTotals(), []);
   const competitor = useCompetitorSite();
+  const logs = useMemo(
+    () =>
+      mode === "competitor"
+        ? buildCompetitorLog(site, sat, competitor.site)
+        : buildLogScript(site, sat),
+    [site, sat, mode, competitor.site],
+  );
 
   useEffect(() => {
     if (focusStep === "comps") setRoomTab("comps");
   }, [focusStep]);
 
   useEffect(() => {
+    setVisible(1);
     const iv = setInterval(() => {
       setVisible((n) => Math.min(logs.length, n + 1));
     }, 380);
     return () => clearInterval(iv);
-  }, [logs.length]);
+  }, [logs]);
 
   return (
     <div className="flex min-h-0 flex-1">
       <div className="flex min-w-0 flex-1 flex-col">
         {mode === "competitor" ? (
-          <CompetitorCapture site={competitor.site} loading={competitor.loading} />
+          <CompetitorCapture
+            site={competitor.site}
+            loading={competitor.loading}
+            onRunCapture={onRunCapture}
+          />
         ) : (
           <AerialGrid />
         )}
         <div className="terminal-log h-[7.5rem] shrink-0 overflow-hidden border-t border-[var(--line)] bg-black text-[11px] leading-5 text-[var(--muted)]">
           <div className="flex items-center justify-between border-b border-[var(--line)] px-3 py-1 text-[10px] text-[var(--ink)]">
-            <span>Collection log</span>
+            <span>
+              {mode === "competitor" ? "Collection log · ASDA Leyton Mills" : "Collection log"}
+            </span>
             <span className="text-[var(--muted)]">
               {mode === "competitor"
-                ? competitor.site
-                  ? `Cars ${competitor.site.cars ?? "—"} · Bays ${competitor.site.bays ?? "—"} · Fill ${
-                      competitor.site.fillPct == null
-                        ? "—"
-                        : `${Math.round(competitor.site.fillPct)}%`
-                    }`
-                  : "Loading capture"
+                ? competitor.site?.vehicles != null &&
+                  competitor.site.cars != null &&
+                  competitor.site.trucks != null &&
+                  competitor.site.bays != null &&
+                  competitor.site.fillPct != null
+                  ? `${competitor.site.vehicles} vehicles · ${competitor.site.cars} cars · ${competitor.site.trucks} vans · ~${competitor.site.bays} bays · fill ${Math.round(competitor.site.fillPct)}%`
+                  : "Run capture"
                 : `Cars ${totals.cars} · Trucks/vans ${totals.trucks} · Building segments ${totals.buildings} · ${AERIAL_MODEL_LINE}`}
             </span>
           </div>

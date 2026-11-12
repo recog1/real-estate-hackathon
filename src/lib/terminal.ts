@@ -1,4 +1,5 @@
 import { aerialTotals } from "./aerial";
+import type { CompetitorSite } from "./competitor";
 import type { Site, SatelliteSpec } from "./types";
 
 export function buildLogScript(site: Site, sat: SatelliteSpec): string[] {
@@ -20,5 +21,38 @@ export function buildLogScript(site: Site, sat: SatelliteSpec): string[] {
     `Wrote seller-claims-vs-observed.pdf`,
     `Wrote underwriting-memo.pdf`,
     `5 documents indexed, agent ready`,
+  ];
+}
+
+export function buildCompetitorLog(
+  site: Site,
+  sat: SatelliteSpec,
+  capture: CompetitorSite | null,
+): string[] {
+  const vehicles = capture?.vehicles;
+  const cars = capture?.cars;
+  const vans = capture?.trucks;
+  const bays = capture?.bays;
+  const fill =
+    capture?.fillPct == null ? null : Math.round(capture.fillPct);
+  const vehicleLine =
+    vehicles != null && cars != null && vans != null
+      ? `${vehicles} vehicles in the car park (${cars} cars, ${vans} vans)`
+      : "Run capture";
+  const bayLine =
+    bays != null
+      ? `Bay estimate ~${bays} (marked car-park area / 30 m² per bay)`
+      : "Run capture";
+  const fillLine = fill != null ? `Fill ${fill}% vs capacity` : "Run capture";
+  return [
+    `Selected ASDA Leyton Mills Superstore, Marshall Road, Leyton E10 5NH`,
+    `Task uplink ${sat.short} over ${site.name}`,
+    `Pulled Esri World Imagery z19, 278 m plot, ${site.lat.toFixed(5)}N ${Math.abs(site.lon).toFixed(5)}W`,
+    `Ran vehicle detection, YOLO11m-OBB + OWLv2`,
+    vehicleLine,
+    bayLine,
+    fillLine,
+    `Park-level occupancy, slight lower bound; imagery date unknown`,
+    `Source: Esri, Maxar, Earthstar Geographics`,
   ];
 }

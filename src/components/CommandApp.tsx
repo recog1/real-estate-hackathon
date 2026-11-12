@@ -11,7 +11,7 @@ import { PipelineStrip } from "@/components/PipelineStrip";
 import { CompsPanel } from "@/components/CompsPanel";
 import { CLAIM_HEADLINE, type WatchMode } from "@/lib/watch";
 import { SATELLITES, getSatellite } from "@/lib/satellites";
-import { FITZROVIA, siteFromClick } from "@/lib/sites";
+import { asdaSite, FITZROVIA, siteFromClick } from "@/lib/sites";
 import { formatEta, formatPassClock, nextPass } from "@/lib/orbits";
 import type { Phase, SatelliteId, Site } from "@/lib/types";
 
@@ -42,7 +42,9 @@ export function CommandApp() {
   const [mode, setMode] = useState<WatchMode>("claim");
   const [focusStep, setFocusStep] = useState<string | null>(null);
   const phaseRef = useRef(phase);
+  const modeRef = useRef(mode);
   phaseRef.current = phase;
+  modeRef.current = mode;
 
   const sat = satId ? getSatellite(satId) : null;
   const pass = useMemo(() => {
@@ -58,7 +60,11 @@ export function CommandApp() {
 
   useEffect(() => {
     window.__hawkSkipToIntel = () => {
-      setSite(siteFromClick(FITZROVIA.lat, FITZROVIA.lon));
+      setSite(
+        modeRef.current === "competitor"
+          ? asdaSite()
+          : siteFromClick(FITZROVIA.lat, FITZROVIA.lon),
+      );
       setSatId("wv3");
       setDeparting(false);
       setPhase("intel");
@@ -99,6 +105,38 @@ export function CommandApp() {
 
   function pickSat(id: SatelliteId) {
     setSatId(id);
+  }
+
+  function setWatchMode(next: WatchMode) {
+    setMode(next);
+    setFocusStep(null);
+    setDeparting(false);
+    if (next === "competitor") {
+      setSite(asdaSite());
+      if (phase === "intel") {
+        if (!satId) setSatId("wv3");
+      } else {
+        setSatId(null);
+        setPhase("survey");
+      }
+      return;
+    }
+    setSite(siteFromClick(FITZROVIA.lat, FITZROVIA.lon));
+    if (phase !== "intel") {
+      setSatId(null);
+      setPhase("survey");
+    }
+  }
+
+  function runCapture() {
+    if (phase === "survey") {
+      beginAscent();
+      return;
+    }
+    setSite(mode === "competitor" ? asdaSite() : siteFromClick(FITZROVIA.lat, FITZROVIA.lon));
+    setSatId("wv3");
+    setDeparting(false);
+    setPhase("intel");
   }
 
   const confirmOpen = phase === "confirm" && sat && site;
@@ -146,6 +184,7 @@ export function CommandApp() {
             site={site}
             departing={departing}
             followSite={phase === "survey"}
+            forceSatellite={mode === "competitor"}
             onPickSite={pickSite}
             onDeparted={() => {
               setDeparting(false);
@@ -263,6 +302,7 @@ export function CommandApp() {
             mode={mode}
             focusStep={focusStep}
             onFocusStep={setFocusStep}
+            onRunCapture={runCapture}
           />
         </div>
       )}
@@ -294,7 +334,7 @@ export function CommandApp() {
             </div>
           </div>
         </div>
-        <ModeToggle mode={mode} onChange={setMode} />
+        <ModeToggle mode={mode} onChange={setWatchMode} />
         <div className="flex items-center gap-2">
           {inspect3d ? (
             <button
@@ -320,13 +360,17 @@ export function CommandApp() {
               onClick={beginAscent}
               className="bg-[var(--accent)] px-4 py-2 font-sans text-[12px] text-black disabled:opacity-60"
             >
-              {departing ? "Ascending…" : "Task satellite"}
+              {departing
+                ? "Ascending…"
+                : mode === "competitor"
+                  ? "Run capture"
+                  : "Task satellite"}
             </button>
           )}
         </div>
       </header>
 
-      {focusStep === "comps" && !(intel && mode === "claim") && (
+      {focusStep === "comps" && mode === "claim" && !intel && (
         <div
           data-comps-overlay="1"
           className={`absolute bottom-3 right-3 top-[7.75rem] z-40 w-[420px] overflow-y-auto p-3 ${floatPanel}`}

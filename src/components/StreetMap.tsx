@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Map as MapLibreMap, Marker, setWorkerUrl } from "maplibre-gl";
-import { FITZROVIA, parcelRing } from "@/lib/sites";
+import { FITZROVIA, parcelRingForSite } from "@/lib/sites";
 import type { Site } from "@/lib/types";
 
 setWorkerUrl("/maplibre-gl-worker.mjs");
@@ -24,6 +24,7 @@ type Props = {
   site: Site | null;
   departing?: boolean;
   followSite?: boolean;
+  forceSatellite?: boolean;
   onPickSite: (lat: number, lon: number) => void;
   onDeparted?: () => void;
 };
@@ -42,8 +43,8 @@ const ASCENT_VIEW = {
   duration: 1400,
 };
 
-function ringPolygon(lat: number, lon: number): number[][] {
-  const flat = parcelRing(lat, lon);
+function ringPolygon(site: Site): number[][] {
+  const flat = parcelRingForSite(site);
   const coords: number[][] = [];
   for (let i = 0; i < flat.length; i += 2) coords.push([flat[i], flat[i + 1]]);
   coords.push(coords[0]);
@@ -341,7 +342,7 @@ function selectedGeoJSON(site: Site) {
         properties: { id: site.id, name: site.name },
         geometry: {
           type: "Polygon" as const,
-          coordinates: [ringPolygon(site.lat, site.lon)],
+          coordinates: [ringPolygon(site)],
         },
       },
     ],
@@ -356,6 +357,7 @@ export function StreetMap({
   site,
   departing = false,
   followSite = true,
+  forceSatellite = false,
   onPickSite,
   onDeparted,
 }: Props) {
@@ -366,7 +368,7 @@ export function StreetMap({
   const departedRef = useRef(onDeparted);
   const siteRef = useRef(site);
   const departingRef = useRef(departing);
-  const [satellite, setSatellite] = useState(false);
+  const [satellite, setSatellite] = useState(forceSatellite);
   const satRef = useRef(false);
   pickRef.current = onPickSite;
   departedRef.current = onDeparted;
@@ -483,6 +485,10 @@ export function StreetMap({
       mapRef.current = null;
     };
   }, []);
+
+  useEffect(() => {
+    setSatellite(forceSatellite);
+  }, [forceSatellite]);
 
   useEffect(() => {
     const map = mapRef.current;

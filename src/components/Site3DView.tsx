@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { Viewer } from "cesium";
 import { cesiumIonToken } from "@/lib/cesium-ion";
-import { FITZROVIA, parcelRing, siteFromClick } from "@/lib/sites";
+import { FITZROVIA, parcelRingForSite, siteFromClick } from "@/lib/sites";
 import type { Site } from "@/lib/types";
 
 type CesiumNS = typeof import("cesium");
@@ -38,7 +38,7 @@ function applyPlot(viewer: Viewer, Cesium: CesiumNS, site: Site) {
   viewer.entities.add({
     id: "plot-fill",
     polygon: {
-      hierarchy: Cesium.Cartesian3.fromDegreesArray(parcelRing(site.lat, site.lon)),
+      hierarchy: Cesium.Cartesian3.fromDegreesArray(parcelRingForSite(site)),
       material: Cesium.Color.fromCssColorString("#22c55e").withAlpha(0.22),
       classificationType: Cesium.ClassificationType.CESIUM_3D_TILE,
     },

@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from "react";
 import type { AerialDetection } from "@/lib/aerial";
+import raw from "@/data/competitor-capture.json";
 
 export type CompetitorSite = {
   name: string | null;
+  address: string | null;
   lat: number | null;
   lon: number | null;
   bounds: {
@@ -15,6 +17,7 @@ export type CompetitorSite = {
   } | null;
   cars: number | null;
   trucks: number | null;
+  vehicles: number | null;
   bays: number | null;
   fillPct: number | null;
   width: number | null;
@@ -22,6 +25,7 @@ export type CompetitorSite = {
   src: string | null;
   detections: AerialDetection[];
   method: string | null;
+  note: string | null;
 };
 
 function num(v: unknown): number | null {
@@ -101,18 +105,51 @@ export function parseCompetitor(raw: unknown): CompetitorSite | null {
           west: num((boundsRaw as Record<string, unknown>).west),
         }
       : null;
-  const xy = coords(root.coords ?? root.center ?? image.center);
+  const siteMeta =
+    root.site && typeof root.site === "object" ? (root.site as Record<string, unknown>) : {};
+  const summary =
+    root.summary && typeof root.summary === "object"
+      ? (root.summary as Record<string, unknown>)
+      : {};
+  const occupancy =
+    image.occupancy && typeof image.occupancy === "object"
+      ? (image.occupancy as Record<string, unknown>)
+      : root.occupancy && typeof root.occupancy === "object"
+        ? (root.occupancy as Record<string, unknown>)
+        : {};
+  const baysRaw = image.bays ?? root.bays ?? summary.bays;
+  const bays =
+    typeof baysRaw === "number"
+      ? baysRaw
+      : baysRaw && typeof baysRaw === "object"
+        ? num((baysRaw as Record<string, unknown>).estimate)
+        : null;
+  const xy = coords(
+    siteMeta.lat != null
+      ? { lat: siteMeta.lat, lng: siteMeta.lng ?? siteMeta.lon }
+      : (root.coords ?? root.center ?? image.center ?? summary),
+  );
   const file =
-    str(image.file_bw) ??
-    str(root.file_bw) ??
-    str(image.file) ??
-    str(root.file) ??
-    "supermarket-bw.jpg";
+    str(image.file_annotated) ??
+    str(root.file_annotated) ??
+    "annotated.jpg";
   const detections = asDetections(image.detections ?? root.detections);
+  const fillPct =
+    asFillPct(occupancy.fill_pct_rounded) ??
+    asFillPct(occupancy.fill_pct) ??
+    asFillPct(summary.fill_pct) ??
+    asFillPct(root.fill) ??
+    asFillPct(image.fill);
   return {
-    name: str(root.name) ?? str(image.name) ?? str(image.label),
-    lat: xy.lat,
-    lon: xy.lon,
+    name:
+      str(siteMeta.name) ??
+      str(summary.site) ??
+      str(root.name) ??
+      str(image.name) ??
+      "ASDA Leyton Mills Superstore",
+    address: str(siteMeta.address) ?? str(summary.address),
+    lat: xy.lat ?? num(siteMeta.lat) ?? num(summary.lat),
+    lon: xy.lon ?? num(siteMeta.lng) ?? num(summary.lng),
     bounds:
       bounds &&
       bounds.north != null &&
@@ -121,17 +158,26 @@ export function parseCompetitor(raw: unknown): CompetitorSite | null {
       bounds.west != null
         ? { north: bounds.north, south: bounds.south, east: bounds.east, west: bounds.west }
         : null,
-    cars: num(counts.car) ?? num(counts.cars),
-    trucks: num(counts["truck/van"]) ?? num(counts.trucks),
-    bays: num(root.bays) ?? num(image.bays) ?? num(counts.bays),
-    fillPct: asFillPct(root.fill) ?? asFillPct(image.fill) ?? asFillPct(root.fill_pct),
+    cars: num(counts.car) ?? num(summary.car) ?? num(counts.cars),
+    trucks: num(counts["truck/van"]) ?? num(summary.truck_van) ?? num(counts.trucks),
+    vehicles: num(counts.vehicles) ?? num(summary.vehicles) ?? num(occupancy.vehicles),
+    bays: bays ?? num(summary.bays),
+    fillPct,
     width: num(image.width) ?? num(root.width),
     height: num(image.height) ?? num(root.height),
     src: `/competitor/${file}`,
     detections,
-    method: str(root.method) ?? str(image.method),
+    method:
+      str(root.method) ??
+      str(image.method) ??
+      (baysRaw && typeof baysRaw === "object"
+        ? str((baysRaw as Record<string, unknown>).method)
+        : null),
+    note: str(occupancy.definition),
   };
 }
+
+export const COMPETITOR_CAPTURE = parseCompetitor(raw);
 
 export async function fetchCompetitorSite(): Promise<CompetitorSite | null> {
   try {
@@ -144,9 +190,10 @@ export async function fetchCompetitorSite(): Promise<CompetitorSite | null> {
 }
 
 export function useCompetitorSite() {
-  const [loading, setLoading] = useState(true);
-  const [site, setSite] = useState<CompetitorSite | null>(null);
+  const [loading, setLoading] = useState(!COMPETITOR_CAPTURE);
+  const [site, setSite] = useState<CompetitorSite | null>(COMPETITOR_CAPTURE);
   useEffect(() => {
+    if (COMPETITOR_CAPTURE) return;
     let live = true;
     void fetchCompetitorSite().then((data) => {
       if (!live) return;

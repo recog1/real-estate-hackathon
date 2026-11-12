@@ -1,8 +1,10 @@
 export type WatchMode = "claim" | "competitor";
 
 export const CLAIM_HEADLINE = "Orbital occupancy intelligence";
-export const COMPETITOR_HEADLINE =
-  "Occupancy from orbit for any asset, including the ones you don't own.";
+export const COMPETITOR_HEADLINE = "Competitor: ASDA Leyton Mills Superstore";
+export const COMPETITOR_SUBHEAD = "Marshall Road, Leyton E10 5NH";
+export const COMPETITOR_NOTE =
+  "Park-level occupancy, slight lower bound; imagery date unknown; Source: Esri, Maxar, Earthstar Geographics";
 
 export const ALSO_WORKS_FOR = [
   {

@@ -25,8 +25,8 @@ function activeIndex(phase: Phase): number {
 }
 
 function competitorActive(phase: Phase): number {
-  if (phase === "intel") return 4;
-  if (phase === "orbit" || phase === "confirm" || phase === "tasking") return 2;
+  if (phase === "intel") return 5;
+  if (phase === "orbit" || phase === "confirm" || phase === "tasking") return 1;
   return 0;
 }
 
@@ -44,47 +44,63 @@ export function PipelineStrip({
   const totals = aerialTotals();
   const competitor = useCompetitorSite();
   const fill =
-    competitor.site?.fillPct != null ? `${Math.round(competitor.site.fillPct)}%` : "—";
-  const cars = competitor.site?.cars != null ? String(competitor.site.cars) : "—";
+    competitor.site?.fillPct != null
+      ? `${Math.round(competitor.site.fillPct)}%`
+      : "Run capture";
+  const vehicles = competitor.site?.vehicles;
+  const cars = competitor.site?.cars;
+  const vans = competitor.site?.trucks;
+  const bays = competitor.site?.bays;
+  const vision =
+    vehicles != null && cars != null && vans != null
+      ? `${vehicles} vehicles in car park (${cars} cars, ${vans} vans)`
+      : "Run capture";
+  const capacity = bays != null ? `~${bays} bays (area / 30 m²)` : "Run capture";
 
   const steps: Step[] =
     mode === "competitor"
       ? [
           {
             id: "target",
-            n: "1–2",
+            n: "1",
             title: "Target selection",
-            tool: "Map click",
-            output: "Watch an asset you do not own",
-            span: 2,
+            tool: "ASDA Leyton Mills",
+            output: "Marshall Road, Leyton E10 5NH",
           },
           {
             id: "sat",
-            n: "3",
-            title: "Satellite tasking + Esri imagery",
-            tool: "WorldView-3 · Esri",
-            output: "Nadir still",
+            n: "2",
+            title: "Satellite + Esri",
+            tool: "WorldView-3 · Esri z19",
+            output: "ASDA Leyton Mills capture",
           },
           {
             id: "vision",
-            n: "4",
+            n: "3",
             title: "Vision detections",
-            tool: "YOLO OBB",
-            output: `Cars ${cars}, vans, buildings`,
+            tool: "YOLO OBB + OWLv2",
+            output: vision,
           },
           {
-            id: "comps",
+            id: "capacity",
+            n: "4",
+            title: "Capacity bay estimate",
+            tool: "Marked area / 30 m²",
+            output: capacity,
+          },
+          {
+            id: "peers",
             n: "5",
-            title: "Area data and comps",
-            tool: "Oxford Circus",
-            output: COMPS_PIPELINE_LINE,
+            title: "Peers and trend",
+            tool: "Retail park occupancy",
+            output: "Park-level, slight lower bound",
           },
           {
             id: "verdict",
             n: "6",
             title: "Fill % vs capacity",
             tool: "Verdict",
-            output: competitor.site ? `Fill ${fill}` : "From detections.json",
+            output: `Fill ${fill}`,
           },
         ]
       : [
@@ -145,7 +161,9 @@ export function PipelineStrip({
       <div className="flex w-28 shrink-0 flex-col justify-center">
         <div className="font-sans text-[10px] text-[var(--ink)]">How it works</div>
         <div className="font-sans text-[8px] text-[var(--muted)]">
-          {mode === "claim" ? "V7 Go orchestrates the documents" : "Same stack, different question"}
+          {mode === "claim"
+            ? "V7 Go orchestrates the documents"
+            : "ASDA Leyton Mills occupancy"}
         </div>
       </div>
       <ol className="m-0 flex min-w-0 flex-1 list-none flex-row gap-1 p-0">
@@ -153,7 +171,7 @@ export function PipelineStrip({
           const lit = i <= current;
           const active = i === current || selectedStep === step.id;
           const wide = step.span === 2 ? " min-w-0 flex-[2]" : " min-w-0 flex-1";
-          const pickable = step.id === "comps";
+          const pickable = mode === "claim" && step.id === "comps";
           return (
             <li
               key={step.id}
