@@ -66,6 +66,63 @@ function framedCameraPose(Cesium: CesiumNS, site: Site, viewer: Viewer) {
   return { destination, direction, up, range };
 }
 
+function launchOrbit(
+  viewer: Viewer,
+  Cesium: CesiumNS,
+  site: Site,
+  host: HTMLDivElement | null,
+) {
+  const existing = viewer.entities.getById("active-parcel");
+  if (existing) viewer.entities.remove(existing);
+  viewer.entities.add({
+    id: "active-parcel",
+    polygon: {
+      hierarchy: Cesium.Cartesian3.fromDegreesArray(parcelRing(site.lat, site.lon, 200)),
+      material: Cesium.Color.fromCssColorString("#d4a04a").withAlpha(0.45),
+      outline: true,
+      outlineColor: Cesium.Color.fromCssColorString("#f0d9a0"),
+      height: 1,
+      extrudedHeight: 36,
+    },
+  });
+
+  for (const spec of SATELLITES) {
+    const orbit = viewer.entities.getById(`orbit-${spec.id}`);
+    const sat = viewer.entities.getById(`sat-${spec.id}`);
+    if (orbit) orbit.show = true;
+    if (sat) sat.show = true;
+  }
+
+  viewer.trackedEntity = undefined;
+  viewer.selectedEntity = undefined;
+  viewer.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
+  viewer.clock.multiplier = 8;
+  viewer.clock.shouldAnimate = true;
+
+  const pose = framedCameraPose(Cesium, site, viewer);
+  host?.removeAttribute("data-orbit-settled");
+  viewer.camera.cancelFlight();
+  viewer.camera.setView({
+    destination: Cesium.Cartesian3.fromDegrees(site.lon, site.lat, 160_000),
+    orientation: {
+      heading: Cesium.Math.toRadians(ORBIT_HEADING),
+      pitch: Cesium.Math.toRadians(-70),
+      roll: 0,
+    },
+  });
+  viewer.camera.flyTo({
+    destination: pose.destination,
+    orientation: { direction: pose.direction, up: pose.up },
+    duration: 5.4,
+    easingFunction: Cesium.EasingFunction.CUBIC_IN_OUT,
+    complete: () => {
+      holdFramedView(viewer, Cesium, site);
+      viewer.clock.multiplier = 8;
+      host?.setAttribute("data-orbit-settled", "1");
+    },
+  });
+}
+
 function holdFramedView(viewer: Viewer, Cesium: CesiumNS, site: Site) {
   viewer.trackedEntity = undefined;
   viewer.selectedEntity = undefined;
@@ -86,6 +143,15 @@ function holdFramedView(viewer: Viewer, Cesium: CesiumNS, site: Site) {
 declare global {
   interface Window {
     CESIUM_BASE_URL?: string;
+    __hawkHeight?: () => number;
+    __hawkCam?: () => { lon: number; lat: number; h: number };
+    __hawkDebug?: () => {
+      pendingTiles: number;
+      tilesLoaded: boolean;
+      layers: number;
+      satAlpha: number;
+      height: number;
+    };
   }
 }
 
@@ -142,15 +208,14 @@ export function GlobeView({
       Cesium.Ion.defaultAccessToken = "";
       Cesium.buildModuleUrl.setBaseUrl("/cesium/");
 
-      const dark = new Cesium.UrlTemplateImageryProvider({
-        url: "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}",
-        maximumLevel: 16,
-        credit: "Esri",
-      });
       const satellite = new Cesium.UrlTemplateImageryProvider({
         url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+        tilingScheme: new Cesium.WebMercatorTilingScheme(),
         maximumLevel: 19,
-        credit: "Esri",
+        tileWidth: 256,
+        tileHeight: 256,
+        enablePickFeatures: false,
+        credit: "",
       });
 
       const viewer = new Cesium.Viewer(hostRef.current, {
@@ -167,23 +232,23 @@ export function GlobeView({
         navigationHelpButton: false,
         navigationInstructionsInitiallyVisible: false,
         shouldAnimate: true,
+        requestRenderMode: false,
+        useBrowserRecommendedResolution: false,
         terrainProvider: new Cesium.EllipsoidTerrainProvider(),
-        baseLayer: new Cesium.ImageryLayer(dark),
-        msaaSamples: 4,
+        baseLayer: new Cesium.ImageryLayer(satellite),
+        msaaSamples: 1,
         creditContainer: document.createElement("div"),
+        contextOptions: {
+          webgl: {
+            alpha: false,
+            antialias: true,
+            preserveDrawingBuffer: true,
+          },
+        },
       });
       viewerRef.current = viewer;
-
-      const satLayer = viewer.imageryLayers.addImageryProvider(satellite);
-      satLayer.alpha = 0;
-      const fadeSat = () => {
-        const height = viewer.camera.positionCartographic.height;
-        satLayer.alpha = Cesium.Math.clamp((4000 - height) / 3200, 0, 1);
-      };
-      viewer.camera.changed.addEventListener(fadeSat);
-      viewer.camera.moveEnd.addEventListener(fadeSat);
-      fadeSat();
-
+      viewer.resolutionScale = 1;
+      viewer.scene.globe.maximumScreenSpaceError = 2;
       viewer.scene.globe.enableLighting = false;
       viewer.scene.globe.showGroundAtmosphere = true;
       viewer.scene.skyAtmosphere.show = true;
@@ -205,13 +270,23 @@ export function GlobeView({
       });
 
       viewer.camera.setView({
-        destination: Cesium.Cartesian3.fromDegrees(LONDON.lon, LONDON.lat, 14000),
+        destination: Cesium.Cartesian3.fromDegrees(LONDON.lon, LONDON.lat, 180_000),
         orientation: {
           heading: 0,
-          pitch: Cesium.Math.toRadians(-89),
+          pitch: Cesium.Math.toRadians(-70),
           roll: 0,
         },
       });
+      window.__hawkHeight = () => viewer.camera.positionCartographic.height;
+      window.__hawkCam = () => {
+        const c = viewer.camera.positionCartographic;
+        return {
+          lon: Cesium.Math.toDegrees(c.longitude),
+          lat: Cesium.Math.toDegrees(c.latitude),
+          h: c.height,
+        };
+      };
+      const pending = siteRef.current;
 
       for (const parcel of SAMPLE_PARCELS) {
         viewer.entities.add({
@@ -278,7 +353,7 @@ export function GlobeView({
           },
           label: {
             text: spec.short,
-            font: "11px IBM Plex Mono, monospace",
+            font: "12px Inter, sans-serif",
             fillColor: Cesium.Color.WHITE,
             outlineColor: Cesium.Color.BLACK,
             outlineWidth: 3,
@@ -292,24 +367,13 @@ export function GlobeView({
 
       handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
       handler.setInputAction((click: { position: unknown }) => {
+        if (phaseRef.current === "survey") return;
         const picked = viewer.scene.pick(click.position as never);
         const id: string | undefined = picked?.id?.id;
-        if (id?.startsWith("sat-") && phaseRef.current !== "survey") {
+        if (id?.startsWith("sat-")) {
           viewer.trackedEntity = undefined;
           pickSat.current(id.replace("sat-", "") as SatelliteId);
-          return;
         }
-        if (phaseRef.current !== "survey") return;
-        const cartesian = viewer.camera.pickEllipsoid(
-          click.position as never,
-          viewer.scene.globe.ellipsoid,
-        );
-        if (!cartesian) return;
-        const carto = Cesium.Cartographic.fromCartesian(cartesian);
-        pickSite.current(
-          Cesium.Math.toDegrees(carto.latitude),
-          Cesium.Math.toDegrees(carto.longitude),
-        );
       }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
 
       const resize = () => {
@@ -319,6 +383,10 @@ export function GlobeView({
       resizeObs = new ResizeObserver(resize);
       resizeObs.observe(hostRef.current);
       requestAnimationFrame(resize);
+      if (pending && lastFly.current !== pending.id) {
+        lastFly.current = pending.id;
+        launchOrbit(viewer, Cesium, pending, hostRef.current);
+      }
     })();
 
     return () => {
@@ -336,48 +404,7 @@ export function GlobeView({
     if (!viewer || !Cesium || !site) return;
     if (lastFly.current === site.id) return;
     lastFly.current = site.id;
-
-    const existing = viewer.entities.getById("active-parcel");
-    if (existing) viewer.entities.remove(existing);
-    viewer.entities.add({
-      id: "active-parcel",
-      polygon: {
-        hierarchy: Cesium.Cartesian3.fromDegreesArray(parcelRing(site.lat, site.lon, 200)),
-        material: Cesium.Color.fromCssColorString("#d4a04a").withAlpha(0.45),
-        outline: true,
-        outlineColor: Cesium.Color.fromCssColorString("#f0d9a0"),
-        height: 1,
-        extrudedHeight: 36,
-      },
-    });
-
-    for (const spec of SATELLITES) {
-      const orbit = viewer.entities.getById(`orbit-${spec.id}`);
-      const sat = viewer.entities.getById(`sat-${spec.id}`);
-      if (orbit) orbit.show = true;
-      if (sat) sat.show = true;
-    }
-
-    viewer.trackedEntity = undefined;
-    viewer.selectedEntity = undefined;
-    viewer.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
-    viewer.clock.multiplier = 8;
-    viewer.clock.shouldAnimate = true;
-
-    const pose = framedCameraPose(Cesium, site, viewer);
-    hostRef.current?.removeAttribute("data-orbit-settled");
-    viewer.camera.cancelFlight();
-    viewer.camera.flyTo({
-      destination: pose.destination,
-      orientation: { direction: pose.direction, up: pose.up },
-      duration: 5.4,
-      easingFunction: Cesium.EasingFunction.CUBIC_IN_OUT,
-      complete: () => {
-        holdFramedView(viewer, Cesium, site);
-        viewer.clock.multiplier = 8;
-        hostRef.current?.setAttribute("data-orbit-settled", "1");
-      },
-    });
+    launchOrbit(viewer, Cesium, site, hostRef.current);
   }, [site]);
 
   useEffect(() => {

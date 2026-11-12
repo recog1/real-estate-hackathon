@@ -2,6 +2,9 @@ import type { Site } from "./types";
 
 export const LONDON = { lon: -0.1276, lat: 51.5074 };
 
+/** Fitzrovia / Margaret Street — demo start and screenshot target. */
+export const FITZROVIA = { lon: -0.1428, lat: 51.5165 };
+
 export const SAMPLE_PARCELS: Site[] = [
   {
     id: "cubitt",

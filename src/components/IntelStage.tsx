@@ -103,7 +103,7 @@ function Feed({
               const bh = box.h * h;
               const color = CLASS_COLOR[box.cls];
               drawCorners(ctx, x, y, bw, bh, color);
-              ctx.font = "10px IBM Plex Mono, monospace";
+              ctx.font = "11px Inter, sans-serif";
               ctx.fillStyle = color;
               const tag = `${box.cls.toUpperCase()} ${(box.conf * 100).toFixed(0)}`;
               ctx.fillText(tag, x, Math.max(12, y - 4));
@@ -130,11 +130,11 @@ function Feed({
         onPlay={() => setReady(true)}
       />
       <canvas ref={canvasRef} className="pointer-events-none absolute inset-0 h-full w-full" />
-      <div className="pointer-events-none absolute left-2 top-2 flex items-center gap-2 font-mono text-[10px] tracking-[0.18em] text-[var(--gold)]">
+      <div className="pointer-events-none absolute left-2 top-2 flex items-center gap-2 font-sans text-[10px] tracking-[0.18em] text-[var(--gold)]">
         <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--cyan)]" />
         {code} · {label}
       </div>
-      <div className="pointer-events-none absolute right-2 top-2 font-mono text-[10px] text-[var(--muted)]">
+      <div className="pointer-events-none absolute right-2 top-2 font-sans text-[10px] text-[var(--muted)]">
         VLM {ready ? "LIVE" : "LOCK"}
       </div>
     </div>
@@ -188,10 +188,10 @@ function AgentPanel() {
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="flex items-center justify-between border-b border-[var(--line)] px-3 py-2">
-        <span className="font-display text-[11px] tracking-[0.22em] text-[var(--gold)]">
+        <span className="font-sans text-[11px] tracking-[0.22em] text-[var(--gold)]">
           HAWK AGENT
         </span>
-        <span className="font-mono text-[10px] text-[var(--muted)]">READS DATA ROOM</span>
+        <span className="font-sans text-[10px] text-[var(--muted)]">READS DATA ROOM</span>
       </div>
       <div ref={scroller} className="min-h-0 flex-1 space-y-2 overflow-y-auto px-3 py-2">
         {messages.map((m) => (
@@ -204,7 +204,7 @@ function AgentPanel() {
             }
           >
             {m.role !== "user" && (
-              <div className="mb-1 font-mono text-[9px] tracking-[0.16em] text-[var(--gold)]">
+              <div className="mb-1 font-sans text-[9px] tracking-[0.16em] text-[var(--gold)]">
                 {m.role === "system" ? "SYS" : "HAWK"}
                 {m.cite ? ` · ${m.cite}` : ""}
               </div>
@@ -213,7 +213,7 @@ function AgentPanel() {
           </div>
         ))}
         {thinking && (
-          <div className="font-mono text-[10px] text-[var(--cyan)]">
+          <div className="font-sans text-[10px] text-[var(--cyan)]">
             ▍ {thinking}
           </div>
         )}
@@ -224,7 +224,7 @@ function AgentPanel() {
             key={c.id}
             type="button"
             onClick={() => ask(c.chip)}
-            className="border border-[var(--line)] px-1.5 py-0.5 font-mono text-[9px] text-[var(--muted)] hover:border-[var(--gold)] hover:text-[var(--gold)]"
+            className="border border-[var(--line)] px-1.5 py-0.5 font-sans text-[9px] text-[var(--muted)] hover:border-[var(--gold)] hover:text-[var(--gold)]"
           >
             {c.chip}
           </button>
@@ -241,11 +241,11 @@ function AgentPanel() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Query the data room…"
-          className="min-w-0 flex-1 bg-transparent px-3 py-2 font-mono text-xs outline-none placeholder:text-[var(--muted)]"
+          className="min-w-0 flex-1 bg-transparent px-3 py-2 font-sans text-xs outline-none placeholder:text-[var(--muted)]"
         />
         <button
           type="submit"
-          className="px-3 font-display text-[11px] tracking-[0.2em] text-[var(--gold)]"
+          className="px-3 font-sans text-[11px] tracking-[0.2em] text-[var(--gold)]"
         >
           SEND
         </button>
@@ -313,7 +313,7 @@ export function IntelStage({ site, sat }: { site: Site; sat: SatelliteSpec }) {
             />
           ))}
         </div>
-        <div className="h-[7.5rem] shrink-0 overflow-hidden border-t border-[var(--line)] bg-black font-mono text-[11px] leading-5 text-[var(--cyan)]">
+        <div className="terminal-log h-[7.5rem] shrink-0 overflow-hidden border-t border-[var(--line)] bg-black text-[11px] leading-5 text-[var(--cyan)]">
           <div className="flex items-center justify-between border-b border-[var(--line)] px-3 py-1 text-[10px] tracking-[0.18em] text-[var(--gold)]">
             <span>AH-TERM // COLLECTION LOG</span>
             {rollup && (
@@ -333,7 +333,7 @@ export function IntelStage({ site, sat }: { site: Site; sat: SatelliteSpec }) {
       </div>
       <aside className="flex w-[360px] shrink-0 flex-col border-l border-[var(--line)]">
         <div className="border-b border-[var(--line)] px-3 py-2">
-          <div className="font-display text-[11px] tracking-[0.22em] text-[var(--gold)]">
+          <div className="font-sans text-[11px] tracking-[0.22em] text-[var(--gold)]">
             DATA ROOM
           </div>
           <div className="mt-2 space-y-1">
@@ -345,7 +345,7 @@ export function IntelStage({ site, sat }: { site: Site; sat: SatelliteSpec }) {
                 className="flex w-full items-center justify-between border border-[var(--line)] px-2 py-1.5 text-left hover:border-[var(--gold)]"
               >
                 <span className="text-xs">{d.title}</span>
-                <span className="font-mono text-[9px] text-[var(--muted)]">
+                <span className="font-sans text-[9px] text-[var(--muted)]">
                   {d.tag} · {d.pages}p
                 </span>
               </button>
@@ -354,7 +354,7 @@ export function IntelStage({ site, sat }: { site: Site; sat: SatelliteSpec }) {
         </div>
         {doc && (
           <div className="border-b border-[var(--line)] p-2">
-            <div className="mb-1 flex items-center justify-between font-mono text-[10px] text-[var(--muted)]">
+            <div className="mb-1 flex items-center justify-between font-sans text-[10px] text-[var(--muted)]">
               <span>{doc.title}</span>
               <a href={doc.file} target="_blank" rel="noreferrer" className="text-[var(--gold)]">
                 OPEN

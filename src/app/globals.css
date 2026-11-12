@@ -17,25 +17,25 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-mono);
-  --font-display: var(--font-display);
+  --font-sans: var(--font-inter), "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
 }
 
 html,
 body {
   height: 100%;
+  min-height: 100dvh;
   background: var(--bg);
   color: var(--ink);
-  font-family: var(--font-sans), "IBM Plex Sans", sans-serif;
+  font-family: var(--font-sans);
 }
 
 .font-display {
-  font-family: var(--font-display), "Barlow Condensed", sans-serif;
+  font-family: var(--font-sans);
 }
 
-.font-mono {
-  font-family: var(--font-mono), "IBM Plex Mono", monospace;
+.terminal-log {
+  font-family: var(--font-mono);
 }
 
 body::before {
@@ -43,18 +43,96 @@ body::before {
   pointer-events: none;
   position: fixed;
   inset: 0;
-  z-index: 40;
+  z-index: 0;
   opacity: 0.035;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.9'/%3E%3C/svg%3E");
 }
 
 .globe-host,
+.street-map-host,
+.street-map-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 240px;
+}
+
+.street-map-host {
+  z-index: 1;
+  background: #0b0d12;
+}
+
+.street-map-host .maplibregl-map,
+.street-map-host .maplibregl-canvas,
+.street-map-host .maplibregl-canvas-container {
+  width: 100%;
+  height: 100%;
+}
+
+.street-map-host .maplibregl-ctrl-logo,
+.street-map-host .maplibregl-compact-show .maplibregl-ctrl-logo {
+  display: none !important;
+}
+
+.street-map-host .maplibregl-ctrl-attrib {
+  background: rgba(7, 8, 11, 0.72) !important;
+  color: #8b93a7;
+  font-family: var(--font-sans);
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  border-radius: 0;
+  margin: 0 8px 8px 0;
+  padding: 2px 6px;
+}
+
+.street-map-host .maplibregl-ctrl-attrib a {
+  color: #c8c3b6;
+}
+
+.map-sat-toggle {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 3;
+  border: 1px solid var(--line);
+  background: rgba(13, 16, 23, 0.88);
+  color: var(--gold);
+  font-family: var(--font-sans);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  padding: 6px 10px;
+}
+
+.site-pulse {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #d4a04a;
+  box-shadow: 0 0 0 0 rgba(212, 160, 74, 0.55);
+  animation: hawk-pulse 1.4s ease-out infinite;
+}
+
+@keyframes hawk-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(212, 160, 74, 0.55);
+  }
+  70% {
+    box-shadow: 0 0 0 18px rgba(212, 160, 74, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(212, 160, 74, 0);
+  }
+}
+
 .globe-host .cesium-viewer,
 .globe-host .cesium-viewer-cesiumWidgetContainer,
 .globe-host .cesium-widget,
 .globe-host .cesium-widget canvas {
-  width: 100%;
-  height: 100%;
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
 }
 
 .cesium-viewer-bottom,
@@ -66,6 +144,19 @@ body::before {
 
 button {
   cursor: pointer;
+}
+
+nextjs-portal,
+[data-nextjs-dev-tools-button],
+[data-nextjs-toast],
+[data-next-mark],
+[data-next-badge],
+[data-next-badge-root],
+[data-nextjs-dev-overlay],
+[data-nextjs-dialog-overlay] {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
 }
 
 ::-webkit-scrollbar {

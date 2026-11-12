@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { HawkMark } from "@/components/HawkMark";
 import { GlobeView } from "@/components/GlobeView";
+import { StreetMap } from "@/components/StreetMap";
 import { IntelStage } from "@/components/IntelStage";
 import { SATELLITES, getSatellite } from "@/lib/satellites";
 import { SAMPLE_PARCELS, siteFromClick } from "@/lib/sites";
@@ -19,14 +20,17 @@ const TASK_STEPS = [
 ];
 
 function Clock() {
-  const [now, setNow] = useState(() => new Date());
+  const [now, setNow] = useState<string>("");
   useEffect(() => {
-    const iv = setInterval(() => setNow(new Date()), 1000);
+    const tick = () =>
+      setNow(new Date().toISOString().replace("T", " ").replace(/\.\d+Z$/, "Z"));
+    tick();
+    const iv = setInterval(tick, 1000);
     return () => clearInterval(iv);
   }, []);
   return (
-    <span className="font-mono text-[11px] tracking-[0.14em] text-[var(--ink)]">
-      {now.toISOString().replace("T", " ").replace(/\.\d+Z$/, "Z")}
+    <span className="font-sans text-[11px] tracking-[0.14em] text-[var(--ink)]">
+      {now || "—"}
     </span>
   );
 }
@@ -68,6 +72,12 @@ export function CommandApp() {
     const next = siteFromClick(lat, lon);
     setSite(next);
     setSatId(null);
+    if (phase === "survey") {
+      window.setTimeout(() => {
+        setPhase((p) => (p === "survey" ? "orbit" : p));
+      }, 900);
+      return;
+    }
     setPhase("orbit");
   }
 
@@ -80,15 +90,15 @@ export function CommandApp() {
   const intel = phase === "intel" && site && sat;
 
   return (
-    <div className="flex h-full min-h-0 flex-col bg-[var(--bg)] text-[var(--ink)]">
+    <div className="flex h-dvh min-h-0 w-full flex-col bg-[var(--bg)] text-[var(--ink)]">
       <header className="flex shrink-0 items-center justify-between border-b border-[var(--line)] px-4 py-2">
         <div className="flex items-center gap-3">
           <HawkMark className="h-8 w-8" />
           <div>
-            <div className="font-display text-xl leading-none tracking-[0.18em] text-[var(--gold)]">
+            <div className="font-sans text-xl leading-none tracking-[0.18em] text-[var(--gold)]">
               ASSET HAWK
             </div>
-            <div className="font-mono text-[10px] tracking-[0.22em] text-[var(--muted)]">
+            <div className="font-sans text-[10px] tracking-[0.22em] text-[var(--muted)]">
               ORBITAL OCCUPANCY INTELLIGENCE
             </div>
           </div>
@@ -99,22 +109,14 @@ export function CommandApp() {
         </div>
         <div className="flex items-center gap-4">
           <Clock />
-          <span className="font-mono text-[11px] text-[var(--gold)]">LONDON</span>
+          <span className="font-sans text-[11px] text-[var(--gold)]">LONDON</span>
         </div>
       </header>
-      <div className="flex shrink-0 items-center justify-between border-b border-[var(--line)] bg-[var(--panel)] px-4 py-1 font-mono text-[10px] tracking-[0.2em] text-[var(--muted)]">
-        <span>CLASSIFICATION // DEMO · UNCLASSIFIED</span>
-        <span>
-          LAYER {phase === "survey" ? "01 MAP" : phase === "intel" ? "03 COLLECTION" : "02 SPACE"}
-        </span>
-        <span>CLICK LAND TO TASK · NO KEYS REQUIRED</span>
-      </div>
-
       <div className="flex min-h-0 flex-1">
         {phase !== "intel" && (
           <aside className="flex w-[280px] shrink-0 flex-col border-r border-[var(--line)] bg-[var(--panel)]">
             <div className="border-b border-[var(--line)] px-3 py-3">
-              <div className="font-display text-[11px] tracking-[0.22em] text-[var(--gold)]">
+              <div className="font-sans text-[11px] tracking-[0.22em] text-[var(--gold)]">
                 BRIEF
               </div>
               <p className="mt-2 text-xs leading-relaxed text-[var(--ink)]">
@@ -122,13 +124,13 @@ export function CommandApp() {
                 multifamily from orbit and estimates true occupancy — so you
                 underwrite the deal independently.
               </p>
-              <p className="mt-2 font-mono text-[10px] leading-relaxed text-[var(--muted)]">
+              <p className="mt-2 font-sans text-[10px] leading-relaxed text-[var(--muted)]">
                 Pan and zoom London. Click any land parcel. Camera flies to
                 space. Task a VHR bird. Four tiles land in the data room.
               </p>
             </div>
             <div className="min-h-0 flex-1 overflow-y-auto px-3 py-2">
-              <div className="mb-2 font-display text-[11px] tracking-[0.22em] text-[var(--muted)]">
+              <div className="mb-2 font-sans text-[11px] tracking-[0.22em] text-[var(--muted)]">
                 SAMPLE ASSETS
               </div>
               {SAMPLE_PARCELS.map((p) => (
@@ -139,7 +141,7 @@ export function CommandApp() {
                   className="mb-1 w-full border border-transparent px-2 py-1.5 text-left hover:border-[var(--line)] hover:bg-[var(--panel-2)]"
                 >
                   <div className="text-xs">{p.name}</div>
-                  <div className="font-mono text-[10px] text-[var(--muted)]">
+                  <div className="font-sans text-[10px] text-[var(--muted)]">
                     {p.borough} · {p.units}u · seller {Math.round(p.sellerOccupancy * 100)}%
                   </div>
                 </button>
@@ -147,11 +149,11 @@ export function CommandApp() {
             </div>
             {site && (
               <div className="border-t border-[var(--line)] px-3 py-3">
-                <div className="font-display text-[11px] tracking-[0.22em] text-[var(--gold)]">
+                <div className="font-sans text-[11px] tracking-[0.22em] text-[var(--gold)]">
                   SELECTED
                 </div>
                 <div className="mt-1 text-sm">{site.name}</div>
-                <div className="font-mono text-[10px] text-[var(--muted)]">
+                <div className="font-sans text-[10px] text-[var(--muted)]">
                   {site.lat.toFixed(4)}N {site.lon.toFixed(4)}E
                   <br />
                   {site.units} units · claimed {Math.round(site.sellerOccupancy * 100)}% ·{" "}
@@ -162,32 +164,49 @@ export function CommandApp() {
           </aside>
         )}
 
-        <div className="relative flex min-w-0 flex-1 flex-col">
-          <div className={intel ? "relative h-[32%] min-h-[180px] shrink-0" : "relative min-h-0 flex-1"}>
-            <GlobeView
-              phase={phase}
-              site={site}
-              selectedSat={satId}
-              onPickSite={pickSite}
-              onPickSatellite={pickSat}
-            />
+        <div className="relative flex h-full min-h-0 min-w-0 flex-1 flex-col">
+          <div
+            className={
+              intel
+                ? "relative h-[32vh] min-h-[180px] w-full shrink-0"
+                : "relative h-full min-h-0 w-full flex-1"
+            }
+          >
+            {(phase !== "survey" || site) && (
+              <GlobeView
+                phase={phase}
+                site={site}
+                selectedSat={satId}
+                onPickSite={pickSite}
+                onPickSatellite={pickSat}
+              />
+            )}
+            <div
+              className={
+                phase === "survey"
+                  ? "absolute inset-0 z-10 h-full w-full opacity-100 transition-opacity duration-700"
+                  : "pointer-events-none absolute inset-0 z-10 h-full w-full opacity-0 transition-opacity duration-700"
+              }
+            >
+              <StreetMap site={phase === "survey" ? site : null} onPickSite={pickSite} />
+            </div>
             {phase === "survey" && (
-              <div className="pointer-events-none absolute bottom-4 left-1/2 -translate-x-1/2 border border-[var(--gold)]/40 bg-black/60 px-3 py-1 font-mono text-[10px] tracking-[0.18em] text-[var(--gold)]">
+              <div className="pointer-events-none absolute bottom-4 left-1/2 z-20 -translate-x-1/2 border border-[var(--gold)]/40 bg-black/60 px-3 py-1 font-sans text-[10px] tracking-[0.18em] text-[var(--gold)]">
                 SCROLL · ZOOM · CLICK ANY LAND PARCEL
               </div>
             )}
             {phase === "orbit" && (
-              <div className="pointer-events-none absolute bottom-4 left-1/2 -translate-x-1/2 border border-[var(--cyan)]/40 bg-black/60 px-3 py-1 font-mono text-[10px] tracking-[0.18em] text-[var(--cyan)]">
+              <div className="pointer-events-none absolute bottom-4 left-1/2 -translate-x-1/2 border border-[var(--cyan)]/40 bg-black/60 px-3 py-1 font-sans text-[10px] tracking-[0.18em] text-[var(--cyan)]">
                 DRAG TO ORBIT · CLICK A SATELLITE TO TASK
               </div>
             )}
             {confirmOpen && sat && site && (
               <div className="absolute right-4 top-4 w-80 border border-[var(--gold)] bg-[var(--panel)]/95 p-4 shadow-[0_0_40px_rgba(212,160,74,0.12)]">
-                <div className="font-display text-[11px] tracking-[0.22em] text-[var(--gold)]">
+                <div className="font-sans text-[11px] tracking-[0.22em] text-[var(--gold)]">
                   TASK CONFIRM
                 </div>
                 <div className="mt-1 text-lg">{sat.name}</div>
-                <dl className="mt-3 space-y-1 font-mono text-[11px] text-[var(--muted)]">
+                <dl className="mt-3 space-y-1 font-sans text-[11px] text-[var(--muted)]">
                   <div className="flex justify-between">
                     <dt>RESOLUTION</dt>
                     <dd className="text-[var(--ink)]">{sat.resolution}</dd>
@@ -223,7 +242,7 @@ export function CommandApp() {
                   <button
                     type="button"
                     onClick={() => setPhase("tasking")}
-                    className="flex-1 bg-[var(--gold)] py-2 font-display text-[12px] tracking-[0.2em] text-black"
+                    className="flex-1 bg-[var(--gold)] py-2 font-sans text-[12px] tracking-[0.2em] text-black"
                   >
                     TASK SATELLITE
                   </button>
@@ -233,7 +252,7 @@ export function CommandApp() {
                       setSatId(null);
                       setPhase("orbit");
                     }}
-                    className="px-3 font-mono text-[10px] text-[var(--muted)]"
+                    className="px-3 font-sans text-[10px] text-[var(--muted)]"
                   >
                     ABORT
                   </button>
@@ -243,12 +262,12 @@ export function CommandApp() {
             {phase === "tasking" && (
               <div className="absolute inset-0 flex items-center justify-center bg-black/55">
                 <div className="w-96 border border-[var(--cyan)] bg-[var(--panel)] p-5">
-                  <div className="font-display tracking-[0.22em] text-[var(--cyan)]">
+                  <div className="font-sans tracking-[0.22em] text-[var(--cyan)]">
                     COLLECTION IN FLIGHT
                   </div>
                   <div className="mt-4 space-y-2">
                     {TASK_STEPS.map((s, i) => (
-                      <div key={s} className="flex items-center gap-3 font-mono text-[11px]">
+                      <div key={s} className="flex items-center gap-3 font-sans text-[11px]">
                         <span
                           className={
                             i < taskStep
@@ -281,7 +300,7 @@ export function CommandApp() {
 
         {phase !== "survey" && phase !== "intel" && (
           <aside className="w-[260px] shrink-0 overflow-y-auto border-l border-[var(--line)] bg-[var(--panel)]">
-            <div className="px-3 py-3 font-display text-[11px] tracking-[0.22em] text-[var(--gold)]">
+            <div className="px-3 py-3 font-sans text-[11px] tracking-[0.22em] text-[var(--gold)]">
               CONSTELLATION
             </div>
             {SATELLITES.map((s) => {
@@ -295,11 +314,11 @@ export function CommandApp() {
                 >
                   <div>
                     <div className="text-xs">{s.name}</div>
-                    <div className="font-mono text-[10px] text-[var(--muted)]">
+                    <div className="font-sans text-[10px] text-[var(--muted)]">
                       {s.resolution} · {s.operator}
                     </div>
                   </div>
-                  <div className="font-mono text-[10px] text-[var(--cyan)]">
+                  <div className="font-sans text-[10px] text-[var(--cyan)]">
                     {p ? formatEta(p.time) : "—"}
                   </div>
                 </button>
@@ -309,17 +328,6 @@ export function CommandApp() {
         )}
       </div>
 
-      <footer className="flex shrink-0 items-center justify-between border-t border-[var(--line)] px-4 py-1 font-mono text-[10px] tracking-[0.14em] text-[var(--muted)]">
-        <span>ASSET HAWK · Grok Bot Real Estate Hackathon London</span>
-        <span>Esri World Dark Gray · TLE SGP4 · no Ion token</span>
-        {site ? (
-          <span>
-            {site.lat.toFixed(5)}N {site.lon.toFixed(5)}E
-          </span>
-        ) : (
-          <span>51.5074N 0.1276W</span>
-        )}
-      </footer>
     </div>
   );
 }
