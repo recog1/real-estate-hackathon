@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { DATA_ROOM, type DataDoc } from "@/lib/dataroom";
 import { CANNED, answerFor } from "@/lib/agent";
+import { V7SourceChip, V7WorkflowPanel } from "@/components/V7WorkflowPanel";
 import { buildLogScript } from "@/lib/terminal";
 import { interpolateBoxes, statsFromBoxes, trackFor, type OccupancyStats } from "@/lib/detections";
 import { ZONES } from "@/lib/zones";
@@ -141,12 +142,12 @@ function Feed({
   );
 }
 
-function AgentPanel() {
+function AgentPanel({ onOpenV7 }: { onOpenV7: () => void }) {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: "sys",
       role: "system",
-      text: "Agent online. Data room indexed. Ask about occupancy, seller claims, or valuation.",
+      text: "Agent online. Data room indexed by V7 Go. Ask about occupancy, seller claims, or valuation.",
     },
   ]);
   const [input, setInput] = useState("");
@@ -162,12 +163,18 @@ function AgentPanel() {
     if (!q || thinking) return;
     setInput("");
     setMessages((m) => [...m, { id: crypto.randomUUID(), role: "user", text: q }]);
-    const { answer, cite } = answerFor(q);
-    const scan = [
-      "Opening data room…",
-      `Reading ${cite}`,
-      "Cross-checking vehicle time series…",
-    ];
+    const { answer, cite, source } = answerFor(q);
+    const scan = source
+      ? [
+          "Opening V7 Go workflow…",
+          "Reading extracted occupancy fields…",
+          "Resolving discrepancy flag…",
+        ]
+      : [
+          "Opening data room…",
+          `Reading ${cite}`,
+          "Cross-checking vehicle time series…",
+        ];
     let i = 0;
     setThinking(scan[0]);
     const iv = setInterval(() => {
@@ -180,7 +187,7 @@ function AgentPanel() {
       setThinking(null);
       setMessages((m) => [
         ...m,
-        { id: crypto.randomUUID(), role: "agent", text: answer, cite },
+        { id: crypto.randomUUID(), role: "agent", text: answer, cite, source },
       ]);
     }, 420);
   }
@@ -206,10 +213,11 @@ function AgentPanel() {
             {m.role !== "user" && (
               <div className="mb-1 font-sans text-[9px] tracking-[0.16em] text-[var(--gold)]">
                 {m.role === "system" ? "SYS" : "HAWK"}
-                {m.cite ? ` · ${m.cite}` : ""}
+                {m.cite && m.source !== "v7" ? ` · ${m.cite}` : ""}
               </div>
             )}
-            {m.text}
+            <div>{m.text}</div>
+            {m.source === "v7" && <V7SourceChip onOpen={onOpenV7} />}
           </div>
         ))}
         {thinking && (
@@ -259,6 +267,7 @@ export function IntelStage({ site, sat }: { site: Site; sat: SatelliteSpec }) {
   const [visible, setVisible] = useState(1);
   const [stats, setStats] = useState<Partial<Record<ZoneId, OccupancyStats>>>({});
   const [doc, setDoc] = useState<DataDoc | null>(null);
+  const [roomTab, setRoomTab] = useState<"v7" | "files">("v7");
   const onStats = useRef((id: ZoneId, s: OccupancyStats) => {
     setStats((prev) => {
       const cur = prev[id];
@@ -331,39 +340,76 @@ export function IntelStage({ site, sat }: { site: Site; sat: SatelliteSpec }) {
           </div>
         </div>
       </div>
-      <aside className="flex w-[360px] shrink-0 flex-col border-l border-[var(--line)]">
-        <div className="border-b border-[var(--line)] px-3 py-2">
+      <aside
+        data-room-tab={roomTab}
+        className="flex w-[420px] shrink-0 flex-col border-l border-[var(--line)] bg-[var(--panel)]"
+      >
+        <div className="flex items-center justify-between border-b border-[var(--line)] px-3 py-2">
           <div className="font-sans text-[11px] tracking-[0.22em] text-[var(--gold)]">
             DATA ROOM
           </div>
-          <div className="mt-2 space-y-1">
-            {DATA_ROOM.map((d) => (
-              <button
-                key={d.id}
-                type="button"
-                onClick={() => setDoc(d)}
-                className="flex w-full items-center justify-between border border-[var(--line)] px-2 py-1.5 text-left hover:border-[var(--gold)]"
-              >
-                <span className="text-xs">{d.title}</span>
-                <span className="font-sans text-[9px] text-[var(--muted)]">
-                  {d.tag} · {d.pages}p
-                </span>
-              </button>
-            ))}
+          <div className="flex gap-1">
+            <button
+              type="button"
+              data-room-tab="files"
+              onClick={() => setRoomTab("files")}
+              className={
+                roomTab === "files"
+                  ? "border border-[var(--gold)] px-2 py-0.5 font-sans text-[9px] tracking-[0.14em] text-[var(--gold)]"
+                  : "border border-[var(--line)] px-2 py-0.5 font-sans text-[9px] tracking-[0.14em] text-[var(--muted)]"
+              }
+            >
+              FILES
+            </button>
+            <button
+              type="button"
+              data-room-tab="v7"
+              onClick={() => setRoomTab("v7")}
+              className={
+                roomTab === "v7"
+                  ? "border border-[#5B4BFF] bg-[#5B4BFF]/15 px-2 py-0.5 font-sans text-[9px] tracking-[0.14em] text-[#c8c4ff]"
+                  : "border border-[var(--line)] px-2 py-0.5 font-sans text-[9px] tracking-[0.14em] text-[var(--muted)]"
+              }
+            >
+              V7 GO
+            </button>
           </div>
         </div>
-        {doc && (
-          <div className="border-b border-[var(--line)] p-2">
-            <div className="mb-1 flex items-center justify-between font-sans text-[10px] text-[var(--muted)]">
-              <span>{doc.title}</span>
-              <a href={doc.file} target="_blank" rel="noreferrer" className="text-[var(--gold)]">
-                OPEN
-              </a>
+        {roomTab === "v7" ? (
+          <div className="min-h-0 flex-[1.4] overflow-y-auto border-b border-[var(--line)] px-3 py-2">
+            <V7WorkflowPanel />
+          </div>
+        ) : (
+          <div className="min-h-0 max-h-[42%] overflow-y-auto border-b border-[var(--line)] px-3 py-2">
+            <div className="space-y-1">
+              {DATA_ROOM.map((d) => (
+                <button
+                  key={d.id}
+                  type="button"
+                  onClick={() => setDoc(d)}
+                  className="flex w-full items-center justify-between border border-[var(--line)] px-2 py-1.5 text-left hover:border-[var(--gold)]"
+                >
+                  <span className="text-xs">{d.title}</span>
+                  <span className="font-sans text-[9px] text-[var(--muted)]">
+                    {d.tag} · {d.pages}p
+                  </span>
+                </button>
+              ))}
             </div>
-            <iframe title={doc.title} src={doc.file} className="h-40 w-full border border-[var(--line)] bg-white" />
+            {doc && (
+              <div className="mt-2">
+                <div className="mb-1 flex items-center justify-between font-sans text-[10px] text-[var(--muted)]">
+                  <span>{doc.title}</span>
+                  <a href={doc.file} target="_blank" rel="noreferrer" className="text-[var(--gold)]">
+                    OPEN
+                  </a>
+                </div>
+                <iframe title={doc.title} src={doc.file} className="h-36 w-full border border-[var(--line)] bg-white" />
+              </div>
+            )}
           </div>
         )}
-        <AgentPanel />
+        <AgentPanel onOpenV7={() => setRoomTab("v7")} />
       </aside>
     </div>
   );

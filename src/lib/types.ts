@@ -80,4 +80,5 @@ export type ChatMessage = {
   role: ChatRole;
   text: string;
   cite?: string;
+  source?: "v7";
 };

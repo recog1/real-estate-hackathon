@@ -1,9 +1,12 @@
+import { V7_SUMMARY } from "@/lib/v7";
+
 export type Canned = {
   id: string;
   chip: string;
   match: RegExp;
   cite: string;
   answer: string;
+  source?: "v7";
 };
 
 export const CANNED: Canned[] = [
@@ -11,9 +14,9 @@ export const CANNED: Canned[] = [
     id: "results",
     chip: "What are the results of this analysis?",
     match: /result|findings|summary|analysis|what did|occupancy/i,
-    cite: "Occupancy Analysis Report · p.2–3",
-    answer:
-      "This is a multifamily residential asset. The seller claims ~95% occupancy. Across four nadir tiles we count 48 dwellings and 34 parked cars. Dwellings with ≥1 car at the kerb are treated as occupied, which implies ~71–75% physical occupancy — materially below the rent roll. Cars-per-unit sits at 0.71 vs a 0.95 claim. See Occupancy Analysis Report p.2 and Seller Claims vs Observed p.1.",
+    cite: "Source: V7 Go workflow",
+    source: "v7",
+    answer: V7_SUMMARY.answer,
   },
   {
     id: "claims",
@@ -52,8 +55,10 @@ export const CANNED: Canned[] = [
 export const FALLBACK =
   "I only underwrite from this collection’s data room. Ask about occupancy, seller claims, vehicle counts, valuation impact, or what to send to IC. I will not speculate beyond the five PDFs on file.";
 
-export function answerFor(prompt: string): { answer: string; cite: string } {
+export function answerFor(
+  prompt: string,
+): { answer: string; cite: string; source?: "v7" } {
   const hit = CANNED.find((c) => c.match.test(prompt));
-  if (hit) return { answer: hit.answer, cite: hit.cite };
+  if (hit) return { answer: hit.answer, cite: hit.cite, source: hit.source };
   return { answer: FALLBACK, cite: "Data room index" };
 }
