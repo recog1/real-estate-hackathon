@@ -1,12 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import {
-  AttributionControl,
-  Map as MapLibreMap,
-  Marker,
-  setWorkerUrl,
-} from "maplibre-gl";
+import { Map as MapLibreMap, Marker, setWorkerUrl } from "maplibre-gl";
 import { FITZROVIA, parcelRing } from "@/lib/sites";
 import type { Site } from "@/lib/types";
 
@@ -15,6 +10,8 @@ setWorkerUrl("/maplibre-gl-worker.mjs");
 const STYLE_URL = "https://tiles.openfreemap.org/styles/liberty";
 const ESRI_IMAGERY =
   "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
+const STREET_ATTRIBUTION = "© OpenFreeMap © OpenMapTiles © OpenStreetMap";
+const ESRI_ATTRIBUTION = "Esri, Maxar, Earthstar Geographics";
 
 const START = {
   center: [FITZROVIA.lon, FITZROVIA.lat] as [number, number],
@@ -227,34 +224,69 @@ function styleBuildings(map: MapLibreMap) {
   ]);
 }
 
+type LayerVisibility = "visible" | "none";
+const layerVis = new WeakMap<MapLibreMap, Map<string, LayerVisibility>>();
+
+function snapshotVisibility(map: MapLibreMap) {
+  let snap = layerVis.get(map);
+  if (snap) return snap;
+  snap = new Map();
+  for (const layer of map.getStyle().layers ?? []) {
+    if (layer.id === "esri-sat" || layer.id.startsWith("hawk-")) continue;
+    try {
+      const vis = map.getLayoutProperty(layer.id, "visibility");
+      snap.set(layer.id, vis === "none" ? "none" : "visible");
+    } catch {
+      snap.set(layer.id, "visible");
+    }
+  }
+  layerVis.set(map, snap);
+  return snap;
+}
+
 function applySatelliteMode(map: MapLibreMap, on: boolean) {
   if (!map.getLayer("esri-sat")) return;
+  const snap = snapshotVisibility(map);
   map.setLayoutProperty("esri-sat", "visibility", on ? "visible" : "none");
-  const keep = new Set([
-    "esri-sat",
-    "building-3d",
-    "hawk-site-fill",
-    "hawk-site-line",
-  ]);
   for (const layer of map.getStyle().layers ?? []) {
-    if (keep.has(layer.id) || layer.type === "symbol") continue;
+    if (layer.id === "esri-sat" || layer.id.startsWith("hawk-")) continue;
     if (layer.type === "background") {
       map.setPaintProperty(layer.id, "background-color", on ? "#07080b" : "#f4f5f6");
       continue;
     }
+    if (on && layer.type === "symbol") continue;
     try {
-      map.setLayoutProperty(layer.id, "visibility", on ? "none" : "visible");
+      const next: LayerVisibility = on ? "none" : (snap.get(layer.id) ?? "visible");
+      map.setLayoutProperty(layer.id, "visibility", next);
     } catch {
       /* some layers reject layout visibility */
     }
   }
-  if (map.getLayer("building-3d")) {
-    map.setLayoutProperty("building-3d", "visibility", "visible");
+  for (const id of ["hawk-site-fill", "hawk-site-line"]) {
+    if (map.getLayer(id)) map.setLayoutProperty(id, "visibility", "visible");
   }
 }
 
 function addOverlays(map: MapLibreMap, satelliteOn: boolean) {
-  if (map.getSource("hawk-site")) return;
+  if (map.getSource("esri-sat")) return;
+  map.addSource("esri-sat", {
+    type: "raster",
+    tiles: [ESRI_IMAGERY],
+    tileSize: 256,
+    maxzoom: 19,
+    attribution: ESRI_ATTRIBUTION,
+  });
+  const before = map.getStyle().layers?.find((l) => l.type !== "background")?.id;
+  map.addLayer(
+    {
+      id: "esri-sat",
+      type: "raster",
+      source: "esri-sat",
+      layout: { visibility: "none" },
+      paint: { "raster-opacity": 1, "raster-fade-duration": 180 },
+    },
+    before,
+  );
   map.addSource("hawk-site", {
     type: "geojson",
     data: { type: "FeatureCollection", features: [] },
@@ -277,26 +309,6 @@ function addOverlays(map: MapLibreMap, satelliteOn: boolean) {
       "line-width": 2,
     },
   });
-  map.addSource("esri-sat", {
-    type: "raster",
-    tiles: [ESRI_IMAGERY],
-    tileSize: 256,
-    maxzoom: 19,
-    attribution: "Esri",
-  });
-  const before = map
-    .getStyle()
-    .layers?.find((l) => l.type === "symbol" || l.id === "building-3d")?.id;
-  map.addLayer(
-    {
-      id: "esri-sat",
-      type: "raster",
-      source: "esri-sat",
-      layout: { visibility: "none" },
-      paint: { "raster-opacity": 1, "raster-fade-duration": 240 },
-    },
-    before,
-  );
   neutralizeLiberty(map);
   styleBuildings(map);
   applySatelliteMode(map, satelliteOn);
@@ -418,14 +430,6 @@ export function StreetMap({
       map = ml;
       mapRef.current = ml;
 
-      ml.addControl(
-        new AttributionControl({
-          compact: true,
-          customAttribution: "© OpenFreeMap © OpenMapTiles © OpenStreetMap",
-        }),
-        "bottom-right",
-      );
-
       ml.on("load", () => {
         if (cancelled) return;
         addOverlays(ml, satRef.current);
@@ -536,6 +540,7 @@ export function StreetMap({
     <div
       className="street-map-host"
       data-departing={departing ? "1" : "0"}
+      data-basemap={satellite ? "satellite" : "street"}
       style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
     >
       <div
@@ -546,10 +551,15 @@ export function StreetMap({
       <button
         type="button"
         className="map-sat-toggle"
+        aria-pressed={satellite}
+        aria-label="Satellite"
         onClick={() => setSatellite((v) => !v)}
       >
-        {satellite ? "Street" : "Satellite"}
+        Satellite
       </button>
+      <div className="map-attrib">
+        {satellite ? ESRI_ATTRIBUTION : STREET_ATTRIBUTION}
+      </div>
     </div>
   );
 }

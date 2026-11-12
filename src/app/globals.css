@@ -84,18 +84,7 @@ body::before {
 }
 
 .street-map-host .maplibregl-ctrl-attrib {
-  background: rgba(7, 8, 11, 0.72) !important;
-  color: #8b93a7;
-  font-family: var(--font-sans);
-  font-size: 9px;
-  letter-spacing: 0.04em;
-  border-radius: 0;
-  margin: 0 8px 8px 0;
-  padding: 2px 6px;
-}
-
-.street-map-host .maplibregl-ctrl-attrib a {
-  color: #c4c4c8;
+  display: none !important;
 }
 
 .map-sat-toggle {
@@ -103,12 +92,35 @@ body::before {
   top: 62px;
   right: 12px;
   z-index: 3;
-  border: 1px solid var(--line);
-  background: rgba(13, 16, 23, 0.92);
-  color: var(--accent);
+  border: 1px solid #f4f4f5;
+  background: #07080b;
+  color: #f4f4f5;
   font-family: var(--font-sans);
   font-size: 11px;
-  padding: 6px 10px;
+  line-height: 1;
+  letter-spacing: 0;
+  text-transform: none;
+  padding: 7px 11px;
+}
+
+.map-sat-toggle[aria-pressed="true"] {
+  background: #f4f4f5;
+  color: #07080b;
+}
+
+.map-attrib {
+  pointer-events: none;
+  position: absolute;
+  right: 12px;
+  bottom: 8px;
+  z-index: 3;
+  background: rgba(7, 8, 11, 0.72);
+  color: #c4c4c8;
+  font-family: var(--font-sans);
+  font-size: 9px;
+  letter-spacing: 0;
+  text-transform: none;
+  padding: 2px 6px;
 }
 
 .site-pin {
