@@ -5,6 +5,7 @@ import { HawkMark } from "@/components/HawkMark";
 import { GlobeView } from "@/components/GlobeView";
 import { StreetMap } from "@/components/StreetMap";
 import { IntelStage } from "@/components/IntelStage";
+import { Site3DView } from "@/components/Site3DView";
 import { SATELLITES, getSatellite } from "@/lib/satellites";
 import { FITZROVIA, siteFromClick } from "@/lib/sites";
 import { formatEta, formatPassClock, nextPass } from "@/lib/orbits";
@@ -33,6 +34,7 @@ export function CommandApp() {
   const [satId, setSatId] = useState<SatelliteId | null>(null);
   const [taskStep, setTaskStep] = useState(0);
   const [departing, setDeparting] = useState(false);
+  const [inspect3d, setInspect3d] = useState(false);
   const phaseRef = useRef(phase);
   phaseRef.current = phase;
 
@@ -105,6 +107,7 @@ export function CommandApp() {
       data-departing={departing ? "1" : "0"}
       data-site={site?.id ?? ""}
       data-space={space ? "1" : "0"}
+      data-inspect3d={inspect3d ? "1" : "0"}
       className="relative h-dvh w-dvw overflow-hidden bg-[var(--bg)] text-[var(--ink)]"
     >
       <div
@@ -251,7 +254,13 @@ export function CommandApp() {
         </div>
       )}
 
-      <header className="absolute inset-x-0 top-0 z-30 flex h-14 items-center justify-between border-b border-[var(--line)] bg-[var(--panel)] px-4">
+      {inspect3d && (
+        <div className="absolute inset-x-0 bottom-0 top-14 z-40 bg-[var(--bg)]">
+          <Site3DView site={site} onClose={() => setInspect3d(false)} />
+        </div>
+      )}
+
+      <header className="absolute inset-x-0 top-0 z-50 flex h-14 items-center justify-between border-b border-[var(--line)] bg-[var(--panel)] px-4">
         <div className="flex items-center gap-3">
           <HawkMark className="h-8 w-8" />
           <div>
@@ -261,16 +270,35 @@ export function CommandApp() {
             </div>
           </div>
         </div>
-        {phase === "survey" && site && (
-          <button
-            type="button"
-            disabled={departing}
-            onClick={beginAscent}
-            className="bg-[var(--accent)] px-4 py-2 font-sans text-[12px] text-black disabled:opacity-60"
-          >
-            {departing ? "Ascending…" : "Task satellite"}
-          </button>
-        )}
+        <div className="flex items-center gap-2">
+          {inspect3d ? (
+            <button
+              type="button"
+              onClick={() => setInspect3d(false)}
+              className="border border-[var(--ink)] px-4 py-2 font-sans text-[12px] text-[var(--ink)]"
+            >
+              Back to map
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setInspect3d(true)}
+              className="border border-[var(--ink)] px-4 py-2 font-sans text-[12px] text-[var(--ink)]"
+            >
+              3D view
+            </button>
+          )}
+          {phase === "survey" && site && !inspect3d && (
+            <button
+              type="button"
+              disabled={departing}
+              onClick={beginAscent}
+              className="bg-[var(--accent)] px-4 py-2 font-sans text-[12px] text-black disabled:opacity-60"
+            >
+              {departing ? "Ascending…" : "Task satellite"}
+            </button>
+          )}
+        </div>
       </header>
 
       {space && (
