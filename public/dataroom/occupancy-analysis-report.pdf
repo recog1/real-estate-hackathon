@@ -9,7 +9,7 @@ endobj
 << /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R /F2 6 0 R >> >> >>
 endobj
 4 0 obj
-<< /Length 2729 >>
+<< /Length 2812 >>
 stream
 0.83 0.63 0.29 rg
 0 760 612 32 re f
@@ -26,87 +26,87 @@ BT
 (Occupancy Analysis Report) Tj
 /F1 10 Tf
 0.15 0.16 0.18 rg
--20 Td
+0 -20 Td
 (Collection ID  AH-2026-1112-LHR-CUBITT) Tj
--14 Td
+0 -14 Td
 (Asset          Cubitt Wharf Residences / Tower Hamlets \(or nearest named multifamily\)) Tj
--14 Td
+0 -14 Td
 (Sensor         WorldView-3  31 cm PAN   off-nadir 18.4 deg) Tj
--14 Td
+0 -14 Td
 (Tiles          4 nadir loops  ·  20-24 s  ·  VLM hawk-v11n) Tj
--14 Td
+0 -14 Td
 () Tj
--14 Td
+0 -14 Td
 (1. Purpose) Tj
--14 Td
+0 -14 Td
 (Occupancy underpins real-estate value. If a multifamily cannot be filled with tenants, the) Tj
--14 Td
+0 -14 Td
 (rent roll is not an income stream - it is a claim. Asset Hawk lets an investor underwrite) Tj
--14 Td
+0 -14 Td
 (that claim from orbit before requesting a single seller document.) Tj
--14 Td
+0 -14 Td
 () Tj
--14 Td
+0 -14 Td
 (2. Method) Tj
--14 Td
+0 -14 Td
 (Dwellings are stable house footprints. Vehicles are COCO car detections, median-smoothed) Tj
--14 Td
+0 -14 Td
 (across the loop. A dwelling is occupied if at least one parked car sits within ~18 m of) Tj
--14 Td
+0 -14 Td
 (its footprint. Through-traffic \(displacement > 4 m/s\) is excluded. People are counted but) Tj
--14 Td
+0 -14 Td
 (not used in the occupancy proxy.) Tj
--14 Td
+0 -14 Td
 () Tj
--14 Td
+0 -14 Td
 (3. Observed \(regional roll-up\)) Tj
--14 Td
+0 -14 Td
 (Dwellings counted          48) Tj
--14 Td
+0 -14 Td
 (Parked cars \(median\)       34) Tj
--14 Td
+0 -14 Td
 (Cars per dwelling          0.71) Tj
--14 Td
+0 -14 Td
 (Occupied \(car-at-kerb\)     34 / 48) Tj
--14 Td
+0 -14 Td
 (Observed occupancy         71-75%  \(point 73%\)) Tj
--14 Td
+0 -14 Td
 (Seller claimed occupancy   95%) Tj
--14 Td
+0 -14 Td
 (Gap                        -22 percentage points) Tj
--14 Td
+0 -14 Td
 () Tj
--14 Td
+0 -14 Td
 (4. Tile breakdown) Tj
--14 Td
+0 -14 Td
 (Z-N North courtyard   occ 75%   cars 9    houses 12) Tj
--14 Td
+0 -14 Td
 (Z-E East street grid  occ 83%   cars 11   houses 12) Tj
--14 Td
+0 -14 Td
 (Z-W West terrace      occ 67%   cars 7    houses 12) Tj
--14 Td
+0 -14 Td
 (Z-S South car park    occ 71%   cars 8    houses 12) Tj
--14 Td
+0 -14 Td
 () Tj
--14 Td
+0 -14 Td
 (5. Interpretation) Tj
--14 Td
+0 -14 Td
 (The west and south tiles drive the miss. Pattern is consistent with empty units rather) Tj
--14 Td
+0 -14 Td
 (than a single-day event: parked-car counts are stable across the loops. Night-time and) Tj
--14 Td
+0 -14 Td
 (weekend revisits recommended before IC.) Tj
--14 Td
+0 -14 Td
 () Tj
--14 Td
+0 -14 Td
 (6. Confidence) Tj
--14 Td
+0 -14 Td
 (This is a physical-occupancy proxy, not a tenancy legal conclusion. Company cars,) Tj
--14 Td
+0 -14 Td
 (residents without cars, and underground parking can bias the ratio. Even with those) Tj
--14 Td
+0 -14 Td
 (caveats, a 20pt+ gap versus a 95% rent roll is material and should be treated as an) Tj
--14 Td
+0 -14 Td
 (overstatement until proven otherwise.) Tj
 ET
 0.07 0.08 0.10 rg
@@ -130,10 +130,10 @@ xref
 0000000058 00000 n 
 0000000115 00000 n 
 0000000251 00000 n 
-0000003030 00000 n 
-0000003102 00000 n 
+0000003114 00000 n 
+0000003186 00000 n 
 trailer
 << /Size 7 /Root 1 0 R >>
 startxref
-3173
+3257
 %%EOF

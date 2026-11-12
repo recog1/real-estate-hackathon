@@ -40,5 +40,12 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# Cesium static assets are copied from node_modules on install
-/public/cesium
+# Cesium workers/assets are copied on install; Cesium.js is committed
+# so a live auto-pull serves it without a reinstall.
+/public/cesium/Workers/
+/public/cesium/Assets/
+/public/cesium/ThirdParty/
+/public/cesium/Widgets/
+/public/cesium/index.js
+/public/cesium/index.cjs
+/public/maplibre-gl-worker.mjs

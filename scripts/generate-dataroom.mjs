@@ -76,11 +76,11 @@ function makePdf(title, lines) {
       "/F1 10 Tf",
       "0.15 0.16 0.18 rg",
     ];
-    let lastY = 720;
     for (const row of pl) {
-      ops.push(`${row.y - lastY} Td`);
+      // Tm needs the full text matrix; a single-number Td is an invalid operator
+      // and some viewers then show only the title drawn before this loop.
+      ops.push(`1 0 0 1 36 ${row.y} Tm`);
       ops.push(`(${pdfEscape(row.text)}) Tj`);
-      lastY = row.y;
     }
     ops.push("ET");
     ops.push("0.07 0.08 0.10 rg");
