@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import type { Viewer } from "cesium";
 import { SATELLITES } from "@/lib/satellites";
-import { LONDON, SAMPLE_PARCELS, parcelRing } from "@/lib/sites";
+import { LONDON, parcelRing } from "@/lib/sites";
 import { geodeticAt, satrecOf } from "@/lib/orbits";
 import { propagate, gstime, eciToGeodetic, degreesLat, degreesLong } from "satellite.js";
 import type { Phase, SatelliteId, Site } from "@/lib/types";
@@ -291,23 +291,6 @@ export function GlobeView({
         };
       };
       const pending = siteRef.current;
-
-      for (const parcel of SAMPLE_PARCELS) {
-        viewer.entities.add({
-          id: `parcel-${parcel.id}`,
-          name: parcel.name,
-          polygon: {
-            hierarchy: Cesium.Cartesian3.fromDegreesArray(
-              parcelRing(parcel.lat, parcel.lon),
-            ),
-            material: Cesium.Color.fromCssColorString("#d4a04a").withAlpha(0.22),
-            outline: true,
-            outlineColor: Cesium.Color.fromCssColorString("#d4a04a"),
-            height: 1,
-            extrudedHeight: 18,
-          },
-        });
-      }
 
       const now = new Date();
       for (const spec of SATELLITES) {

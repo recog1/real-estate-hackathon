@@ -6,7 +6,7 @@ import { GlobeView } from "@/components/GlobeView";
 import { StreetMap } from "@/components/StreetMap";
 import { IntelStage } from "@/components/IntelStage";
 import { SATELLITES, getSatellite } from "@/lib/satellites";
-import { SAMPLE_PARCELS, siteFromClick } from "@/lib/sites";
+import { FITZROVIA, siteFromClick } from "@/lib/sites";
 import { formatEta, formatPassClock, nextPass } from "@/lib/orbits";
 import type { Phase, SatelliteId, Site } from "@/lib/types";
 
@@ -24,22 +24,6 @@ const TASK_STEPS = [
   "KA-BAND DOWNLINK",
   "VLM INFERENCE",
 ];
-
-function Clock() {
-  const [now, setNow] = useState<string>("");
-  useEffect(() => {
-    const tick = () =>
-      setNow(new Date().toISOString().replace("T", " ").replace(/\.\d+Z$/, "Z"));
-    tick();
-    const iv = setInterval(tick, 1000);
-    return () => clearInterval(iv);
-  }, []);
-  return (
-    <span className="font-sans text-[11px] tracking-[0.14em] text-[var(--ink)]">
-      {now || "—"}
-    </span>
-  );
-}
 
 export function CommandApp() {
   const [phase, setPhase] = useState<Phase>("survey");
@@ -62,7 +46,7 @@ export function CommandApp() {
 
   useEffect(() => {
     window.__hawkSkipToIntel = () => {
-      setSite(SAMPLE_PARCELS[0]);
+      setSite(siteFromClick(FITZROVIA.lat, FITZROVIA.lon));
       setSatId("wv3");
       setDeparting(false);
       setPhase("intel");
@@ -155,7 +139,7 @@ export function CommandApp() {
         </div>
         {phase === "survey" && !site && (
           <div className="pointer-events-none absolute bottom-5 left-1/2 z-20 -translate-x-1/2 border border-[var(--gold)]/40 bg-black/60 px-3 py-1 font-sans text-[10px] tracking-[0.18em] text-[var(--gold)]">
-            SCROLL · ZOOM · CLICK ANY LAND PARCEL
+            SCROLL · ZOOM · CLICK ANYWHERE TO SELECT A SITE
           </div>
         )}
         {phase === "survey" && site && !departing && (
@@ -283,10 +267,6 @@ export function CommandApp() {
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-4">
-            <Clock />
-            <span className="font-sans text-[11px] text-[var(--gold)]">LONDON</span>
-          </div>
         </div>
       </header>
 
@@ -302,32 +282,10 @@ export function CommandApp() {
               underwrite the deal independently.
             </p>
             <p className="mt-2 font-sans text-[10px] leading-relaxed text-[var(--muted)]">
-              Pan and zoom London. Click a parcel — the map flies to the
-              asset. Task a satellite when you are ready to leave the street
-              and collect from orbit.
+              Pan and zoom London. Click anywhere on the map to pin a site.
+              Task a satellite when you are ready to leave the street and
+              collect from orbit.
             </p>
-          </div>
-          <div className="min-h-0 flex-1 overflow-y-auto px-3 py-2">
-            <div className="mb-2 font-sans text-[11px] tracking-[0.22em] text-[var(--muted)]">
-              SAMPLE ASSETS
-            </div>
-            {SAMPLE_PARCELS.map((p) => (
-              <button
-                key={p.id}
-                type="button"
-                onClick={() => pickSite(p.lat, p.lon)}
-                className={
-                  site?.id === p.id
-                    ? "mb-1 w-full border border-[var(--gold)] bg-[var(--panel-2)] px-2 py-1.5 text-left"
-                    : "mb-1 w-full border border-transparent px-2 py-1.5 text-left hover:border-[var(--line)] hover:bg-[var(--panel-2)]"
-                }
-              >
-                <div className="text-xs">{p.name}</div>
-                <div className="font-sans text-[10px] text-[var(--muted)]">
-                  {p.borough} · {p.units}u · seller {Math.round(p.sellerOccupancy * 100)}%
-                </div>
-              </button>
-            ))}
           </div>
           {site && (
             <div className="border-t border-[var(--line)] px-3 py-3">
