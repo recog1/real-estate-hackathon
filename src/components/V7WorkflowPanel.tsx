@@ -94,7 +94,7 @@ export function V7WorkflowPanel() {
                     active
                       ? "min-w-0 flex-1 border border-[#5B4BFF] bg-[#5B4BFF]/20 px-1 py-1.5 text-center font-sans text-[8px] leading-tight tracking-[0.08em] text-[#c8c4ff]"
                       : complete
-                        ? "min-w-0 flex-1 border border-[var(--gold)]/50 bg-[var(--gold)]/10 px-1 py-1.5 text-center font-sans text-[8px] leading-tight tracking-[0.08em] text-[var(--gold)]"
+                        ? "min-w-0 flex-1 border border-[var(--accent)]/50 bg-[var(--accent)]/10 px-1 py-1.5 text-center font-sans text-[8px] leading-tight tracking-[0.08em] text-[var(--accent)]"
                         : "min-w-0 flex-1 border border-[var(--line)] px-1 py-1.5 text-center font-sans text-[8px] leading-tight tracking-[0.08em] text-[var(--muted)]"
                   }
                 >

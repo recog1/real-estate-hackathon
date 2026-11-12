@@ -13,7 +13,7 @@ export const SATELLITES: SatelliteSpec[] = [
     band: "VHR optical",
     tle1: "1 40115U 14048A   26316.46165122  .00000897  00000+0  11086-3 0  9995",
     tle2: "2 40115  97.8434  29.1469 0001935 140.6204 219.5152 14.85217080663910",
-    color: "#d4a04a",
+    color: "#f4f4f5",
     vhr: true,
   },
   {
@@ -26,7 +26,7 @@ export const SATELLITES: SatelliteSpec[] = [
     band: "VHR optical",
     tle1: "1 48268U 21034A   26316.48691657  .00000192  00000+0  30953-4 0  9997",
     tle2: "2 48268  97.8951  29.1227 0001356  88.8012 271.3356 14.81672302299612",
-    color: "#e8c37a",
+    color: "#d4d4d8",
     vhr: true,
   },
   {

@@ -62,7 +62,7 @@ function AgentPanel({ onOpenV7 }: { onOpenV7: () => void }) {
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="flex items-center justify-between border-b border-[var(--line)] px-3 py-2">
-        <span className="font-sans text-[11px] tracking-[0.22em] text-[var(--gold)]">
+        <span className="font-sans text-[11px] tracking-[0.22em] text-[var(--accent)]">
           HAWK AGENT
         </span>
         <span className="font-sans text-[10px] text-[var(--muted)]">READS DATA ROOM</span>
@@ -78,7 +78,7 @@ function AgentPanel({ onOpenV7 }: { onOpenV7: () => void }) {
             }
           >
             {m.role !== "user" && (
-              <div className="mb-1 font-sans text-[9px] tracking-[0.16em] text-[var(--gold)]">
+              <div className="mb-1 font-sans text-[9px] tracking-[0.16em] text-[var(--accent)]">
                 {m.role === "system" ? "SYS" : "HAWK"}
                 {m.cite && m.source !== "v7" ? ` · ${m.cite}` : ""}
               </div>
@@ -99,7 +99,7 @@ function AgentPanel({ onOpenV7 }: { onOpenV7: () => void }) {
             key={c.id}
             type="button"
             onClick={() => ask(c.chip)}
-            className="border border-[var(--line)] px-1.5 py-0.5 font-sans text-[9px] text-[var(--muted)] hover:border-[var(--gold)] hover:text-[var(--gold)]"
+            className="border border-[var(--line)] px-1.5 py-0.5 font-sans text-[9px] text-[var(--muted)] hover:border-[var(--accent)] hover:text-[var(--accent)]"
           >
             {c.chip}
           </button>
@@ -120,7 +120,7 @@ function AgentPanel({ onOpenV7 }: { onOpenV7: () => void }) {
         />
         <button
           type="submit"
-          className="px-3 font-sans text-[11px] tracking-[0.2em] text-[var(--gold)]"
+          className="px-3 font-sans text-[11px] tracking-[0.2em] text-[var(--accent)]"
         >
           SEND
         </button>
@@ -148,7 +148,7 @@ export function IntelStage({ site, sat }: { site: Site; sat: SatelliteSpec }) {
       <div className="flex min-w-0 flex-1 flex-col">
         <AerialGrid />
         <div className="terminal-log h-[7.5rem] shrink-0 overflow-hidden border-t border-[var(--line)] bg-black text-[11px] leading-5 text-[var(--cyan)]">
-          <div className="flex items-center justify-between border-b border-[var(--line)] px-3 py-1 text-[10px] tracking-[0.18em] text-[var(--gold)]">
+          <div className="flex items-center justify-between border-b border-[var(--line)] px-3 py-1 text-[10px] tracking-[0.18em] text-[var(--accent)]">
             <span>AH-TERM // COLLECTION LOG</span>
             <span className="text-[var(--muted)]">
               CARS {totals.cars} · TRUCKS {totals.trucks} · DWELLINGS {totals.dwellings} ·{" "}
@@ -168,7 +168,7 @@ export function IntelStage({ site, sat }: { site: Site; sat: SatelliteSpec }) {
         className="flex w-[420px] shrink-0 flex-col border-l border-[var(--line)] bg-[var(--panel)]"
       >
         <div className="flex items-center justify-between border-b border-[var(--line)] px-3 py-2">
-          <div className="font-sans text-[11px] tracking-[0.22em] text-[var(--gold)]">
+          <div className="font-sans text-[11px] tracking-[0.22em] text-[var(--accent)]">
             DATA ROOM
           </div>
           <div className="flex gap-1">
@@ -178,7 +178,7 @@ export function IntelStage({ site, sat }: { site: Site; sat: SatelliteSpec }) {
               onClick={() => setRoomTab("files")}
               className={
                 roomTab === "files"
-                  ? "border border-[var(--gold)] px-2 py-0.5 font-sans text-[9px] tracking-[0.14em] text-[var(--gold)]"
+                  ? "border border-[var(--accent)] px-2 py-0.5 font-sans text-[9px] tracking-[0.14em] text-[var(--accent)]"
                   : "border border-[var(--line)] px-2 py-0.5 font-sans text-[9px] tracking-[0.14em] text-[var(--muted)]"
               }
             >
@@ -210,7 +210,7 @@ export function IntelStage({ site, sat }: { site: Site; sat: SatelliteSpec }) {
                   key={d.id}
                   type="button"
                   onClick={() => setDoc(d)}
-                  className="flex w-full items-center justify-between border border-[var(--line)] px-2 py-1.5 text-left hover:border-[var(--gold)]"
+                  className="flex w-full items-center justify-between border border-[var(--line)] px-2 py-1.5 text-left hover:border-[var(--accent)]"
                 >
                   <span className="text-xs">{d.title}</span>
                   <span className="font-sans text-[9px] text-[var(--muted)]">
@@ -223,7 +223,7 @@ export function IntelStage({ site, sat }: { site: Site; sat: SatelliteSpec }) {
               <div className="mt-2">
                 <div className="mb-1 flex items-center justify-between font-sans text-[10px] text-[var(--muted)]">
                   <span>{doc.title}</span>
-                  <a href={doc.file} target="_blank" rel="noreferrer" className="text-[var(--gold)]">
+                  <a href={doc.file} target="_blank" rel="noreferrer" className="text-[var(--accent)]">
                     OPEN
                   </a>
                 </div>

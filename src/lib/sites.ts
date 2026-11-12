@@ -88,18 +88,21 @@ export function siteFromClick(lat: number, lon: number): Site {
   };
 }
 
-export function parcelRing(lat: number, lon: number, sizeM = 160): number[] {
-  const dLat = sizeM / 111_320;
-  const dLon = sizeM / (111_320 * Math.cos((lat * Math.PI) / 180));
-  const jitter = 0.22;
+/** Axis-aligned square about one London building/plot, centred on the click. */
+export const SITE_PLOT_M = 36;
+
+export function parcelRing(lat: number, lon: number, sizeM = SITE_PLOT_M): number[] {
+  const half = sizeM / 2;
+  const dLat = half / 111_320;
+  const dLon = half / (111_320 * Math.cos((lat * Math.PI) / 180));
   return [
-    lon - dLon * (0.9 + jitter),
-    lat - dLat * 0.7,
-    lon + dLon * 0.85,
-    lat - dLat * (0.95),
-    lon + dLon * 1.05,
-    lat + dLat * 0.8,
-    lon - dLon * 0.75,
-    lat + dLat * 1.05,
+    lon - dLon,
+    lat - dLat,
+    lon + dLon,
+    lat - dLat,
+    lon + dLon,
+    lat + dLat,
+    lon - dLon,
+    lat + dLat,
   ];
 }

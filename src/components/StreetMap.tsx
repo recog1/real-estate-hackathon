@@ -67,9 +67,11 @@ function applySiteOnMap(
   }
   markerRef.current?.remove();
   const el = document.createElement("div");
-  el.className = "site-pulse";
+  el.className = "site-pin";
   el.title = site.name;
-  markerRef.current = new Marker({ element: el, anchor: "center" })
+  el.innerHTML =
+    '<svg viewBox="0 0 24 36" aria-hidden="true"><path d="M12 0C5.4 0 0 5.4 0 12.1 0 21.2 12 36 12 36s12-14.8 12-23.9C24 5.4 18.6 0 12 0z" fill="#22c55e"/><circle cx="12" cy="12" r="4.2" fill="#fff"/></svg>';
+  markerRef.current = new Marker({ element: el, anchor: "bottom" })
     .setLngLat([site.lon, site.lat])
     .addTo(map);
   const view = {
@@ -97,23 +99,131 @@ function clearSiteOnMap(map: MapLibreMap, markerRef: { current: Marker | null })
   markerRef.current = null;
 }
 
+function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
+  const h = hex.replace("#", "");
+  if (h.length === 3) {
+    return {
+      r: parseInt(h[0] + h[0], 16),
+      g: parseInt(h[1] + h[1], 16),
+      b: parseInt(h[2] + h[2], 16),
+    };
+  }
+  if (h.length === 6 || h.length === 8) {
+    return {
+      r: parseInt(h.slice(0, 2), 16),
+      g: parseInt(h.slice(2, 4), 16),
+      b: parseInt(h.slice(4, 6), 16),
+    };
+  }
+  return null;
+}
+
+function rgbToHsl(r: number, g: number, b: number) {
+  r /= 255;
+  g /= 255;
+  b /= 255;
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const l = (max + min) / 2;
+  if (max === min) return { h: 0, s: 0, l };
+  const d = max - min;
+  const s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+  let h = 0;
+  if (max === r) h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
+  else if (max === g) h = ((b - r) / d + 2) / 6;
+  else h = ((r - g) / d + 4) / 6;
+  return { h: h * 360, s, l };
+}
+
+function parseCssColor(input: string): { h: number; s: number; l: number; a: number } | null {
+  const c = input.trim();
+  if (c.startsWith("#")) {
+    const rgb = hexToRgb(c);
+    if (!rgb) return null;
+    return { ...rgbToHsl(rgb.r, rgb.g, rgb.b), a: 1 };
+  }
+  const rgb = c.match(
+    /^rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)(?:\s*,\s*([\d.]+))?\s*\)$/i,
+  );
+  if (rgb) {
+    return { ...rgbToHsl(+rgb[1], +rgb[2], +rgb[3]), a: rgb[4] != null ? +rgb[4] : 1 };
+  }
+  const hsl = c.match(
+    /^hsla?\(\s*([\d.]+)\s*,\s*([\d.]+)%\s*,\s*([\d.]+)%(?:\s*,\s*([\d.]+))?\s*\)$/i,
+  );
+  if (hsl) {
+    return { h: +hsl[1], s: +hsl[2] / 100, l: +hsl[3] / 100, a: hsl[4] != null ? +hsl[4] : 1 };
+  }
+  return null;
+}
+
+function neutralizeCssColor(input: string): string {
+  const p = parseCssColor(input);
+  if (!p) return input;
+  const warm = p.h >= 12 && p.h <= 72;
+  if (!warm || p.s < 0.04) return input;
+  const l = Math.round(p.l * 100);
+  return p.a < 1 ? `hsla(0,0%,${l}%,${Number(p.a.toFixed(3))})` : `hsl(0,0%,${l}%)`;
+}
+
+function rewriteColors(value: unknown): unknown {
+  if (typeof value === "string") return neutralizeCssColor(value);
+  if (Array.isArray(value)) return value.map(rewriteColors);
+  return value;
+}
+
+const COLOR_PAINT_PROPS = [
+  "background-color",
+  "fill-color",
+  "fill-outline-color",
+  "fill-extrusion-color",
+  "line-color",
+  "text-color",
+  "text-halo-color",
+  "icon-color",
+  "circle-color",
+  "circle-stroke-color",
+] as const;
+
+function neutralizeLiberty(map: MapLibreMap) {
+  for (const layer of map.getStyle().layers ?? []) {
+    if (layer.id.startsWith("hawk-")) continue;
+    for (const key of COLOR_PAINT_PROPS) {
+      try {
+        const current = map.getPaintProperty(layer.id, key);
+        if (current == null) continue;
+        map.setPaintProperty(layer.id, key, rewriteColors(current) as never);
+      } catch {
+        /* property not on this layer */
+      }
+    }
+  }
+  if (map.getLayer("landuse_residential")) {
+    map.setPaintProperty("landuse_residential", "fill-color", "hsl(0,0%,91%)");
+  }
+  if (map.getLayer("building")) {
+    map.setPaintProperty("building", "fill-color", "#d4d6db");
+    map.setPaintProperty("building", "fill-outline-color", "#c4c7cc");
+  }
+}
+
 function styleBuildings(map: MapLibreMap) {
   if (!map.getLayer("building-3d")) return;
   map.setLayerZoomRange("building-3d", 13, 24);
   map.setPaintProperty("building-3d", "fill-extrusion-vertical-gradient", true);
-  map.setPaintProperty("building-3d", "fill-extrusion-opacity", 0.92);
+  map.setPaintProperty("building-3d", "fill-extrusion-opacity", 0.88);
   map.setPaintProperty("building-3d", "fill-extrusion-color", [
     "interpolate",
     ["linear"],
     ["coalesce", ["get", "render_height"], 12],
     0,
-    "#d8cfc3",
+    "#d8dbe0",
     20,
-    "#c4b196",
+    "#c5c9d0",
     50,
-    "#a38a6c",
+    "#aeb3bb",
     110,
-    "#6f5a44",
+    "#8b919a",
   ]);
 }
 
@@ -129,7 +239,7 @@ function applySatelliteMode(map: MapLibreMap, on: boolean) {
   for (const layer of map.getStyle().layers ?? []) {
     if (keep.has(layer.id) || layer.type === "symbol") continue;
     if (layer.type === "background") {
-      map.setPaintProperty(layer.id, "background-color", on ? "#07080b" : "#f6f4f0");
+      map.setPaintProperty(layer.id, "background-color", on ? "#07080b" : "#f4f5f6");
       continue;
     }
     try {
@@ -154,8 +264,8 @@ function addOverlays(map: MapLibreMap, satelliteOn: boolean) {
     type: "fill",
     source: "hawk-site",
     paint: {
-      "fill-color": "#d4a04a",
-      "fill-opacity": 0.38,
+      "fill-color": "#22c55e",
+      "fill-opacity": 0.15,
     },
   });
   map.addLayer({
@@ -163,8 +273,8 @@ function addOverlays(map: MapLibreMap, satelliteOn: boolean) {
     type: "line",
     source: "hawk-site",
     paint: {
-      "line-color": "#f0d9a0",
-      "line-width": 2.6,
+      "line-color": "#22c55e",
+      "line-width": 2,
     },
   });
   map.addSource("esri-sat", {
@@ -187,6 +297,7 @@ function addOverlays(map: MapLibreMap, satelliteOn: boolean) {
     },
     before,
   );
+  neutralizeLiberty(map);
   styleBuildings(map);
   applySatelliteMode(map, satelliteOn);
 }

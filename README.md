@@ -26,8 +26,8 @@ pnpm start
 
 ## Demo script (~2 minutes)
 
-1. **Landing (0:00–0:20).** Header reads ASSET HAWK. Left brief: occupancy is the underwriting question. Freely pan/zoom the dark London map. Gold parcels are sample multifamily assets — any click on land works.
-2. **Select (0:20).** Click a gold parcel (or anywhere on land). Parcel highlights.
+1. **Landing (0:00–0:20).** Header reads ASSET HAWK. Full-screen London street map. Any click on land works.
+2. **Select (0:20).** Click anywhere on land. A green parcel highlights the selected site. **TASK SATELLITE** appears at the bottom centre.
 3. **Space (0:22–0:32).** One continuous camera flight, same globe, out to an orbital view. Satellites move on real SGP4 orbits (accelerated). Drag to orbit the camera.
 4. **Task (0:32–0:45).** Click **WorldView-3** (31 cm). Confirm card: resolution, next pass, off-nadir. **TASK SATELLITE**. Short fake uplink/downlink animation.
 5. **Collection (0:45–1:10).** Four live tiles (2×2) with VLM boxes: house / car / person + confidence. Counts on the terminal. Occupancy proxy = dwellings with ≥1 car at the kerb.
