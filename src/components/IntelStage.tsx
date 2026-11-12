@@ -4,143 +4,10 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { DATA_ROOM, type DataDoc } from "@/lib/dataroom";
 import { CANNED, answerFor } from "@/lib/agent";
 import { V7SourceChip, V7WorkflowPanel } from "@/components/V7WorkflowPanel";
+import { AerialGrid } from "@/components/AerialGrid";
 import { buildLogScript } from "@/lib/terminal";
-import { interpolateBoxes, statsFromBoxes, trackFor, type OccupancyStats } from "@/lib/detections";
-import { ZONES } from "@/lib/zones";
-import type { Box, ChatMessage, DetectionTrack, SatelliteSpec, Site, ZoneId } from "@/lib/types";
-
-const CLASS_COLOR: Record<Box["cls"], string> = {
-  house: "#d4a04a",
-  car: "#7ee0d6",
-  person: "#ff6b4a",
-};
-
-function drawCorners(
-  ctx: CanvasRenderingContext2D,
-  x: number,
-  y: number,
-  w: number,
-  h: number,
-  color: string,
-) {
-  const len = Math.min(12, w * 0.35, h * 0.35);
-  ctx.strokeStyle = color;
-  ctx.lineWidth = 1.5;
-  ctx.beginPath();
-  ctx.moveTo(x, y + len);
-  ctx.lineTo(x, y);
-  ctx.lineTo(x + len, y);
-  ctx.moveTo(x + w - len, y);
-  ctx.lineTo(x + w, y);
-  ctx.lineTo(x + w, y + len);
-  ctx.moveTo(x + w, y + h - len);
-  ctx.lineTo(x + w, y + h);
-  ctx.lineTo(x + w - len, y + h);
-  ctx.moveTo(x + len, y + h);
-  ctx.lineTo(x, y + h);
-  ctx.lineTo(x, y + h - len);
-  ctx.stroke();
-}
-
-function Feed({
-  zoneId,
-  code,
-  label,
-  video,
-  detectionsUrl,
-  onStats,
-}: {
-  zoneId: ZoneId;
-  code: string;
-  label: string;
-  video: string;
-  detectionsUrl: string;
-  onStats: (id: ZoneId, stats: OccupancyStats) => void;
-}) {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const trackRef = useRef<DetectionTrack>(trackFor(zoneId));
-  const [ready, setReady] = useState(false);
-
-  useEffect(() => {
-    let alive = true;
-    fetch(detectionsUrl)
-      .then((r) => (r.ok ? r.json() : null))
-      .then((json) => {
-        if (alive && json?.frames) trackRef.current = json as DetectionTrack;
-      })
-      .catch(() => undefined);
-    return () => {
-      alive = false;
-    };
-  }, [detectionsUrl]);
-
-  useEffect(() => {
-    let raf = 0;
-    const tick = () => {
-      const video = videoRef.current;
-      const canvas = canvasRef.current;
-      if (video && canvas) {
-        const w = video.clientWidth;
-        const h = video.clientHeight;
-        if (w && h) {
-          if (canvas.width !== w) canvas.width = w;
-          if (canvas.height !== h) canvas.height = h;
-          const ctx = canvas.getContext("2d");
-          if (ctx) {
-            ctx.clearRect(0, 0, w, h);
-            const t = video.currentTime || 0;
-            const boxes = interpolateBoxes(trackRef.current, t);
-            onStats(zoneId, statsFromBoxes(boxes));
-            const scan = ((t * 40) % h);
-            ctx.fillStyle = "rgba(126,224,214,0.04)";
-            ctx.fillRect(0, scan, w, 8);
-            ctx.strokeStyle = "rgba(212,160,74,0.35)";
-            ctx.strokeRect(6, 6, w - 12, h - 12);
-            for (const box of boxes) {
-              const x = box.x * w;
-              const y = box.y * h;
-              const bw = box.w * w;
-              const bh = box.h * h;
-              const color = CLASS_COLOR[box.cls];
-              drawCorners(ctx, x, y, bw, bh, color);
-              ctx.font = "11px Inter, sans-serif";
-              ctx.fillStyle = color;
-              const tag = `${box.cls.toUpperCase()} ${(box.conf * 100).toFixed(0)}`;
-              ctx.fillText(tag, x, Math.max(12, y - 4));
-            }
-          }
-        }
-      }
-      raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [onStats, zoneId]);
-
-  return (
-    <div className="relative min-h-0 overflow-hidden border border-[var(--line)] bg-black">
-      <video
-        ref={videoRef}
-        src={video}
-        className="h-full w-full object-cover"
-        autoPlay
-        muted
-        loop
-        playsInline
-        onPlay={() => setReady(true)}
-      />
-      <canvas ref={canvasRef} className="pointer-events-none absolute inset-0 h-full w-full" />
-      <div className="pointer-events-none absolute left-2 top-2 flex items-center gap-2 font-sans text-[10px] tracking-[0.18em] text-[var(--gold)]">
-        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--cyan)]" />
-        {code} · {label}
-      </div>
-      <div className="pointer-events-none absolute right-2 top-2 font-sans text-[10px] text-[var(--muted)]">
-        VLM {ready ? "LIVE" : "LOCK"}
-      </div>
-    </div>
-  );
-}
+import { AERIAL_MODEL_LINE, aerialTotals } from "@/lib/aerial";
+import type { ChatMessage, SatelliteSpec, Site } from "@/lib/types";
 
 function AgentPanel({ onOpenV7 }: { onOpenV7: () => void }) {
   const [messages, setMessages] = useState<ChatMessage[]>([
@@ -265,23 +132,9 @@ function AgentPanel({ onOpenV7 }: { onOpenV7: () => void }) {
 export function IntelStage({ site, sat }: { site: Site; sat: SatelliteSpec }) {
   const logs = useMemo(() => buildLogScript(site, sat), [site, sat]);
   const [visible, setVisible] = useState(1);
-  const [stats, setStats] = useState<Partial<Record<ZoneId, OccupancyStats>>>({});
   const [doc, setDoc] = useState<DataDoc | null>(null);
   const [roomTab, setRoomTab] = useState<"v7" | "files">("v7");
-  const onStats = useRef((id: ZoneId, s: OccupancyStats) => {
-    setStats((prev) => {
-      const cur = prev[id];
-      if (
-        cur &&
-        cur.houses === s.houses &&
-        cur.cars === s.cars &&
-        cur.people === s.people
-      ) {
-        return prev;
-      }
-      return { ...prev, [id]: s };
-    });
-  }).current;
+  const totals = useMemo(() => aerialTotals(), []);
 
   useEffect(() => {
     const iv = setInterval(() => {
@@ -290,47 +143,17 @@ export function IntelStage({ site, sat }: { site: Site; sat: SatelliteSpec }) {
     return () => clearInterval(iv);
   }, [logs.length]);
 
-  const rollup = useMemo(() => {
-    const vals = ZONES.map((z) => stats[z.id]).filter(Boolean) as OccupancyStats[];
-    if (!vals.length) return null;
-    const houses = vals.reduce((a, b) => a + b.houses, 0);
-    const cars = vals.reduce((a, b) => a + b.cars, 0);
-    const people = vals.reduce((a, b) => a + b.people, 0);
-    const occupied = vals.reduce((a, b) => a + b.occupied, 0);
-    return {
-      houses,
-      cars,
-      people,
-      carsPerHouse: houses ? cars / houses : 0,
-      occupancy: houses ? occupied / houses : 0,
-    };
-  }, [stats]);
-
   return (
     <div className="flex min-h-0 flex-1">
       <div className="flex min-w-0 flex-1 flex-col">
-        <div className="grid min-h-0 flex-1 grid-cols-2 grid-rows-2 gap-px bg-[var(--line)]">
-          {ZONES.map((z) => (
-            <Feed
-              key={z.id}
-              zoneId={z.id}
-              code={z.code}
-              label={z.label}
-              video={z.video}
-              detectionsUrl={z.detections}
-              onStats={onStats}
-            />
-          ))}
-        </div>
+        <AerialGrid />
         <div className="terminal-log h-[7.5rem] shrink-0 overflow-hidden border-t border-[var(--line)] bg-black text-[11px] leading-5 text-[var(--cyan)]">
           <div className="flex items-center justify-between border-b border-[var(--line)] px-3 py-1 text-[10px] tracking-[0.18em] text-[var(--gold)]">
             <span>AH-TERM // COLLECTION LOG</span>
-            {rollup && (
-              <span className="text-[var(--muted)]">
-                HOUSES {rollup.houses} · CARS {rollup.cars} · PPL {rollup.people} ·
-                C/H {rollup.carsPerHouse.toFixed(2)} · OCC {(rollup.occupancy * 100).toFixed(0)}%
-              </span>
-            )}
+            <span className="text-[var(--muted)]">
+              CARS {totals.cars} · TRUCKS {totals.trucks} · DWELLINGS {totals.dwellings} ·{" "}
+              {AERIAL_MODEL_LINE}
+            </span>
           </div>
           <div className="h-full overflow-hidden px-3 py-1">
             {logs.slice(Math.max(0, visible - 6), visible).map((line, i) => (
