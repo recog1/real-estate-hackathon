@@ -2,8 +2,8 @@ import type { Site } from "./types";
 
 export const LONDON = { lon: -0.1276, lat: 51.5074 };
 
-/** Fitzrovia / Margaret Street — demo start and screenshot target. */
-export const FITZROVIA = { lon: -0.1428, lat: 51.5165 };
+/** Oxford Circus — default demo start. */
+export const FITZROVIA = { lon: -0.142, lat: 51.5155 };
 
 export const SAMPLE_PARCELS: Site[] = [
   {
@@ -88,8 +88,8 @@ export function siteFromClick(lat: number, lon: number): Site {
   };
 }
 
-/** Axis-aligned square about one London building/plot, centred on the click. */
-export const SITE_PLOT_M = 36;
+/** Axis-aligned square about one city block, centred on the click. */
+export const SITE_PLOT_M = 250;
 
 export function parcelRing(lat: number, lon: number, sizeM = SITE_PLOT_M): number[] {
   const half = sizeM / 2;

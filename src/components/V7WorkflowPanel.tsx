@@ -11,8 +11,8 @@ import {
 const PIPELINE = [
   "5 PDFs",
   "V7 Go extraction",
-  "Discrepancy Flag",
-  "Underwriting Finding",
+  "Discrepancy flag",
+  "Underwriting finding",
 ] as const;
 
 function V7Mark({ size = "md" }: { size?: "sm" | "md" }) {
@@ -20,12 +20,8 @@ function V7Mark({ size = "md" }: { size?: "sm" | "md" }) {
   const go = size === "sm" ? "text-[9px]" : "text-[10px]";
   return (
     <span className="inline-flex items-center gap-1">
-      <span
-        className={`bg-[#5B4BFF] font-sans font-semibold tracking-[0.16em] text-white ${box}`}
-      >
-        V7
-      </span>
-      <span className={`font-sans tracking-[0.18em] text-[#c8c4ff] ${go}`}>GO</span>
+      <span className={`bg-white font-sans font-semibold text-black ${box}`}>V7</span>
+      <span className={`font-sans text-[var(--muted)] ${go}`}>Go</span>
     </span>
   );
 }
@@ -61,9 +57,7 @@ export function V7WorkflowPanel() {
         <div>
           <div className="flex items-center gap-2">
             <V7Mark />
-            <span className="font-sans text-[10px] tracking-[0.18em] text-[#9d95ff]">
-              WORKFLOW
-            </span>
+            <span className="font-sans text-[10px] text-[var(--muted)]">Workflow</span>
           </div>
           <div className="mt-1 text-[13px] leading-snug text-[var(--ink)]">
             {V7_WORKFLOW_NAME}
@@ -73,15 +67,15 @@ export function V7WorkflowPanel() {
           href={V7_WORKFLOW_URL}
           target="_blank"
           rel="noreferrer"
-          className="shrink-0 bg-[#5B4BFF] px-2.5 py-1.5 font-sans text-[10px] tracking-[0.14em] text-white hover:bg-[#6d5dff]"
+          className="shrink-0 bg-white px-2.5 py-1.5 font-sans text-[10px] text-black hover:bg-[var(--ink)]"
         >
-          OPEN IN V7 GO
+          Open in V7 Go
         </a>
       </div>
 
-      <div className="border border-[#5B4BFF]/35 bg-[#12101f] px-2 py-2">
-        <div className="mb-2 font-sans text-[9px] tracking-[0.16em] text-[#9d95ff]">
-          {done ? "PIPELINE COMPLETE" : "RUNNING EXTRACTION…"}
+      <div className="border border-[var(--line)] bg-[var(--panel-2)] px-2 py-2">
+        <div className="mb-2 font-sans text-[9px] text-[var(--muted)]">
+          {done ? "Pipeline complete" : "Running extraction…"}
         </div>
         <div className="flex items-stretch gap-1">
           {PIPELINE.map((label, i) => {
@@ -92,14 +86,14 @@ export function V7WorkflowPanel() {
                 <div
                   className={
                     active
-                      ? "min-w-0 flex-1 border border-[#5B4BFF] bg-[#5B4BFF]/20 px-1 py-1.5 text-center font-sans text-[8px] leading-tight tracking-[0.08em] text-[#c8c4ff]"
+                      ? "min-w-0 flex-1 border border-[var(--accent)] bg-white/10 px-1 py-1.5 text-center font-sans text-[8px] leading-tight text-[var(--ink)]"
                       : complete
-                        ? "min-w-0 flex-1 border border-[var(--accent)]/50 bg-[var(--accent)]/10 px-1 py-1.5 text-center font-sans text-[8px] leading-tight tracking-[0.08em] text-[var(--accent)]"
-                        : "min-w-0 flex-1 border border-[var(--line)] px-1 py-1.5 text-center font-sans text-[8px] leading-tight tracking-[0.08em] text-[var(--muted)]"
+                        ? "min-w-0 flex-1 border border-[var(--line)] bg-white/5 px-1 py-1.5 text-center font-sans text-[8px] leading-tight text-[var(--ink)]"
+                        : "min-w-0 flex-1 border border-[var(--line)] px-1 py-1.5 text-center font-sans text-[8px] leading-tight text-[var(--muted)]"
                   }
                 >
                   {active && (
-                    <span className="mr-1 inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-[#5B4BFF]" />
+                    <span className="mr-1 inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-white" />
                   )}
                   {label}
                 </div>
@@ -114,17 +108,15 @@ export function V7WorkflowPanel() {
 
       <div
         data-v7-discrepancy="1"
-        className="relative border border-[var(--danger)]/40 bg-[var(--panel-2)] px-3 py-2.5"
+        className="relative border border-[var(--line)] bg-[var(--panel-2)] px-3 py-2.5"
       >
         <div className="absolute right-2 top-2">
-          <span className="inline-flex items-center gap-1 border border-[#5B4BFF]/40 bg-[#5B4BFF]/10 px-1.5 py-0.5 font-sans text-[8px] tracking-[0.14em] text-[#c8c4ff]">
+          <span className="inline-flex items-center gap-1 border border-[var(--line)] px-1.5 py-0.5 font-sans text-[8px] text-[var(--muted)]">
             <V7Mark size="sm" />
-            POWERED BY V7 GO
+            Powered by V7 Go
           </span>
         </div>
-        <div className="font-sans text-[9px] tracking-[0.16em] text-[var(--muted)]">
-          OCCUPANCY DISCREPANCY
-        </div>
+        <div className="font-sans text-[9px] text-[var(--muted)]">Occupancy discrepancy</div>
         <div className="mt-1 flex items-baseline gap-2 pr-24">
           <span className="font-sans text-2xl text-[var(--ink)]">
             {V7_SUMMARY.seller_claimed_occupancy_pct}%
@@ -136,22 +128,20 @@ export function V7WorkflowPanel() {
           </span>
           <span className="font-sans text-[11px] text-[var(--muted)]">observed</span>
         </div>
-        <div className="mt-1.5 inline-block border border-[var(--danger)]/50 bg-[var(--danger)]/15 px-1.5 py-0.5 font-sans text-[9px] tracking-[0.12em] text-[var(--danger)]">
-          {V7_SUMMARY.flag} · {Math.abs(V7_SUMMARY.gap_pts)} PT
+        <div className="mt-1.5 inline-block border border-[var(--danger)]/50 bg-[var(--danger)]/15 px-1.5 py-0.5 font-sans text-[9px] text-[var(--danger)]">
+          {V7_SUMMARY.flag} · {Math.abs(V7_SUMMARY.gap_pts)} pt
         </div>
       </div>
 
       <div className={done ? "opacity-100 transition-opacity duration-500" : "opacity-40"}>
-        <div className="mb-1 font-sans text-[9px] tracking-[0.16em] text-[var(--muted)]">
-          PER-DOCUMENT EXTRACTION
-        </div>
+        <div className="mb-1 font-sans text-[9px] text-[var(--muted)]">Per-document extraction</div>
         <table className="w-full border-collapse text-left">
           <thead>
-            <tr className="border-b border-[var(--line)] font-sans text-[8px] tracking-[0.12em] text-[var(--muted)]">
-              <th className="py-1 font-normal">DOC</th>
-              <th className="whitespace-nowrap py-1 font-normal">CLAIMED %</th>
-              <th className="whitespace-nowrap py-1 font-normal">OBSERVED %</th>
-              <th className="whitespace-nowrap py-1 font-normal">FLAG</th>
+            <tr className="border-b border-[var(--line)] font-sans text-[8px] text-[var(--muted)]">
+              <th className="py-1 font-normal">Doc</th>
+              <th className="whitespace-nowrap py-1 font-normal">Claimed %</th>
+              <th className="whitespace-nowrap py-1 font-normal">Observed %</th>
+              <th className="whitespace-nowrap py-1 font-normal">Flag</th>
             </tr>
           </thead>
           <tbody>
@@ -166,8 +156,8 @@ export function V7WorkflowPanel() {
                     <span
                       className={
                         over
-                          ? "inline-block whitespace-nowrap border border-[var(--danger)]/50 bg-[var(--danger)]/15 px-1 py-0.5 font-sans text-[8px] tracking-[0.08em] text-[var(--danger)]"
-                          : "inline-block whitespace-nowrap border border-[var(--line)] px-1 py-0.5 font-sans text-[8px] tracking-[0.08em] text-[var(--muted)]"
+                          ? "inline-block whitespace-nowrap border border-[var(--danger)]/50 bg-[var(--danger)]/15 px-1 py-0.5 font-sans text-[8px] text-[var(--danger)]"
+                          : "inline-block whitespace-nowrap border border-[var(--line)] px-1 py-0.5 font-sans text-[8px] text-[var(--muted)]"
                       }
                     >
                       {row.discrepancy_flag}
@@ -189,11 +179,9 @@ export function V7SourceChip({ onOpen }: { onOpen: () => void }) {
       type="button"
       data-v7-source-chip="1"
       onClick={onOpen}
-      className="mt-1 inline-flex items-center gap-1 border border-[#5B4BFF]/50 bg-[#5B4BFF]/10 px-1.5 py-0.5 font-sans text-[9px] tracking-[0.12em] text-[#c8c4ff] hover:border-[#5B4BFF] hover:text-white"
+      className="mt-1 inline-flex items-center gap-1 border border-[var(--line)] bg-white/5 px-1.5 py-0.5 font-sans text-[9px] text-[var(--ink)] hover:border-[var(--accent)]"
     >
-      <span className="bg-[#5B4BFF] px-1 py-px text-[8px] font-semibold tracking-[0.14em] text-white">
-        V7
-      </span>
+      <span className="bg-white px-1 py-px text-[8px] font-semibold text-black">V7</span>
       Source: V7 Go workflow
     </button>
   );

@@ -45,16 +45,17 @@ export const AERIAL_TILES = AERIAL_RUN.images.map((image, index) => ({
   image,
 }));
 
+/** Aerial-4 — most detections; used as the single intel photo. */
+export const AERIAL_HERO =
+  AERIAL_TILES.find((t) => t.image.file === "aerial-4.jpg") ?? AERIAL_TILES[3]!;
+
 export function aerialTotals() {
-  return AERIAL_TILES.reduce(
-    (acc, tile) => {
-      acc.cars += tile.image.counts.car;
-      acc.trucks += tile.image.counts["truck/van"];
-      acc.dwellings += tile.image.counts["house/building"];
-      return acc;
-    },
-    { cars: 0, trucks: 0, dwellings: 0 },
-  );
+  const image = AERIAL_HERO.image;
+  return {
+    cars: image.counts.car,
+    trucks: image.counts["truck/van"],
+    dwellings: image.counts["house/building"],
+  };
 }
 
 export function detStyle(label: string): {

@@ -548,7 +548,7 @@ export function StreetMap({
         className="map-sat-toggle"
         onClick={() => setSatellite((v) => !v)}
       >
-        {satellite ? "STREET" : "SATELLITE"}
+        {satellite ? "Street" : "Satellite"}
       </button>
     </div>
   );

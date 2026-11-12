@@ -4,8 +4,7 @@ import { useEffect, useRef } from "react";
 import type { Viewer } from "cesium";
 import { SATELLITES } from "@/lib/satellites";
 import { LONDON, parcelRing } from "@/lib/sites";
-import { geodeticAt, satrecOf } from "@/lib/orbits";
-import { propagate, gstime, eciToGeodetic, degreesLat, degreesLong } from "satellite.js";
+import { demoOrbitSamples, demoSatOverSite } from "@/lib/orbits";
 import type { Phase, SatelliteId, Site } from "@/lib/types";
 
 type CesiumNS = typeof import("cesium");
@@ -16,64 +15,34 @@ type Props = {
   selectedSat: SatelliteId | null;
   onPickSite: (lat: number, lon: number) => void;
   onPickSatellite: (id: SatelliteId) => void;
+  onNadirLocked?: () => void;
 };
 
-const ORBIT_HEADING = 42;
-const ORBIT_PITCH = -60;
-const ORBIT_RANGE_MIN = 6_000_000;
-const ORBIT_RANGE_MAX = 9_000_000;
+const ORBIT_HEIGHT_M = 1_650_000;
+/** ~1.1 km nadir — 250 m block fills a good part of Esri World Imagery. */
+const SITE_HEIGHT_M = 1_100;
 
-function framedCameraPose(Cesium: CesiumNS, site: Site, viewer: Viewer) {
-  const sitePos = Cesium.Cartesian3.fromDegrees(site.lon, site.lat, 0);
-  const now = Cesium.JulianDate.toDate(viewer.clock.currentTime);
-  const pts = [sitePos];
-  for (const spec of SATELLITES) {
-    const g = geodeticAt(spec, now);
-    if (!g) continue;
-    pts.push(Cesium.Cartesian3.fromDegrees(g.lon, g.lat, g.heightKm * 1000));
-  }
-  const sphere = Cesium.BoundingSphere.fromPoints(pts);
-  const range = Cesium.Math.clamp(
-    Math.max(ORBIT_RANGE_MIN, sphere.radius * 1.15),
-    ORBIT_RANGE_MIN,
-    ORBIT_RANGE_MAX,
-  );
-  const heading = Cesium.Math.toRadians(ORBIT_HEADING);
-  const pitch = Cesium.Math.toRadians(ORBIT_PITCH);
-  const enu = Cesium.Transforms.eastNorthUpToFixedFrame(sitePos);
-  const local = new Cesium.Cartesian3(
-    range * Math.cos(pitch) * Math.sin(heading),
-    range * Math.cos(pitch) * Math.cos(heading),
-    -range * Math.sin(pitch),
-  );
-  const destination = Cesium.Matrix4.multiplyByPoint(
-    enu,
-    local,
-    new Cesium.Cartesian3(),
-  );
-  const direction = Cesium.Cartesian3.normalize(
-    Cesium.Cartesian3.subtract(sitePos, destination, new Cesium.Cartesian3()),
-    new Cesium.Cartesian3(),
-  );
-  const right = Cesium.Cartesian3.normalize(
-    Cesium.Cartesian3.cross(direction, Cesium.Cartesian3.UNIT_Z, new Cesium.Cartesian3()),
-    new Cesium.Cartesian3(),
-  );
-  const up = Cesium.Cartesian3.normalize(
-    Cesium.Cartesian3.cross(right, direction, new Cesium.Cartesian3()),
-    new Cesium.Cartesian3(),
-  );
-  return { destination, direction, up, range };
+function nadirView(Cesium: CesiumNS, lon: number, lat: number, heightM: number) {
+  return {
+    destination: Cesium.Cartesian3.fromDegrees(lon, lat, heightM),
+    orientation: {
+      heading: 0,
+      pitch: Cesium.Math.toRadians(-90),
+      roll: 0,
+    },
+  };
 }
 
-function launchOrbit(
+function applySiteEntities(
   viewer: Viewer,
   Cesium: CesiumNS,
   site: Site,
-  host: HTMLDivElement | null,
 ) {
   const existing = viewer.entities.getById("active-parcel");
   if (existing) viewer.entities.remove(existing);
+  const pin = viewer.entities.getById("active-pin");
+  if (pin) viewer.entities.remove(pin);
+
   viewer.entities.add({
     id: "active-parcel",
     polygon: {
@@ -82,52 +51,95 @@ function launchOrbit(
       outline: true,
       outlineColor: Cesium.Color.fromCssColorString("#22c55e"),
       height: 1,
-      extrudedHeight: 36,
+      extrudedHeight: 24,
     },
   });
-
-  for (const spec of SATELLITES) {
-    const orbit = viewer.entities.getById(`orbit-${spec.id}`);
-    const sat = viewer.entities.getById(`sat-${spec.id}`);
-    if (orbit) orbit.show = true;
-    if (sat) sat.show = true;
-  }
-
-  viewer.trackedEntity = undefined;
-  viewer.selectedEntity = undefined;
-  viewer.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
-  viewer.clock.multiplier = 8;
-  viewer.clock.shouldAnimate = true;
-
-  const pose = framedCameraPose(Cesium, site, viewer);
-  host?.removeAttribute("data-orbit-settled");
-  viewer.camera.cancelFlight();
-  // Pre-frame on London so the street-map cross-fade reveals an already-set
-  // orbital view instead of cutting to a 160 km jump.
-  viewer.camera.setView({
-    destination: pose.destination,
-    orientation: { direction: pose.direction, up: pose.up },
+  viewer.entities.add({
+    id: "active-pin",
+    position: Cesium.Cartesian3.fromDegrees(site.lon, site.lat, 40),
+    billboard: {
+      image: "/icons/satellite.svg",
+      width: 1,
+      height: 1,
+      color: Cesium.Color.TRANSPARENT,
+    },
+    point: {
+      pixelSize: 14,
+      color: Cesium.Color.fromCssColorString("#22c55e"),
+      outlineColor: Cesium.Color.WHITE,
+      outlineWidth: 2,
+      disableDepthTestDistance: Number.POSITIVE_INFINITY,
+    },
   });
-  holdFramedView(viewer, Cesium, site);
-  viewer.clock.multiplier = 8;
-  host?.setAttribute("data-orbit-settled", "1");
 }
 
-function holdFramedView(viewer: Viewer, Cesium: CesiumNS, site: Site) {
+function applyDemoOrbits(viewer: Viewer, Cesium: CesiumNS, site: Site) {
+  for (const spec of SATELLITES) {
+    const samples = demoOrbitSamples(spec, site.lat, site.lon);
+    const positions = samples.map((g) =>
+      Cesium.Cartesian3.fromDegrees(g.lon, g.lat, g.heightKm * 1000),
+    );
+    const orbit = viewer.entities.getById(`orbit-${spec.id}`);
+    if (orbit?.polyline) {
+      orbit.polyline.positions = new Cesium.ConstantProperty(positions);
+      orbit.show = true;
+    }
+    const sat = viewer.entities.getById(`sat-${spec.id}`);
+    if (sat) sat.show = true;
+  }
+}
+
+function launchOrbit(
+  viewer: Viewer,
+  Cesium: CesiumNS,
+  site: Site,
+  host: HTMLDivElement | null,
+) {
+  applySiteEntities(viewer, Cesium, site);
+  applyDemoOrbits(viewer, Cesium, site);
+
   viewer.trackedEntity = undefined;
   viewer.selectedEntity = undefined;
-  viewer.camera.cancelFlight();
   viewer.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
-  const pose = framedCameraPose(Cesium, site, viewer);
-  viewer.camera.setView({
-    destination: pose.destination,
-    orientation: { direction: pose.direction, up: pose.up },
+  viewer.clock.shouldAnimate = false;
+  viewer.clock.multiplier = 0;
+
+  host?.removeAttribute("data-orbit-settled");
+  viewer.camera.cancelFlight();
+  const start = nadirView(Cesium, site.lon, site.lat, 90_000);
+  viewer.camera.setView(start);
+  viewer.camera.flyTo({
+    ...nadirView(Cesium, site.lon, site.lat, ORBIT_HEIGHT_M),
+    duration: 2.4,
+    complete: () => {
+      host?.setAttribute("data-orbit-settled", "1");
+    },
   });
   const ctrl = viewer.scene.screenSpaceCameraController;
+  ctrl.enableRotate = false;
+  ctrl.enableTranslate = false;
+  ctrl.enableTilt = false;
+  ctrl.enableLook = false;
   ctrl.inertiaSpin = 0;
   ctrl.inertiaTranslate = 0;
   ctrl.inertiaZoom = 0;
   ctrl.enableCollisionDetection = false;
+}
+
+function diveToSite(
+  viewer: Viewer,
+  Cesium: CesiumNS,
+  site: Site,
+  onDone: () => void,
+) {
+  viewer.camera.cancelFlight();
+  viewer.trackedEntity = undefined;
+  viewer.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
+  viewer.camera.flyTo({
+    ...nadirView(Cesium, site.lon, site.lat, SITE_HEIGHT_M),
+    duration: 2.2,
+    complete: onDone,
+  });
 }
 
 declare global {
@@ -159,6 +171,7 @@ export function GlobeView({
   selectedSat,
   onPickSite,
   onPickSatellite,
+  onNadirLocked,
 }: Props) {
   const hostRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<Viewer | null>(null);
@@ -167,12 +180,15 @@ export function GlobeView({
   const siteRef = useRef(site);
   const pickSite = useRef(onPickSite);
   const pickSat = useRef(onPickSatellite);
+  const nadirLocked = useRef(onNadirLocked);
   const lastFly = useRef<string | null>(null);
+  const lastDive = useRef<string | null>(null);
 
   phaseRef.current = phase;
   siteRef.current = site;
   pickSite.current = onPickSite;
   pickSat.current = onPickSatellite;
+  nadirLocked.current = onNadirLocked;
 
   useEffect(() => {
     const host = hostRef.current;
@@ -234,7 +250,7 @@ export function GlobeView({
         timeline: false,
         navigationHelpButton: false,
         navigationInstructionsInitiallyVisible: false,
-        shouldAnimate: true,
+        shouldAnimate: false,
         requestRenderMode: false,
         useBrowserRecommendedResolution: false,
         terrainProvider: new Cesium.EllipsoidTerrainProvider(),
@@ -262,8 +278,8 @@ export function GlobeView({
       viewer.scene.highDynamicRange = false;
       viewer.scene.screenSpaceCameraController.minimumZoomDistance = 180;
       viewer.scene.screenSpaceCameraController.maximumZoomDistance = 4.2e7;
-      viewer.clock.shouldAnimate = true;
-      viewer.clock.multiplier = 1;
+      viewer.clock.shouldAnimate = false;
+      viewer.clock.multiplier = 0;
       viewer.clock.currentTime = Cesium.JulianDate.now();
       viewer.trackedEntity = undefined;
       viewer.screenSpaceEventHandler.removeInputAction(
@@ -273,14 +289,7 @@ export function GlobeView({
         if (viewer.trackedEntity) viewer.trackedEntity = undefined;
       });
 
-      viewer.camera.setView({
-        destination: Cesium.Cartesian3.fromDegrees(LONDON.lon, LONDON.lat, 180_000),
-        orientation: {
-          heading: 0,
-          pitch: Cesium.Math.toRadians(-70),
-          roll: 0,
-        },
-      });
+      viewer.camera.setView(nadirView(Cesium, LONDON.lon, LONDON.lat, 180_000));
       window.__hawkHeight = () => viewer.camera.positionCartographic.height;
       window.__hawkCam = () => {
         const c = viewer.camera.positionCartographic;
@@ -292,32 +301,13 @@ export function GlobeView({
       };
       const pending = siteRef.current;
 
-      const now = new Date();
       for (const spec of SATELLITES) {
-        const rec = satrecOf(spec);
-        const orbit: ReturnType<typeof Cesium.Cartesian3.fromDegrees>[] = [];
-        const periodMin = (2 * Math.PI) / rec.no;
-        const samples = 180;
-        for (let i = 0; i <= samples; i++) {
-          const t = new Date(now.getTime() + (i / samples) * periodMin * 60 * 1000);
-          const pv = propagate(rec, t);
-          if (!pv?.position) continue;
-          const gd = eciToGeodetic(pv.position, gstime(t));
-          orbit.push(
-            Cesium.Cartesian3.fromDegrees(
-              degreesLong(gd.longitude),
-              degreesLat(gd.latitude),
-              gd.height * 1000,
-            ),
-          );
-        }
-
         viewer.entities.add({
           id: `orbit-${spec.id}`,
           polyline: {
-            positions: orbit,
+            positions: [],
             width: 1.6,
-            material: Cesium.Color.fromCssColorString(spec.color).withAlpha(0.55),
+            material: Cesium.Color.fromCssColorString(spec.color).withAlpha(0.7),
           },
           show: false,
         });
@@ -325,10 +315,10 @@ export function GlobeView({
         viewer.entities.add({
           id: `sat-${spec.id}`,
           name: spec.name,
-          position: new Cesium.CallbackPositionProperty((time) => {
-            const date = Cesium.JulianDate.toDate(time ?? viewer.clock.currentTime);
-            const g = geodeticAt(spec, date);
-            if (!g) return undefined;
+          position: new Cesium.CallbackPositionProperty(() => {
+            const current = siteRef.current;
+            if (!current) return undefined;
+            const g = demoSatOverSite(spec, current.lat, current.lon);
             return Cesium.Cartesian3.fromDegrees(g.lon, g.lat, g.heightKm * 1000);
           }, false),
           billboard: {
@@ -432,8 +422,50 @@ export function GlobeView({
     if (!viewer || !Cesium || !site) return;
     if (lastFly.current === site.id) return;
     lastFly.current = site.id;
+    lastDive.current = null;
     launchOrbit(viewer, Cesium, site, hostRef.current);
   }, [site]);
+
+  useEffect(() => {
+    const viewer = viewerRef.current;
+    const Cesium = cesiumRef.current;
+    const current = siteRef.current;
+    if (!viewer || !Cesium || !current) return;
+
+    const setSatVisible = (show: boolean) => {
+      for (const spec of SATELLITES) {
+        const orbit = viewer.entities.getById(`orbit-${spec.id}`);
+        const sat = viewer.entities.getById(`sat-${spec.id}`);
+        if (orbit) orbit.show = show;
+        if (sat) sat.show = show;
+      }
+    };
+
+    if (phase === "orbit" && selectedSat) {
+      const key = `${current.id}:${selectedSat}`;
+      if (lastDive.current === key) return;
+      lastDive.current = key;
+      setSatVisible(false);
+      viewer.scene.globe.maximumScreenSpaceError = 1.1;
+      diveToSite(viewer, Cesium, current, () => {
+        hostRef.current?.setAttribute("data-nadir-locked", "1");
+        nadirLocked.current?.();
+      });
+      return;
+    }
+
+    if (phase === "orbit" && !selectedSat && lastDive.current) {
+      lastDive.current = null;
+      hostRef.current?.removeAttribute("data-nadir-locked");
+      setSatVisible(true);
+      viewer.scene.globe.maximumScreenSpaceError = 2;
+      viewer.camera.cancelFlight();
+      viewer.camera.flyTo({
+        ...nadirView(Cesium, current.lon, current.lat, ORBIT_HEIGHT_M),
+        duration: 1.6,
+      });
+    }
+  }, [selectedSat, phase]);
 
   useEffect(() => {
     const viewer = viewerRef.current;

@@ -62,10 +62,8 @@ function AgentPanel({ onOpenV7 }: { onOpenV7: () => void }) {
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="flex items-center justify-between border-b border-[var(--line)] px-3 py-2">
-        <span className="font-sans text-[11px] tracking-[0.22em] text-[var(--accent)]">
-          HAWK AGENT
-        </span>
-        <span className="font-sans text-[10px] text-[var(--muted)]">READS DATA ROOM</span>
+        <span className="font-sans text-[12px] text-[var(--ink)]">Hawk agent</span>
+        <span className="font-sans text-[10px] text-[var(--muted)]">Reads data room</span>
       </div>
       <div ref={scroller} className="min-h-0 flex-1 space-y-2 overflow-y-auto px-3 py-2">
         {messages.map((m) => (
@@ -78,8 +76,8 @@ function AgentPanel({ onOpenV7 }: { onOpenV7: () => void }) {
             }
           >
             {m.role !== "user" && (
-              <div className="mb-1 font-sans text-[9px] tracking-[0.16em] text-[var(--accent)]">
-                {m.role === "system" ? "SYS" : "HAWK"}
+              <div className="mb-1 font-sans text-[9px] text-[var(--muted)]">
+                {m.role === "system" ? "System" : "Hawk"}
                 {m.cite && m.source !== "v7" ? ` · ${m.cite}` : ""}
               </div>
             )}
@@ -88,7 +86,7 @@ function AgentPanel({ onOpenV7 }: { onOpenV7: () => void }) {
           </div>
         ))}
         {thinking && (
-          <div className="font-sans text-[10px] text-[var(--cyan)]">
+          <div className="font-sans text-[10px] text-[var(--muted)]">
             ▍ {thinking}
           </div>
         )}
@@ -99,7 +97,7 @@ function AgentPanel({ onOpenV7 }: { onOpenV7: () => void }) {
             key={c.id}
             type="button"
             onClick={() => ask(c.chip)}
-            className="border border-[var(--line)] px-1.5 py-0.5 font-sans text-[9px] text-[var(--muted)] hover:border-[var(--accent)] hover:text-[var(--accent)]"
+            className="border border-[var(--line)] px-1.5 py-0.5 font-sans text-[9px] text-[var(--muted)] hover:border-[var(--accent)] hover:text-[var(--ink)]"
           >
             {c.chip}
           </button>
@@ -120,9 +118,9 @@ function AgentPanel({ onOpenV7 }: { onOpenV7: () => void }) {
         />
         <button
           type="submit"
-          className="px-3 font-sans text-[11px] tracking-[0.2em] text-[var(--accent)]"
+          className="px-3 font-sans text-[12px] text-[var(--ink)]"
         >
-          SEND
+          Send
         </button>
       </form>
     </div>
@@ -147,11 +145,11 @@ export function IntelStage({ site, sat }: { site: Site; sat: SatelliteSpec }) {
     <div className="flex min-h-0 flex-1">
       <div className="flex min-w-0 flex-1 flex-col">
         <AerialGrid />
-        <div className="terminal-log h-[7.5rem] shrink-0 overflow-hidden border-t border-[var(--line)] bg-black text-[11px] leading-5 text-[var(--cyan)]">
-          <div className="flex items-center justify-between border-b border-[var(--line)] px-3 py-1 text-[10px] tracking-[0.18em] text-[var(--accent)]">
-            <span>AH-TERM // COLLECTION LOG</span>
+        <div className="terminal-log h-[7.5rem] shrink-0 overflow-hidden border-t border-[var(--line)] bg-black text-[11px] leading-5 text-[var(--muted)]">
+          <div className="flex items-center justify-between border-b border-[var(--line)] px-3 py-1 text-[10px] text-[var(--ink)]">
+            <span>Collection log</span>
             <span className="text-[var(--muted)]">
-              CARS {totals.cars} · TRUCKS {totals.trucks} · DWELLINGS {totals.dwellings} ·{" "}
+              Cars {totals.cars} · Trucks {totals.trucks} · Dwellings {totals.dwellings} ·{" "}
               {AERIAL_MODEL_LINE}
             </span>
           </div>
@@ -168,9 +166,7 @@ export function IntelStage({ site, sat }: { site: Site; sat: SatelliteSpec }) {
         className="flex w-[420px] shrink-0 flex-col border-l border-[var(--line)] bg-[var(--panel)]"
       >
         <div className="flex items-center justify-between border-b border-[var(--line)] px-3 py-2">
-          <div className="font-sans text-[11px] tracking-[0.22em] text-[var(--accent)]">
-            DATA ROOM
-          </div>
+          <div className="font-sans text-[12px] text-[var(--ink)]">Data room</div>
           <div className="flex gap-1">
             <button
               type="button"
@@ -178,11 +174,11 @@ export function IntelStage({ site, sat }: { site: Site; sat: SatelliteSpec }) {
               onClick={() => setRoomTab("files")}
               className={
                 roomTab === "files"
-                  ? "border border-[var(--accent)] px-2 py-0.5 font-sans text-[9px] tracking-[0.14em] text-[var(--accent)]"
-                  : "border border-[var(--line)] px-2 py-0.5 font-sans text-[9px] tracking-[0.14em] text-[var(--muted)]"
+                  ? "border border-[var(--accent)] px-2 py-0.5 font-sans text-[10px] text-[var(--ink)]"
+                  : "border border-[var(--line)] px-2 py-0.5 font-sans text-[10px] text-[var(--muted)]"
               }
             >
-              FILES
+              Files
             </button>
             <button
               type="button"
@@ -190,11 +186,11 @@ export function IntelStage({ site, sat }: { site: Site; sat: SatelliteSpec }) {
               onClick={() => setRoomTab("v7")}
               className={
                 roomTab === "v7"
-                  ? "border border-[#5B4BFF] bg-[#5B4BFF]/15 px-2 py-0.5 font-sans text-[9px] tracking-[0.14em] text-[#c8c4ff]"
-                  : "border border-[var(--line)] px-2 py-0.5 font-sans text-[9px] tracking-[0.14em] text-[var(--muted)]"
+                  ? "border border-[var(--accent)] bg-white/10 px-2 py-0.5 font-sans text-[10px] text-[var(--ink)]"
+                  : "border border-[var(--line)] px-2 py-0.5 font-sans text-[10px] text-[var(--muted)]"
               }
             >
-              V7 GO
+              V7 Go
             </button>
           </div>
         </div>
@@ -223,8 +219,8 @@ export function IntelStage({ site, sat }: { site: Site; sat: SatelliteSpec }) {
               <div className="mt-2">
                 <div className="mb-1 flex items-center justify-between font-sans text-[10px] text-[var(--muted)]">
                   <span>{doc.title}</span>
-                  <a href={doc.file} target="_blank" rel="noreferrer" className="text-[var(--accent)]">
-                    OPEN
+                  <a href={doc.file} target="_blank" rel="noreferrer" className="text-[var(--ink)]">
+                    Open
                   </a>
                 </div>
                 <iframe title={doc.title} src={doc.file} className="h-36 w-full border border-[var(--line)] bg-white" />
