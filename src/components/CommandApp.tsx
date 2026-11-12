@@ -7,7 +7,7 @@ import { StreetMap } from "@/components/StreetMap";
 import { IntelStage } from "@/components/IntelStage";
 import { Site3DView } from "@/components/Site3DView";
 import { SATELLITES, getSatellite } from "@/lib/satellites";
-import { asdaSite, isAsdaSite, nearAsda, siteFromClick } from "@/lib/sites";
+import { asdaSite, nearAsda, siteFromClick } from "@/lib/sites";
 import { formatEta, formatPassClock, nextPass } from "@/lib/orbits";
 import type { Phase, SatelliteId, Site } from "@/lib/types";
 
@@ -34,7 +34,6 @@ export function CommandApp() {
   const [departing, setDeparting] = useState(false);
   const [inspect3d, setInspect3d] = useState(false);
   const phaseRef = useRef(phase);
-  const intelTimer = useRef<number | null>(null);
   phaseRef.current = phase;
   const mode = "competitor" as const;
 
@@ -52,14 +51,12 @@ export function CommandApp() {
 
   useEffect(() => {
     window.__hawkSkipToIntel = () => {
-      if (intelTimer.current != null) window.clearTimeout(intelTimer.current);
       setSite(asdaSite());
       setSatId("wv3");
       setDeparting(false);
       setPhase("intel");
     };
     return () => {
-      if (intelTimer.current != null) window.clearTimeout(intelTimer.current);
       delete window.__hawkSkipToIntel;
     };
   }, []);
@@ -81,22 +78,8 @@ export function CommandApp() {
 
   function pickSite(lat: number, lon: number) {
     if (departing) return;
-    if (intelTimer.current != null) {
-      window.clearTimeout(intelTimer.current);
-      intelTimer.current = null;
-    }
-    if (nearAsda(lat, lon)) {
-      setSite(asdaSite());
-      setSatId("wv3");
-      setDeparting(false);
-      setPhase("survey");
-      intelTimer.current = window.setTimeout(() => {
-        setPhase("intel");
-        intelTimer.current = null;
-      }, 780) as unknown as number;
-      return;
-    }
-    setSite(siteFromClick(lat, lon));
+    const next = nearAsda(lat, lon) ? asdaSite() : siteFromClick(lat, lon);
+    setSite(next);
     setSatId(null);
     setDeparting(false);
     if (phase !== "survey") setPhase("survey");
@@ -143,7 +126,7 @@ export function CommandApp() {
         className="absolute inset-0 z-0 h-dvh w-dvw"
         style={{ width: "100vw", height: "100vh" }}
       >
-        {site && phase !== "survey" && (
+        {site && (
           <GlobeView
             phase={phase}
             site={site}
@@ -151,7 +134,9 @@ export function CommandApp() {
             onPickSite={pickSite}
             onPickSatellite={pickSat}
             onNadirLocked={() => {
-              if (phaseRef.current === "orbit") setPhase("confirm");
+              if (phaseRef.current === "orbit" || phaseRef.current === "confirm") {
+                setPhase("intel");
+              }
             }}
           />
         )}
@@ -175,9 +160,9 @@ export function CommandApp() {
             }}
           />
         </div>
-        {phase === "survey" && (
+        {phase === "survey" && !site && (
           <aside
-            data-watch-panel={site && isAsdaSite(site) ? "asda" : "empty"}
+            data-watch-panel="empty"
             className="absolute bottom-0 right-0 top-14 z-20 flex w-[420px] flex-col border-l border-[var(--line)] bg-[var(--panel)]"
           >
             <div className="m-auto max-w-[17rem] px-6 text-center">
@@ -329,14 +314,14 @@ export function CommandApp() {
               3D view
             </button>
           )}
-          {phase === "survey" && site && !isAsdaSite(site) && !inspect3d && (
+          {phase === "survey" && site && !inspect3d && (
             <button
               type="button"
               disabled={departing}
               onClick={beginAscent}
               className="bg-[var(--accent)] px-4 py-2 font-sans text-[12px] text-black disabled:opacity-60"
             >
-              {departing ? "Ascending…" : "Run capture"}
+              {departing ? "Ascending…" : "Task satellite"}
             </button>
           )}
         </div>
