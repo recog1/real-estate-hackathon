@@ -6,6 +6,8 @@ import { GlobeView } from "@/components/GlobeView";
 import { StreetMap } from "@/components/StreetMap";
 import { IntelStage } from "@/components/IntelStage";
 import { Site3DView } from "@/components/Site3DView";
+import { ModeToggle } from "@/components/ModeToggle";
+import { CLAIM_HEADLINE, type WatchMode } from "@/lib/watch";
 import { SATELLITES, getSatellite } from "@/lib/satellites";
 import { FITZROVIA, siteFromClick } from "@/lib/sites";
 import { formatEta, formatPassClock, nextPass } from "@/lib/orbits";
@@ -35,6 +37,7 @@ export function CommandApp() {
   const [taskStep, setTaskStep] = useState(0);
   const [departing, setDeparting] = useState(false);
   const [inspect3d, setInspect3d] = useState(false);
+  const [mode, setMode] = useState<WatchMode>("claim");
   const phaseRef = useRef(phase);
   phaseRef.current = phase;
 
@@ -108,6 +111,7 @@ export function CommandApp() {
       data-site={site?.id ?? ""}
       data-space={space ? "1" : "0"}
       data-inspect3d={inspect3d ? "1" : "0"}
+      data-mode={mode}
       className="relative h-dvh w-dvw overflow-hidden bg-[var(--bg)] text-[var(--ink)]"
     >
       <div
@@ -250,7 +254,7 @@ export function CommandApp() {
 
       {intel && site && sat && (
         <div className="absolute inset-0 z-20 flex flex-col bg-[var(--bg)] pt-14">
-          <IntelStage site={site} sat={sat} />
+          <IntelStage site={site} sat={sat} mode={mode} />
         </div>
       )}
 
@@ -266,10 +270,11 @@ export function CommandApp() {
           <div>
             <div className="font-sans text-lg leading-none text-[var(--ink)]">Asset Hawk</div>
             <div className="mt-0.5 font-sans text-[10px] text-[var(--muted)]">
-              Orbital occupancy intelligence
+              {mode === "competitor" ? "Watch a competitor" : CLAIM_HEADLINE}
             </div>
           </div>
         </div>
+        <ModeToggle mode={mode} onChange={setMode} />
         <div className="flex items-center gap-2">
           {inspect3d ? (
             <button

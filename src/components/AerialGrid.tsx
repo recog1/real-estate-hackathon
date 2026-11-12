@@ -9,7 +9,7 @@ import {
 } from "@/lib/aerial";
 import type { AerialDetection } from "@/lib/aerial";
 
-function DetectionMark({
+export function DetectionMark({
   d,
   width,
   height,

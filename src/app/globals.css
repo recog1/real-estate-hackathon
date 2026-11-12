@@ -87,6 +87,32 @@ body::before {
   display: none !important;
 }
 
+.mode-toggle {
+  display: flex;
+  border: 1px solid #f4f4f5;
+}
+
+.mode-toggle button {
+  background: #07080b;
+  color: #f4f4f5;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  line-height: 1;
+  letter-spacing: 0;
+  text-transform: none;
+  padding: 7px 11px;
+  border-right: 1px solid #f4f4f5;
+}
+
+.mode-toggle button:last-child {
+  border-right: 0;
+}
+
+.mode-toggle button[aria-pressed="true"] {
+  background: #f4f4f5;
+  color: #07080b;
+}
+
 .map-sat-toggle {
   position: absolute;
   top: 62px;

@@ -5,8 +5,12 @@ import { DATA_ROOM, type DataDoc } from "@/lib/dataroom";
 import { CANNED, answerFor } from "@/lib/agent";
 import { V7SourceChip, V7WorkflowPanel } from "@/components/V7WorkflowPanel";
 import { AerialGrid } from "@/components/AerialGrid";
+import { CompetitorCapture } from "@/components/CompetitorCapture";
+import { CompetitorPanel } from "@/components/CompetitorPanel";
 import { buildLogScript } from "@/lib/terminal";
 import { AERIAL_MODEL_LINE, aerialTotals } from "@/lib/aerial";
+import { useCompetitorSite } from "@/lib/competitor";
+import type { WatchMode } from "@/lib/watch";
 import type { ChatMessage, SatelliteSpec, Site } from "@/lib/types";
 
 function AgentPanel({ onOpenV7 }: { onOpenV7: () => void }) {
@@ -127,12 +131,21 @@ function AgentPanel({ onOpenV7 }: { onOpenV7: () => void }) {
   );
 }
 
-export function IntelStage({ site, sat }: { site: Site; sat: SatelliteSpec }) {
+export function IntelStage({
+  site,
+  sat,
+  mode,
+}: {
+  site: Site;
+  sat: SatelliteSpec;
+  mode: WatchMode;
+}) {
   const logs = useMemo(() => buildLogScript(site, sat), [site, sat]);
   const [visible, setVisible] = useState(1);
   const [doc, setDoc] = useState<DataDoc | null>(null);
   const [roomTab, setRoomTab] = useState<"v7" | "files">("v7");
   const totals = useMemo(() => aerialTotals(), []);
+  const competitor = useCompetitorSite();
 
   useEffect(() => {
     const iv = setInterval(() => {
@@ -144,13 +157,24 @@ export function IntelStage({ site, sat }: { site: Site; sat: SatelliteSpec }) {
   return (
     <div className="flex min-h-0 flex-1">
       <div className="flex min-w-0 flex-1 flex-col">
-        <AerialGrid />
+        {mode === "competitor" ? (
+          <CompetitorCapture site={competitor.site} loading={competitor.loading} />
+        ) : (
+          <AerialGrid />
+        )}
         <div className="terminal-log h-[7.5rem] shrink-0 overflow-hidden border-t border-[var(--line)] bg-black text-[11px] leading-5 text-[var(--muted)]">
           <div className="flex items-center justify-between border-b border-[var(--line)] px-3 py-1 text-[10px] text-[var(--ink)]">
             <span>Collection log</span>
             <span className="text-[var(--muted)]">
-              Cars {totals.cars} · Trucks/vans {totals.trucks} · Building segments{" "}
-              {totals.buildings} · {AERIAL_MODEL_LINE}
+              {mode === "competitor"
+                ? competitor.site
+                  ? `Cars ${competitor.site.cars ?? "—"} · Bays ${competitor.site.bays ?? "—"} · Fill ${
+                      competitor.site.fillPct == null
+                        ? "—"
+                        : `${Math.round(competitor.site.fillPct)}%`
+                    }`
+                  : "Loading capture"
+                : `Cars ${totals.cars} · Trucks/vans ${totals.trucks} · Building segments ${totals.buildings} · ${AERIAL_MODEL_LINE}`}
             </span>
           </div>
           <div className="h-full overflow-hidden px-3 py-1">
@@ -161,6 +185,11 @@ export function IntelStage({ site, sat }: { site: Site; sat: SatelliteSpec }) {
           </div>
         </div>
       </div>
+      {mode === "competitor" ? (
+        <aside className="flex w-[420px] shrink-0 flex-col border-l border-[var(--line)] bg-[var(--panel)]">
+          <CompetitorPanel site={competitor.site} loading={competitor.loading} />
+        </aside>
+      ) : (
       <aside
         data-room-tab={roomTab}
         className="flex w-[420px] shrink-0 flex-col border-l border-[var(--line)] bg-[var(--panel)]"
@@ -230,6 +259,7 @@ export function IntelStage({ site, sat }: { site: Site; sat: SatelliteSpec }) {
         )}
         <AgentPanel onOpenV7={() => setRoomTab("v7")} />
       </aside>
+      )}
     </div>
   );
 }
