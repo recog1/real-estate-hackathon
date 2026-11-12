@@ -1,0 +1,107 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R /F2 6 0 R >> >> >>
+endobj
+4 0 obj
+<< /Length 1646 >>
+stream
+0.83 0.63 0.29 rg
+0 760 612 32 re f
+0.93 0.90 0.84 rg
+0 0 612 48 re f
+BT
+1 1 1 rg
+/F2 10 Tf
+36 771 Td
+(ASSET HAWK   ORBITAL OCCUPANCY INTELLIGENCE) Tj
+0.07 0.08 0.10 rg
+/F2 18 Tf
+0 -48 Td
+(Underwriting Memo) Tj
+/F1 10 Tf
+0.15 0.16 0.18 rg
+-20 Td
+(To       Investment Committee) Tj
+-14 Td
+(From     Asset Hawk  /  collection AH-2026-1112) Tj
+-14 Td
+(Re       Bid posture on London multifamily \(Cubitt Wharf or selected parcel\)) Tj
+-14 Td
+() Tj
+-14 Td
+(Recommendation) Tj
+-14 Td
+(Do not underwrite at 95% occupancy. Bid off 73% physical occupancy with a 150 bps vacancy) Tj
+-14 Td
+(reserve. Treat the asking cap as 20-25% too tight until tenancy is proven.) Tj
+-14 Td
+() Tj
+-14 Td
+(Valuation sketch) Tj
+-14 Td
+(Ask implied value \(illustrative\)     48-55m GBP at ~5.25% cap on claimed NOI) Tj
+-14 Td
+(Occupancy haircut                    95% -> 73%  approx -23% in-place income) Tj
+-14 Td
+(Unsupported value                    10-13m GBP) Tj
+-14 Td
+(Hawk bid frame                       price the 73% case, not the 95% case) Tj
+-14 Td
+() Tj
+-14 Td
+(Why this exists) Tj
+-14 Td
+(Occupancy underpins value. If you cannot fill it with tenants, what is it worth? Asset) Tj
+-14 Td
+(Hawk answers that from orbit, before the seller opens a data room, so the first) Tj
+-14 Td
+(conversation is on our numbers - not theirs.) Tj
+-14 Td
+() Tj
+-14 Td
+(IC pack) Tj
+-14 Td
+(1. This memo) Tj
+-14 Td
+(2. Seller Claims vs Observed) Tj
+-14 Td
+(3. Occupancy Analysis Report) Tj
+-14 Td
+(4. Site Imagery Pack) Tj
+-14 Td
+(5. Vehicle Count Time Series) Tj
+ET
+0.07 0.08 0.10 rg
+BT
+/F1 8 Tf
+36 28 Td
+(DEMO / UNCLASSIFIED    p. 1/1    Independent of seller data room) Tj
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Times-Roman >>
+endobj
+6 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Times-Bold >>
+endobj
+xref
+0 7
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000251 00000 n 
+0000001949 00000 n 
+0000002021 00000 n 
+trailer
+<< /Size 7 /Root 1 0 R >>
+startxref
+2092
+%%EOF

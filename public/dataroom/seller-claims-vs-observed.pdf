@@ -1,0 +1,91 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R /F2 6 0 R >> >> >>
+endobj
+4 0 obj
+<< /Length 1426 >>
+stream
+0.83 0.63 0.29 rg
+0 760 612 32 re f
+0.93 0.90 0.84 rg
+0 0 612 48 re f
+BT
+1 1 1 rg
+/F2 10 Tf
+36 771 Td
+(ASSET HAWK   ORBITAL OCCUPANCY INTELLIGENCE) Tj
+0.07 0.08 0.10 rg
+/F2 18 Tf
+0 -48 Td
+(Seller Claims vs Observed) Tj
+/F1 10 Tf
+0.15 0.16 0.18 rg
+-20 Td
+(Field                     Seller pack           Asset Hawk observed) Tj
+-14 Td
+(Occupancy                 95%                   71-75% \(73% point\)) Tj
+-14 Td
+(Units                     142                   48 dwellings in the four tiles \(subset of) Tj
+-14 Td
+(massing\)) Tj
+-14 Td
+(TTM rent                  3.42m GBP             unsupported at claimed occupancy) Tj
+-14 Td
+(Cars / occupied unit      not disclosed         0.71 cars / dwelling) Tj
+-14 Td
+(Vacancy                   5%                    ~27% physical proxy) Tj
+-14 Td
+() Tj
+-14 Td
+(Delta) Tj
+-14 Td
+(Occupancy gap             -22 percentage points) Tj
+-14 Td
+(Flag                      MATERIAL OVERSTATEMENT) Tj
+-14 Td
+() Tj
+-14 Td
+(Narrative) Tj
+-14 Td
+(This multifamily residential property is offered as a 95% occupied income stream.) Tj
+-14 Td
+(Independent orbital collection shows parked-car density consistent with roughly 70-75%) Tj
+-14 Td
+(occupancy. We do not need the seller's data room to see the miss. We should not ask for it) Tj
+-14 Td
+(until we have priced the gap.) Tj
+ET
+0.07 0.08 0.10 rg
+BT
+/F1 8 Tf
+36 28 Td
+(DEMO / UNCLASSIFIED    p. 1/1    Independent of seller data room) Tj
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Times-Roman >>
+endobj
+6 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Times-Bold >>
+endobj
+xref
+0 7
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000251 00000 n 
+0000001729 00000 n 
+0000001801 00000 n 
+trailer
+<< /Size 7 /Root 1 0 R >>
+startxref
+1872
+%%EOF

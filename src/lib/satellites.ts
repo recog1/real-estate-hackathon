@@ -1,0 +1,88 @@
+import type { SatelliteSpec } from "./types";
+
+// TLEs pulled from Celestrak GP (epoch ~2026-11-12). Hard-coded so the demo
+// runs offline with no API keys. Orbits remain physically plausible.
+export const SATELLITES: SatelliteSpec[] = [
+  {
+    id: "wv3",
+    name: "WorldView-3",
+    short: "WV-3",
+    operator: "Maxar",
+    resolution: "31 cm PAN",
+    resolutionM: 0.31,
+    band: "VHR optical",
+    tle1: "1 40115U 14048A   26316.46165122  .00000897  00000+0  11086-3 0  9995",
+    tle2: "2 40115  97.8434  29.1469 0001935 140.6204 219.5152 14.85217080663910",
+    color: "#d4a04a",
+    vhr: true,
+  },
+  {
+    id: "pneo3",
+    name: "Pléiades Neo 3",
+    short: "PNEO-3",
+    operator: "Airbus",
+    resolution: "30 cm PAN",
+    resolutionM: 0.3,
+    band: "VHR optical",
+    tle1: "1 48268U 21034A   26316.48691657  .00000192  00000+0  30953-4 0  9997",
+    tle2: "2 48268  97.8951  29.1227 0001356  88.8012 271.3356 14.81672302299612",
+    color: "#e8c37a",
+    vhr: true,
+  },
+  {
+    id: "skysat-c1",
+    name: "SkySat-C1",
+    short: "SKY-C1",
+    operator: "Planet",
+    resolution: "50 cm",
+    resolutionM: 0.5,
+    band: "VHR optical",
+    tle1: "1 41601U 16040C   26316.29138269  .00009590  00000+0  25446-3 0  9997",
+    tle2: "2 41601  96.9437 340.0982 0002351 151.6239 208.5136 15.38489061580627",
+    color: "#7ee0d6",
+    vhr: true,
+  },
+  {
+    id: "skysat-a",
+    name: "SkySat-A",
+    short: "SKY-A",
+    operator: "Planet",
+    resolution: "90 cm",
+    resolutionM: 0.9,
+    band: "VHR optical",
+    tle1: "1 39418U 13066C   26316.10560736  .00002654  00000+0  15032-3 0  9997",
+    tle2: "2 39418  97.3624   0.7005 0021711 157.8647 202.3527 15.13665481710852",
+    color: "#5ec4b8",
+    vhr: true,
+  },
+  {
+    id: "s2a",
+    name: "Sentinel-2A",
+    short: "S2A",
+    operator: "ESA",
+    resolution: "10 m MSI",
+    resolutionM: 10,
+    band: "Wide-area MSI",
+    tle1: "1 40697U 15028A   26315.62715235  .00000295  00000+0  12902-3 0  9992",
+    tle2: "2 40697  98.5619  28.3134 0001181  97.1672 262.9645 14.30821442594810",
+    color: "#8b9cff",
+    vhr: false,
+  },
+  {
+    id: "l9",
+    name: "Landsat 9",
+    short: "LDCM-9",
+    operator: "NASA / USGS",
+    resolution: "15 m PAN",
+    resolutionM: 15,
+    band: "Multispectral",
+    tle1: "1 49260U 21088A   26316.17989990  .00000353  00000+0  88298-4 0  9999",
+    tle2: "2 49260  98.2130  24.4376 0001057  87.4077 272.7242 14.57111117272554",
+    color: "#b8c0d4",
+    vhr: false,
+  },
+];
+
+export function getSatellite(id: string): SatelliteSpec {
+  return SATELLITES.find((s) => s.id === id) ?? SATELLITES[0];
+}
