@@ -76,9 +76,11 @@ export const DEMO_INTEL = {
 } as const;
 
 export function siteFromClick(lat: number, lon: number): Site {
+  const demo =
+    Math.abs(lat - FITZROVIA.lat) < 1e-4 && Math.abs(lon - FITZROVIA.lon) < 1e-4;
   return {
     id: `site-${lat.toFixed(4)}-${lon.toFixed(4)}`,
-    name: "Selected site",
+    name: demo ? "Oxford Circus" : "Selected site",
     borough: DEMO_INTEL.borough,
     lat,
     lon,
@@ -88,8 +90,8 @@ export function siteFromClick(lat: number, lon: number): Site {
   };
 }
 
-/** Axis-aligned square about one city block, centred on the click. */
-export const SITE_PLOT_M = 250;
+/** Axis-aligned square matching the Oxford Circus capture (~300 m). */
+export const SITE_PLOT_M = 300;
 
 export function parcelRing(lat: number, lon: number, sizeM = SITE_PLOT_M): number[] {
   const half = sizeM / 2;

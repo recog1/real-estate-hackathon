@@ -27,7 +27,9 @@ const TASK_STEPS = [
 
 export function CommandApp() {
   const [phase, setPhase] = useState<Phase>("survey");
-  const [site, setSite] = useState<Site | null>(null);
+  const [site, setSite] = useState<Site | null>(() =>
+    siteFromClick(FITZROVIA.lat, FITZROVIA.lon),
+  );
   const [satId, setSatId] = useState<SatelliteId | null>(null);
   const [taskStep, setTaskStep] = useState(0);
   const [departing, setDeparting] = useState(false);

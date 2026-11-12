@@ -1,6 +1,12 @@
 "use client";
 
-import { AERIAL_HERO, AERIAL_MODEL_LINE, detStyle } from "@/lib/aerial";
+import {
+  AERIAL_ATTRIBUTION,
+  AERIAL_HERO,
+  AERIAL_MODEL_LINE,
+  aerialTotals,
+  detStyle,
+} from "@/lib/aerial";
 import type { AerialDetection } from "@/lib/aerial";
 
 function DetectionMark({
@@ -63,8 +69,7 @@ function DetectionMark({
 export function AerialGrid() {
   const { image, src, label } = AERIAL_HERO;
   const n = image.detections.length;
-  const { car, "truck/van": trucks, "house/building": dwellings } = image.counts;
-  const vpd = dwellings ? (car + trucks) / dwellings : 0;
+  const { cars, trucks, buildings } = aerialTotals();
 
   return (
     <div data-aerial-grid="1" className="relative flex min-h-0 flex-1 flex-col bg-black">
@@ -82,15 +87,17 @@ export function AerialGrid() {
             d={d}
             width={image.width}
             height={image.height}
-            delayMs={n > 1 ? (i / (n - 1)) * 1000 : 0}
+            delayMs={n > 1 ? (i / (n - 1)) * 800 : 0}
           />
         ))}
       </svg>
       <div className="pointer-events-none absolute inset-x-0 top-0 bg-gradient-to-b from-black/70 to-transparent px-3 py-2">
         <div className="font-sans text-[11px] text-[var(--ink)]">
-          Cars {car} · Trucks/vans {trucks} · Dwellings {dwellings} · Vehicles/dwelling{" "}
-          {vpd.toFixed(2)} · {AERIAL_MODEL_LINE}
+          Cars {cars}, Trucks/vans {trucks}, Building segments {buildings} · {AERIAL_MODEL_LINE}
         </div>
+      </div>
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent px-3 py-1.5">
+        <div className="font-sans text-[10px] text-white/70">{AERIAL_ATTRIBUTION}</div>
       </div>
     </div>
   );

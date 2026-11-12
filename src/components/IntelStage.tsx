@@ -149,8 +149,8 @@ export function IntelStage({ site, sat }: { site: Site; sat: SatelliteSpec }) {
           <div className="flex items-center justify-between border-b border-[var(--line)] px-3 py-1 text-[10px] text-[var(--ink)]">
             <span>Collection log</span>
             <span className="text-[var(--muted)]">
-              Cars {totals.cars} · Trucks {totals.trucks} · Dwellings {totals.dwellings} ·{" "}
-              {AERIAL_MODEL_LINE}
+              Cars {totals.cars} · Trucks/vans {totals.trucks} · Building segments{" "}
+              {totals.buildings} · {AERIAL_MODEL_LINE}
             </span>
           </div>
           <div className="h-full overflow-hidden px-3 py-1">
