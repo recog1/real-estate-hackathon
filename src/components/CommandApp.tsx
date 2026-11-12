@@ -7,6 +7,7 @@ import { StreetMap } from "@/components/StreetMap";
 import { IntelStage } from "@/components/IntelStage";
 import { Site3DView } from "@/components/Site3DView";
 import { ModeToggle } from "@/components/ModeToggle";
+import { PipelineStrip } from "@/components/PipelineStrip";
 import { CLAIM_HEADLINE, type WatchMode } from "@/lib/watch";
 import { SATELLITES, getSatellite } from "@/lib/satellites";
 import { FITZROVIA, siteFromClick } from "@/lib/sites";
@@ -161,7 +162,7 @@ export function CommandApp() {
           </div>
         )}
         {confirmOpen && sat && site && (
-          <div className={`absolute right-[18.5rem] top-20 z-40 w-80 p-4 ${floatPanel}`}>
+          <div className={`absolute right-[18.5rem] top-[7.75rem] z-40 w-80 p-4 ${floatPanel}`}>
             <div className="font-sans text-[12px] text-[var(--ink)]">Task confirm</div>
             <div className="mt-1 text-lg">{sat.name}</div>
             <dl className="mt-3 space-y-1 font-sans text-[11px] text-[var(--muted)]">
@@ -253,7 +254,7 @@ export function CommandApp() {
       </div>
 
       {intel && site && sat && (
-        <div className="absolute inset-0 z-20 flex flex-col bg-[var(--bg)] pt-14">
+        <div className="absolute inset-0 z-20 flex flex-col bg-[var(--bg)] pt-28">
           <IntelStage site={site} sat={sat} mode={mode} />
         </div>
       )}
@@ -261,6 +262,12 @@ export function CommandApp() {
       {inspect3d && (
         <div className="absolute inset-x-0 bottom-0 top-14 z-40 bg-[var(--bg)]">
           <Site3DView site={site} onClose={() => setInspect3d(false)} />
+        </div>
+      )}
+
+      {!inspect3d && (
+        <div className="absolute inset-x-0 top-14 z-40 border-b border-[var(--line)] bg-[var(--panel)]">
+          <PipelineStrip mode={mode} phase={phase} />
         </div>
       )}
 
@@ -307,7 +314,7 @@ export function CommandApp() {
       </header>
 
       {space && (
-        <aside className={`absolute bottom-3 right-3 top-16 z-30 w-[260px] overflow-y-auto ${floatPanel}`}>
+        <aside className={`absolute bottom-3 right-3 top-[7.75rem] z-30 w-[260px] overflow-y-auto ${floatPanel}`}>
           <div className="px-3 py-3 font-sans text-[12px] text-[var(--ink)]">Constellation</div>
           {SATELLITES.map((s) => {
             const p = catalogPasses[s.id] ?? null;
