@@ -311,7 +311,7 @@ export function CommandApp() {
 
       <footer className="flex shrink-0 items-center justify-between border-t border-[var(--line)] px-4 py-1 font-mono text-[10px] tracking-[0.14em] text-[var(--muted)]">
         <span>ASSET HAWK · Grok Bot Real Estate Hackathon London</span>
-        <span>CARTO dark-matter · TLE SGP4 · no Ion token</span>
+        <span>Esri World Dark Gray · TLE SGP4 · no Ion token</span>
         {site ? (
           <span>
             {site.lat.toFixed(5)}N {site.lon.toFixed(5)}E

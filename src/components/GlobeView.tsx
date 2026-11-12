@@ -58,11 +58,15 @@ export function GlobeView({
       Cesium.Ion.defaultAccessToken = "";
       Cesium.buildModuleUrl.setBaseUrl("/cesium/");
 
-      const imagery = new Cesium.UrlTemplateImageryProvider({
-        url: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png",
-        subdomains: ["a", "b", "c", "d"],
+      const dark = new Cesium.UrlTemplateImageryProvider({
+        url: "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}",
+        maximumLevel: 16,
+        credit: "Esri",
+      });
+      const satellite = new Cesium.UrlTemplateImageryProvider({
+        url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
         maximumLevel: 19,
-        credit: "CARTO",
+        credit: "Esri",
       });
 
       const viewer = new Cesium.Viewer(hostRef.current, {
@@ -80,11 +84,21 @@ export function GlobeView({
         navigationInstructionsInitiallyVisible: false,
         shouldAnimate: true,
         terrainProvider: new Cesium.EllipsoidTerrainProvider(),
-        baseLayer: new Cesium.ImageryLayer(imagery),
+        baseLayer: new Cesium.ImageryLayer(dark),
         msaaSamples: 4,
         creditContainer: document.createElement("div"),
       });
       viewerRef.current = viewer;
+
+      const satLayer = viewer.imageryLayers.addImageryProvider(satellite);
+      satLayer.alpha = 0;
+      const fadeSat = () => {
+        const height = viewer.camera.positionCartographic.height;
+        satLayer.alpha = Cesium.Math.clamp((4000 - height) / 3200, 0, 1);
+      };
+      viewer.camera.changed.addEventListener(fadeSat);
+      viewer.camera.moveEnd.addEventListener(fadeSat);
+      fadeSat();
 
       viewer.scene.globe.enableLighting = false;
       viewer.scene.globe.showGroundAtmosphere = true;

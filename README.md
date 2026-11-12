@@ -6,7 +6,7 @@ Orbital occupancy intelligence for real estate.
 
 This is the Grok Bot Real Estate Hackathon London (12 Nov 2026) demo. Dark command UI, London globe, live-looking satellite tasking, four VLM feeds, a data room, and an agent that reads it.
 
-No API keys. No Cesium Ion token. CARTO dark-matter tiles + hard-coded TLEs.
+No API keys. No Cesium Ion token. Esri World Dark Gray / World Imagery tiles (keyless) + hard-coded TLEs.
 
 ## Run
 
@@ -38,7 +38,7 @@ pnpm start
 
 | Piece | Real | Mocked |
 | --- | --- | --- |
-| Map / globe | CesiumJS, CARTO raster tiles, one scene 2D→space | — |
+| Map / globe | CesiumJS, Esri raster tiles, one scene 2D→space | — |
 | Parcels | Hard-coded London footprints; any land click mints a site | Names/unit counts |
 | Orbits | `satellite.js` SGP4 on real Celestrak TLEs | Clock runs ~48× |
 | Next-pass / off-nadir | Computed from TLE vs site | — |
