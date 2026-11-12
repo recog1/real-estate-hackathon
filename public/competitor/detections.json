@@ -1,0 +1,4052 @@
+{
+  "generated": "2026-11-12",
+  "site": {
+    "name": "ASDA Leyton Mills Superstore",
+    "retail_park": "Leyton Mills Retail Park",
+    "address": "1 Leyton Mills, Marshall Road, Leyton, London E10 5NH",
+    "lat": 51.55636,
+    "lng": -0.00901,
+    "coord_source": "OpenStreetMap Nominatim shop node (51.5563628, -0.0090093); address confirmed on the ASDA store locator (Marshall Road, Leyton E10 5NH). Open-air/surface car park confirmed by AccessAble."
+  },
+  "mode": "competitor-watch",
+  "question": "How busy is this supermarket car park, from orbit?",
+  "models": {
+    "yolo11m-obb": "Ultralytics YOLO11m-OBB (DOTAv1), tiled 256px/25% overlap, imgsz 1024, conf>=0.10, rotated NMS probIoU 0.4; vehicles only (other DOTA classes dropped). Conf lowered from 0.25 used on Oxford Circus because vehicles here are ~24 px and grey-on-grey on asphalt; conf 0.25 recalled only 11 in-lot vehicles.",
+    "owlv2": "google/owlv2-base-patch16-ensemble, tiled 640px/20% overlap, score>=0.20 for cars/trucks (lowered from the Oxford Circus extra-car cut of 0.30 for the same reason), NMS 0.4 then overlap-filter vs YOLO (IoU 0.1). Size filter 8\u201390 px, area 40\u20133500 px\u00b2. Only vehicles inside the customer car-park polygon are kept."
+  },
+  "imagery": {
+    "source": "Esri World_Imagery XYZ tiles, zoom 19 (~0.19 m/px)",
+    "attribution": "Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community",
+    "date": "unknown (Esri mosaic; capture date not published on the XYZ tiles)",
+    "zoom": 19,
+    "size_m": 278.5,
+    "note": "Crop is a 278 m square centred a little south-west of the store so the surface customer car park and the store are both in frame. The A12, the railway, surrounding houses and the store's northern loading dock were kept out of the count polygon."
+  },
+  "bounds": {
+    "north": 51.557070801828274,
+    "south": 51.554569299041376,
+    "west": -0.0116729736328125,
+    "east": -0.007649660110473633
+  },
+  "images": [
+    {
+      "file": "supermarket.jpg",
+      "file_bw": "supermarket-bw.jpg",
+      "file_annotated": "annotated.jpg",
+      "width": 1500,
+      "height": 1500,
+      "bounds": {
+        "north": 51.557070801828274,
+        "south": 51.554569299041376,
+        "west": -0.0116729736328125,
+        "east": -0.007649660110473633
+      },
+      "center": [
+        51.555820050434825,
+        -0.009661316871643066
+      ],
+      "size_m": 278.5,
+      "models_used": [
+        "yolo11m-obb",
+        "owlv2-base-patch16-ensemble"
+      ],
+      "counts": {
+        "car": 154,
+        "truck/van": 13,
+        "vehicles": 167,
+        "vehicles_in_marked_bays": 139,
+        "vehicles_on_circulation": 28
+      },
+      "counts_by_source": {
+        "yolo11m-obb_vehicles": 35,
+        "owlv2_extra_vehicles": 132
+      },
+      "counts_by_zone": {
+        "west": 73,
+        "east": 32,
+        "circulation": 28,
+        "front": 18,
+        "south": 16
+      },
+      "bays": {
+        "estimate": 917,
+        "method": "Four marked bay-grid polygons were traced on the z19 mosaic: the west tree-island lot (including the close-in bays along the store's west facade), the south marked lot, the east lot between the store and the adjacent retail shed, and the short-stay bays south of the store. Arterial/spine roads, the central roundabout and the neighbouring shed roof were excluded. Total marked area 27496 m\u00b2 \u00f7 30 m\u00b2 per bay = 917 bays (west 11352 m\u00b2 \u2192 378; south 7232 m\u00b2 \u2192 241; east 6536 m\u00b2 \u2192 218; front 2375 m\u00b2 \u2192 79). 30 m\u00b2 per bay (including aisles and tree islands) is used rather than the 25 m\u00b2 efficient-lot rule of thumb because this retail-park layout has large tree islands and wide aisles; 25 m\u00b2 would imply 1100 bays, above the published figure of roughly 890 spaces for the whole Leyton Mills Retail Park (shared by ASDA, TK Maxx and other units; carparkcheck.co.uk, not independently verified). 917 bays is consistent with that published figure, given that this frame covers the main shared surface lots and not every peripheral service space.",
+        "area_m2": 27496,
+        "m2_per_bay": 30,
+        "by_grid_m2": {
+          "west": 11352,
+          "south": 7232,
+          "east": 6536,
+          "front": 2375
+        },
+        "by_grid_bays_30m2": {
+          "west": 378,
+          "south": 241,
+          "east": 218,
+          "front": 79
+        },
+        "alt_25m2_would_give": 1100,
+        "published_whole_park_spaces_approx": 890,
+        "published_source": "carparkcheck.co.uk, Leyton Mills Retail Park (ASDA, TK Maxx and others sharing one car park); not independently verified."
+      },
+      "occupancy": {
+        "vehicles": 167,
+        "bays": 917,
+        "fill_pct": 18.2,
+        "fill_pct_rounded": 18,
+        "definition": "vehicles inside the customer car-park polygon / estimated bays. A small number of vehicles sit on internal aisles or the spine road rather than in a marked stall."
+      },
+      "false_positives_and_misses": {
+        "imagery_date": "unknown (Esri mosaic)",
+        "false_positives": [
+          "A handful of low-score (0.20\u20130.22) boxes in the west and south lots fall on empty-bay shadows, tree-island gaps or a possible bin near the north-west perimeter rather than a clear vehicle (visual estimate: about 4\u20138).",
+          "One oversized box over a tight cluster of cars in the north-east of the east lot was rejected by the size filter; those cars are missed rather than merged into one count."
+        ],
+        "misses": [
+          "The east lot is the fullest area and the model still misses a number of low-contrast or tightly packed cars (visual review: on the order of 10\u201320 vehicles without a box).",
+          "Some dark cars under the west-lot tree canopies are also missed.",
+          "YOLO11m-OBB at the Oxford Circus conf of 0.25 only found 11 in-lot vehicles; even at 0.10 it under-detects on this grey asphalt. OWLv2 carries most of the count."
+        ],
+        "other_notes": [
+          "Fill % is therefore a slight lower bound on how many vehicles are actually in the car park, partly offset by the few false positives above.",
+          "The lot is shared with neighbouring retail units in Leyton Mills Retail Park, so the figure is park-level occupancy, not ASDA-only customers.",
+          "Three white vans parked on the verge north-west of the access road were left outside the polygon (not in the marked customer bays). The store's northern loading-dock lorries were also excluded. A false box on the adjacent retail shed roof was filtered out."
+        ]
+      },
+      "carpark_polygon_px": [
+        [
+          170,
+          480
+        ],
+        [
+          300,
+          450
+        ],
+        [
+          500,
+          430
+        ],
+        [
+          620,
+          430
+        ],
+        [
+          650,
+          500
+        ],
+        [
+          730,
+          530
+        ],
+        [
+          760,
+          700
+        ],
+        [
+          780,
+          850
+        ],
+        [
+          900,
+          830
+        ],
+        [
+          1040,
+          720
+        ],
+        [
+          1120,
+          580
+        ],
+        [
+          1250,
+          550
+        ],
+        [
+          1450,
+          560
+        ],
+        [
+          1520,
+          620
+        ],
+        [
+          1545,
+          750
+        ],
+        [
+          1530,
+          950
+        ],
+        [
+          1480,
+          1040
+        ],
+        [
+          1350,
+          1070
+        ],
+        [
+          1180,
+          1110
+        ],
+        [
+          1080,
+          1180
+        ],
+        [
+          1050,
+          1360
+        ],
+        [
+          1000,
+          1440
+        ],
+        [
+          800,
+          1460
+        ],
+        [
+          500,
+          1460
+        ],
+        [
+          340,
+          1430
+        ],
+        [
+          290,
+          1300
+        ],
+        [
+          270,
+          1150
+        ],
+        [
+          200,
+          1080
+        ],
+        [
+          145,
+          950
+        ],
+        [
+          135,
+          800
+        ],
+        [
+          150,
+          650
+        ],
+        [
+          165,
+          540
+        ]
+      ],
+      "bay_grids_px": {
+        "west": [
+          [
+            185,
+            505
+          ],
+          [
+            500,
+            465
+          ],
+          [
+            640,
+            505
+          ],
+          [
+            745,
+            535
+          ],
+          [
+            760,
+            820
+          ],
+          [
+            710,
+            1005
+          ],
+          [
+            540,
+            1070
+          ],
+          [
+            350,
+            1105
+          ],
+          [
+            200,
+            1085
+          ],
+          [
+            155,
+            1000
+          ],
+          [
+            165,
+            850
+          ],
+          [
+            185,
+            720
+          ]
+        ],
+        "south": [
+          [
+            330,
+            1130
+          ],
+          [
+            990,
+            1145
+          ],
+          [
+            1035,
+            1220
+          ],
+          [
+            1015,
+            1430
+          ],
+          [
+            850,
+            1455
+          ],
+          [
+            490,
+            1450
+          ],
+          [
+            330,
+            1380
+          ]
+        ],
+        "east": [
+          [
+            1125,
+            595
+          ],
+          [
+            1475,
+            575
+          ],
+          [
+            1530,
+            670
+          ],
+          [
+            1530,
+            980
+          ],
+          [
+            1450,
+            1040
+          ],
+          [
+            1210,
+            1070
+          ],
+          [
+            1105,
+            980
+          ],
+          [
+            1105,
+            705
+          ]
+        ],
+        "front": [
+          [
+            785,
+            855
+          ],
+          [
+            1000,
+            835
+          ],
+          [
+            1095,
+            900
+          ],
+          [
+            1095,
+            1020
+          ],
+          [
+            1010,
+            1095
+          ],
+          [
+            850,
+            1095
+          ],
+          [
+            785,
+            995
+          ]
+        ]
+      },
+      "detections": [
+        {
+          "label": "truck/van",
+          "score": 0.457,
+          "bbox": [
+            203.5,
+            1002.1,
+            26.7,
+            29.4
+          ],
+          "bbox_norm": [
+            0.13567,
+            0.66803,
+            0.0178,
+            0.01959
+          ],
+          "source": "yolo11m-obb",
+          "zone": "west",
+          "polygon": [
+            [
+              217.1,
+              1031.4
+            ],
+            [
+              230.2,
+              1022.9
+            ],
+            [
+              216.7,
+              1002.1
+            ],
+            [
+              203.5,
+              1010.6
+            ]
+          ]
+        },
+        {
+          "label": "truck/van",
+          "score": 0.342,
+          "bbox": [
+            192.7,
+            1013.0,
+            13.7,
+            11.1
+          ],
+          "bbox_norm": [
+            0.12849,
+            0.67533,
+            0.00914,
+            0.00737
+          ],
+          "source": "yolo11m-obb",
+          "zone": "west",
+          "polygon": [
+            [
+              206.4,
+              1024.0
+            ],
+            [
+              206.4,
+              1013.0
+            ],
+            [
+              192.7,
+              1013.0
+            ],
+            [
+              192.7,
+              1024.0
+            ]
+          ]
+        },
+        {
+          "label": "truck/van",
+          "score": 0.238,
+          "bbox": [
+            1150.4,
+            816.4,
+            26.2,
+            25.0
+          ],
+          "bbox_norm": [
+            0.76695,
+            0.54424,
+            0.01747,
+            0.01664
+          ],
+          "source": "yolo11m-obb",
+          "zone": "east",
+          "polygon": [
+            [
+              1159.5,
+              841.3
+            ],
+            [
+              1176.6,
+              828.8
+            ],
+            [
+              1167.5,
+              816.4
+            ],
+            [
+              1150.4,
+              828.9
+            ]
+          ]
+        },
+        {
+          "label": "truck/van",
+          "score": 0.153,
+          "bbox": [
+            596.3,
+            556.3,
+            39.5,
+            48.2
+          ],
+          "bbox_norm": [
+            0.39755,
+            0.37086,
+            0.02633,
+            0.03211
+          ],
+          "source": "yolo11m-obb",
+          "zone": "west",
+          "polygon": [
+            [
+              624.0,
+              604.5
+            ],
+            [
+              635.8,
+              596.3
+            ],
+            [
+              608.1,
+              556.3
+            ],
+            [
+              596.3,
+              564.5
+            ]
+          ]
+        },
+        {
+          "label": "truck/van",
+          "score": 0.151,
+          "bbox": [
+            238.8,
+            993.2,
+            24.8,
+            24.4
+          ],
+          "bbox_norm": [
+            0.15922,
+            0.66214,
+            0.01653,
+            0.01625
+          ],
+          "source": "yolo11m-obb",
+          "zone": "west",
+          "polygon": [
+            [
+              249.0,
+              1017.6
+            ],
+            [
+              263.6,
+              1005.6
+            ],
+            [
+              253.5,
+              993.2
+            ],
+            [
+              238.8,
+              1005.2
+            ]
+          ]
+        },
+        {
+          "label": "truck/van",
+          "score": 0.134,
+          "bbox": [
+            197.3,
+            765.4,
+            14.1,
+            12.6
+          ],
+          "bbox_norm": [
+            0.13152,
+            0.51028,
+            0.00939,
+            0.00837
+          ],
+          "source": "yolo11m-obb",
+          "zone": "west",
+          "polygon": [
+            [
+              211.3,
+              778.0
+            ],
+            [
+              211.4,
+              765.5
+            ],
+            [
+              197.4,
+              765.4
+            ],
+            [
+              197.3,
+              777.9
+            ]
+          ]
+        },
+        {
+          "label": "truck/van",
+          "score": 0.125,
+          "bbox": [
+            1147.4,
+            789.1,
+            18.6,
+            18.9
+          ],
+          "bbox_norm": [
+            0.76491,
+            0.5261,
+            0.01241,
+            0.0126
+          ],
+          "source": "yolo11m-obb",
+          "zone": "east",
+          "polygon": [
+            [
+              1160.2,
+              808.0
+            ],
+            [
+              1166.0,
+              794.7
+            ],
+            [
+              1153.2,
+              789.1
+            ],
+            [
+              1147.4,
+              802.4
+            ]
+          ]
+        },
+        {
+          "label": "truck/van",
+          "score": 0.103,
+          "bbox": [
+            491.0,
+            449.5,
+            47.5,
+            22.1
+          ],
+          "bbox_norm": [
+            0.32736,
+            0.29965,
+            0.03167,
+            0.01471
+          ],
+          "source": "yolo11m-obb",
+          "zone": "circulation",
+          "polygon": [
+            [
+              493.6,
+              471.5
+            ],
+            [
+              538.5,
+              463.5
+            ],
+            [
+              536.0,
+              449.5
+            ],
+            [
+              491.0,
+              457.5
+            ]
+          ]
+        },
+        {
+          "label": "car",
+          "score": 0.377,
+          "bbox": [
+            184.9,
+            455.8,
+            32.0,
+            38.1
+          ],
+          "bbox_norm": [
+            0.12324,
+            0.30385,
+            0.02137,
+            0.02542
+          ],
+          "source": "yolo11m-obb",
+          "zone": "circulation",
+          "polygon": [
+            [
+              202.4,
+              493.9
+            ],
+            [
+              216.9,
+              485.3
+            ],
+            [
+              199.3,
+              455.8
+            ],
+            [
+              184.9,
+              464.4
+            ]
+          ]
+        },
+        {
+          "label": "car",
+          "score": 0.356,
+          "bbox": [
+            1304.7,
+            762.4,
+            31.0,
+            25.6
+          ],
+          "bbox_norm": [
+            0.86983,
+            0.50828,
+            0.02067,
+            0.01703
+          ],
+          "source": "yolo11m-obb",
+          "zone": "east",
+          "polygon": [
+            [
+              1311.4,
+              788.0
+            ],
+            [
+              1335.8,
+              774.1
+            ],
+            [
+              1329.1,
+              762.4
+            ],
+            [
+              1304.7,
+              776.3
+            ]
+          ]
+        },
+        {
+          "label": "car",
+          "score": 0.339,
+          "bbox": [
+            1296.6,
+            749.9,
+            30.2,
+            25.2
+          ],
+          "bbox_norm": [
+            0.86439,
+            0.49996,
+            0.02015,
+            0.01681
+          ],
+          "source": "yolo11m-obb",
+          "zone": "east",
+          "polygon": [
+            [
+              1303.3,
+              775.1
+            ],
+            [
+              1326.8,
+              761.5
+            ],
+            [
+              1320.1,
+              749.9
+            ],
+            [
+              1296.6,
+              763.6
+            ]
+          ]
+        },
+        {
+          "label": "car",
+          "score": 0.334,
+          "bbox": [
+            705.2,
+            614.0,
+            25.6,
+            30.0
+          ],
+          "bbox_norm": [
+            0.47013,
+            0.40934,
+            0.01708,
+            0.02003
+          ],
+          "source": "yolo11m-obb",
+          "zone": "west",
+          "polygon": [
+            [
+              718.3,
+              644.1
+            ],
+            [
+              730.8,
+              636.9
+            ],
+            [
+              717.8,
+              614.0
+            ],
+            [
+              705.2,
+              621.2
+            ]
+          ]
+        },
+        {
+          "label": "car",
+          "score": 0.331,
+          "bbox": [
+            561.3,
+            496.1,
+            25.4,
+            35.8
+          ],
+          "bbox_norm": [
+            0.37421,
+            0.33076,
+            0.01694,
+            0.0239
+          ],
+          "source": "yolo11m-obb",
+          "zone": "west",
+          "polygon": [
+            [
+              573.9,
+              532.0
+            ],
+            [
+              586.7,
+              526.7
+            ],
+            [
+              574.1,
+              496.1
+            ],
+            [
+              561.3,
+              501.4
+            ]
+          ]
+        },
+        {
+          "label": "car",
+          "score": 0.306,
+          "bbox": [
+            922.9,
+            789.3,
+            26.0,
+            29.8
+          ],
+          "bbox_norm": [
+            0.61529,
+            0.52621,
+            0.01732,
+            0.01984
+          ],
+          "source": "yolo11m-obb",
+          "zone": "circulation",
+          "polygon": [
+            [
+              937.4,
+              819.1
+            ],
+            [
+              948.9,
+              811.6
+            ],
+            [
+              934.5,
+              789.3
+            ],
+            [
+              922.9,
+              796.8
+            ]
+          ]
+        },
+        {
+          "label": "car",
+          "score": 0.27,
+          "bbox": [
+            1285.0,
+            726.6,
+            29.5,
+            24.7
+          ],
+          "bbox_norm": [
+            0.85666,
+            0.48438,
+            0.01966,
+            0.01644
+          ],
+          "source": "yolo11m-obb",
+          "zone": "east",
+          "polygon": [
+            [
+              1291.6,
+              751.2
+            ],
+            [
+              1314.5,
+              739.0
+            ],
+            [
+              1307.8,
+              726.6
+            ],
+            [
+              1285.0,
+              738.9
+            ]
+          ]
+        },
+        {
+          "label": "car",
+          "score": 0.269,
+          "bbox": [
+            858.3,
+            995.8,
+            29.2,
+            22.5
+          ],
+          "bbox_norm": [
+            0.57218,
+            0.66389,
+            0.01946,
+            0.01497
+          ],
+          "source": "yolo11m-obb",
+          "zone": "front",
+          "polygon": [
+            [
+              863.5,
+              1018.3
+            ],
+            [
+              887.5,
+              1008.1
+            ],
+            [
+              882.2,
+              995.8
+            ],
+            [
+              858.3,
+              1006.0
+            ]
+          ]
+        },
+        {
+          "label": "car",
+          "score": 0.257,
+          "bbox": [
+            955.6,
+            874.6,
+            31.1,
+            26.7
+          ],
+          "bbox_norm": [
+            0.63704,
+            0.58305,
+            0.0207,
+            0.01778
+          ],
+          "source": "yolo11m-obb",
+          "zone": "front",
+          "polygon": [
+            [
+              963.0,
+              901.3
+            ],
+            [
+              986.6,
+              886.7
+            ],
+            [
+              979.1,
+              874.6
+            ],
+            [
+              955.6,
+              889.1
+            ]
+          ]
+        },
+        {
+          "label": "car",
+          "score": 0.234,
+          "bbox": [
+            218.5,
+            1070.6,
+            28.6,
+            25.5
+          ],
+          "bbox_norm": [
+            0.14566,
+            0.71371,
+            0.01905,
+            0.01701
+          ],
+          "source": "yolo11m-obb",
+          "zone": "west",
+          "polygon": [
+            [
+              226.3,
+              1096.1
+            ],
+            [
+              247.1,
+              1083.0
+            ],
+            [
+              239.2,
+              1070.6
+            ],
+            [
+              218.5,
+              1083.6
+            ]
+          ]
+        },
+        {
+          "label": "car",
+          "score": 0.214,
+          "bbox": [
+            1204.0,
+            715.4,
+            28.7,
+            23.0
+          ],
+          "bbox_norm": [
+            0.80264,
+            0.47696,
+            0.0191,
+            0.01532
+          ],
+          "source": "yolo11m-obb",
+          "zone": "east",
+          "polygon": [
+            [
+              1209.7,
+              738.4
+            ],
+            [
+              1232.6,
+              727.6
+            ],
+            [
+              1226.9,
+              715.4
+            ],
+            [
+              1204.0,
+              726.2
+            ]
+          ]
+        },
+        {
+          "label": "car",
+          "score": 0.204,
+          "bbox": [
+            953.6,
+            767.4,
+            29.1,
+            33.9
+          ],
+          "bbox_norm": [
+            0.63572,
+            0.51157,
+            0.01942,
+            0.02258
+          ],
+          "source": "yolo11m-obb",
+          "zone": "circulation",
+          "polygon": [
+            [
+              969.5,
+              801.2
+            ],
+            [
+              982.7,
+              793.0
+            ],
+            [
+              966.7,
+              767.4
+            ],
+            [
+              953.6,
+              775.5
+            ]
+          ]
+        },
+        {
+          "label": "car",
+          "score": 0.197,
+          "bbox": [
+            1282.9,
+            679.0,
+            32.6,
+            20.9
+          ],
+          "bbox_norm": [
+            0.85528,
+            0.45264,
+            0.02176,
+            0.01391
+          ],
+          "source": "yolo11m-obb",
+          "zone": "east",
+          "polygon": [
+            [
+              1286.0,
+              699.8
+            ],
+            [
+              1315.6,
+              693.7
+            ],
+            [
+              1312.5,
+              679.0
+            ],
+            [
+              1282.9,
+              685.1
+            ]
+          ]
+        },
+        {
+          "label": "car",
+          "score": 0.194,
+          "bbox": [
+            1225.6,
+            813.2,
+            29.5,
+            26.1
+          ],
+          "bbox_norm": [
+            0.81705,
+            0.54213,
+            0.01964,
+            0.01743
+          ],
+          "source": "yolo11m-obb",
+          "zone": "east",
+          "polygon": [
+            [
+              1233.5,
+              839.3
+            ],
+            [
+              1255.0,
+              825.9
+            ],
+            [
+              1247.1,
+              813.2
+            ],
+            [
+              1225.6,
+              826.6
+            ]
+          ]
+        },
+        {
+          "label": "car",
+          "score": 0.189,
+          "bbox": [
+            540.7,
+            513.7,
+            24.1,
+            29.2
+          ],
+          "bbox_norm": [
+            0.36045,
+            0.34249,
+            0.01604,
+            0.01945
+          ],
+          "source": "yolo11m-obb",
+          "zone": "west",
+          "polygon": [
+            [
+              554.1,
+              542.9
+            ],
+            [
+              564.7,
+              536.7
+            ],
+            [
+              551.3,
+              513.7
+            ],
+            [
+              540.7,
+              520.0
+            ]
+          ]
+        },
+        {
+          "label": "car",
+          "score": 0.189,
+          "bbox": [
+            1272.6,
+            704.5,
+            29.0,
+            22.5
+          ],
+          "bbox_norm": [
+            0.84841,
+            0.46968,
+            0.01935,
+            0.015
+          ],
+          "source": "yolo11m-obb",
+          "zone": "east",
+          "polygon": [
+            [
+              1277.9,
+              727.0
+            ],
+            [
+              1301.6,
+              716.7
+            ],
+            [
+              1296.3,
+              704.5
+            ],
+            [
+              1272.6,
+              714.8
+            ]
+          ]
+        },
+        {
+          "label": "car",
+          "score": 0.161,
+          "bbox": [
+            388.1,
+            954.4,
+            17.9,
+            19.1
+          ],
+          "bbox_norm": [
+            0.2587,
+            0.63626,
+            0.01191,
+            0.01273
+          ],
+          "source": "yolo11m-obb",
+          "zone": "west",
+          "polygon": [
+            [
+              395.6,
+              973.5
+            ],
+            [
+              405.9,
+              967.6
+            ],
+            [
+              398.4,
+              954.4
+            ],
+            [
+              388.1,
+              960.3
+            ]
+          ]
+        },
+        {
+          "label": "car",
+          "score": 0.159,
+          "bbox": [
+            903.4,
+            1062.4,
+            30.1,
+            25.1
+          ],
+          "bbox_norm": [
+            0.60224,
+            0.70824,
+            0.02004,
+            0.0167
+          ],
+          "source": "yolo11m-obb",
+          "zone": "front",
+          "polygon": [
+            [
+              910.1,
+              1087.4
+            ],
+            [
+              933.4,
+              1074.8
+            ],
+            [
+              926.7,
+              1062.4
+            ],
+            [
+              903.4,
+              1075.0
+            ]
+          ]
+        },
+        {
+          "label": "car",
+          "score": 0.145,
+          "bbox": [
+            566.4,
+            934.1,
+            22.8,
+            29.7
+          ],
+          "bbox_norm": [
+            0.37761,
+            0.62271,
+            0.01519,
+            0.01978
+          ],
+          "source": "yolo11m-obb",
+          "zone": "west",
+          "polygon": [
+            [
+              577.3,
+              963.7
+            ],
+            [
+              589.2,
+              958.4
+            ],
+            [
+              578.3,
+              934.1
+            ],
+            [
+              566.4,
+              939.4
+            ]
+          ]
+        },
+        {
+          "label": "car",
+          "score": 0.142,
+          "bbox": [
+            953.9,
+            969.3,
+            25.7,
+            22.8
+          ],
+          "bbox_norm": [
+            0.63593,
+            0.64619,
+            0.01711,
+            0.0152
+          ],
+          "source": "yolo11m-obb",
+          "zone": "front",
+          "polygon": [
+            [
+              960.5,
+              992.1
+            ],
+            [
+              979.6,
+              982.6
+            ],
+            [
+              972.9,
+              969.3
+            ],
+            [
+              953.9,
+              978.7
+            ]
+          ]
+        },
+        {
+          "label": "car",
+          "score": 0.135,
+          "bbox": [
+            1329.7,
+            745.4,
+            28.2,
+            23.8
+          ],
+          "bbox_norm": [
+            0.88648,
+            0.49693,
+            0.01878,
+            0.01587
+          ],
+          "source": "yolo11m-obb",
+          "zone": "east",
+          "polygon": [
+            [
+              1336.2,
+              769.2
+            ],
+            [
+              1357.9,
+              756.6
+            ],
+            [
+              1351.4,
+              745.4
+            ],
+            [
+              1329.7,
+              758.0
+            ]
+          ]
+        },
+        {
+          "label": "car",
+          "score": 0.131,
+          "bbox": [
+            643.3,
+            550.3,
+            25.4,
+            32.5
+          ],
+          "bbox_norm": [
+            0.42888,
+            0.36683,
+            0.0169,
+            0.02167
+          ],
+          "source": "yolo11m-obb",
+          "zone": "west",
+          "polygon": [
+            [
+              655.2,
+              582.8
+            ],
+            [
+              668.7,
+              576.7
+            ],
+            [
+              656.7,
+              550.3
+            ],
+            [
+              643.3,
+              556.3
+            ]
+          ]
+        },
+        {
+          "label": "car",
+          "score": 0.123,
+          "bbox": [
+            1245.2,
+            580.8,
+            25.0,
+            32.4
+          ],
+          "bbox_norm": [
+            0.83011,
+            0.38719,
+            0.01667,
+            0.02159
+          ],
+          "source": "yolo11m-obb",
+          "zone": "east",
+          "polygon": [
+            [
+              1257.5,
+              613.2
+            ],
+            [
+              1270.2,
+              607.3
+            ],
+            [
+              1257.8,
+              580.8
+            ],
+            [
+              1245.2,
+              586.7
+            ]
+          ]
+        },
+        {
+          "label": "car",
+          "score": 0.12,
+          "bbox": [
+            1137.2,
+            788.8,
+            28.8,
+            24.2
+          ],
+          "bbox_norm": [
+            0.75813,
+            0.52584,
+            0.01921,
+            0.01616
+          ],
+          "source": "yolo11m-obb",
+          "zone": "east",
+          "polygon": [
+            [
+              1143.8,
+              813.0
+            ],
+            [
+              1166.0,
+              801.2
+            ],
+            [
+              1159.4,
+              788.8
+            ],
+            [
+              1137.2,
+              800.6
+            ]
+          ]
+        },
+        {
+          "label": "car",
+          "score": 0.112,
+          "bbox": [
+            202.7,
+            1001.3,
+            34.4,
+            40.9
+          ],
+          "bbox_norm": [
+            0.1351,
+            0.66755,
+            0.02291,
+            0.02726
+          ],
+          "source": "yolo11m-obb",
+          "zone": "west",
+          "polygon": [
+            [
+              223.3,
+              1042.2
+            ],
+            [
+              237.0,
+              1033.4
+            ],
+            [
+              216.3,
+              1001.3
+            ],
+            [
+              202.7,
+              1010.1
+            ]
+          ]
+        },
+        {
+          "label": "car",
+          "score": 0.109,
+          "bbox": [
+            538.2,
+            619.1,
+            25.8,
+            28.2
+          ],
+          "bbox_norm": [
+            0.35882,
+            0.4127,
+            0.01719,
+            0.01878
+          ],
+          "source": "yolo11m-obb",
+          "zone": "west",
+          "polygon": [
+            [
+              552.1,
+              647.2
+            ],
+            [
+              564.0,
+              638.9
+            ],
+            [
+              550.1,
+              619.1
+            ],
+            [
+              538.2,
+              627.4
+            ]
+          ]
+        },
+        {
+          "label": "car",
+          "score": 0.106,
+          "bbox": [
+            1191.0,
+            685.4,
+            31.8,
+            29.3
+          ],
+          "bbox_norm": [
+            0.79397,
+            0.45692,
+            0.02117,
+            0.01954
+          ],
+          "source": "yolo11m-obb",
+          "zone": "east",
+          "polygon": [
+            [
+              1200.4,
+              714.7
+            ],
+            [
+              1222.7,
+              698.0
+            ],
+            [
+              1213.3,
+              685.4
+            ],
+            [
+              1191.0,
+              702.1
+            ]
+          ]
+        },
+        {
+          "label": "car",
+          "score": 0.436,
+          "bbox": [
+            356.3,
+            1091.2,
+            21.9,
+            25.5
+          ],
+          "bbox_norm": [
+            0.23751,
+            0.72746,
+            0.01463,
+            0.01702
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "circulation"
+        },
+        {
+          "label": "car",
+          "score": 0.426,
+          "bbox": [
+            175.8,
+            638.0,
+            23.4,
+            31.8
+          ],
+          "bbox_norm": [
+            0.11722,
+            0.42533,
+            0.01563,
+            0.02118
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "west"
+        },
+        {
+          "label": "car",
+          "score": 0.418,
+          "bbox": [
+            520.8,
+            1367.9,
+            33.7,
+            35.8
+          ],
+          "bbox_norm": [
+            0.34722,
+            0.91194,
+            0.02249,
+            0.02386
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "south"
+        },
+        {
+          "label": "car",
+          "score": 0.415,
+          "bbox": [
+            447.6,
+            1131.7,
+            20.1,
+            19.4
+          ],
+          "bbox_norm": [
+            0.2984,
+            0.75447,
+            0.01341,
+            0.01294
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "south"
+        },
+        {
+          "label": "car",
+          "score": 0.409,
+          "bbox": [
+            1317.3,
+            597.9,
+            61.0,
+            41.3
+          ],
+          "bbox_norm": [
+            0.87817,
+            0.39857,
+            0.0407,
+            0.0275
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "east"
+        },
+        {
+          "label": "car",
+          "score": 0.403,
+          "bbox": [
+            653.3,
+            516.6,
+            20.8,
+            24.7
+          ],
+          "bbox_norm": [
+            0.43556,
+            0.34437,
+            0.01388,
+            0.0165
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "west"
+        },
+        {
+          "label": "car",
+          "score": 0.4,
+          "bbox": [
+            873.2,
+            914.8,
+            29.6,
+            31.6
+          ],
+          "bbox_norm": [
+            0.58211,
+            0.60987,
+            0.01973,
+            0.02105
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "front"
+        },
+        {
+          "label": "truck/van",
+          "score": 0.393,
+          "bbox": [
+            1244.2,
+            863.1,
+            41.2,
+            40.7
+          ],
+          "bbox_norm": [
+            0.82946,
+            0.57538,
+            0.02746,
+            0.02713
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "east"
+        },
+        {
+          "label": "car",
+          "score": 0.388,
+          "bbox": [
+            635.2,
+            573.9,
+            17.8,
+            17.9
+          ],
+          "bbox_norm": [
+            0.42345,
+            0.38262,
+            0.01186,
+            0.01195
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "west"
+        },
+        {
+          "label": "car",
+          "score": 0.387,
+          "bbox": [
+            1018.2,
+            966.4,
+            30.9,
+            30.2
+          ],
+          "bbox_norm": [
+            0.67879,
+            0.64425,
+            0.02059,
+            0.02013
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "front"
+        },
+        {
+          "label": "car",
+          "score": 0.379,
+          "bbox": [
+            574.6,
+            464.8,
+            15.0,
+            19.7
+          ],
+          "bbox_norm": [
+            0.38309,
+            0.30986,
+            0.01001,
+            0.01315
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "circulation"
+        },
+        {
+          "label": "car",
+          "score": 0.379,
+          "bbox": [
+            634.5,
+            1229.7,
+            42.7,
+            37.1
+          ],
+          "bbox_norm": [
+            0.42302,
+            0.81981,
+            0.02848,
+            0.02473
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "south"
+        },
+        {
+          "label": "car",
+          "score": 0.376,
+          "bbox": [
+            1059.3,
+            879.1,
+            25.7,
+            20.6
+          ],
+          "bbox_norm": [
+            0.70618,
+            0.58607,
+            0.01715,
+            0.01375
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "front"
+        },
+        {
+          "label": "car",
+          "score": 0.373,
+          "bbox": [
+            381.4,
+            619.2,
+            21.9,
+            28.9
+          ],
+          "bbox_norm": [
+            0.25426,
+            0.41279,
+            0.01462,
+            0.01923
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "west"
+        },
+        {
+          "label": "car",
+          "score": 0.372,
+          "bbox": [
+            436.4,
+            911.6,
+            23.2,
+            25.1
+          ],
+          "bbox_norm": [
+            0.29095,
+            0.60772,
+            0.01547,
+            0.0167
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "west"
+        },
+        {
+          "label": "car",
+          "score": 0.371,
+          "bbox": [
+            652.8,
+            1016.4,
+            22.6,
+            20.3
+          ],
+          "bbox_norm": [
+            0.43517,
+            0.67758,
+            0.01504,
+            0.01353
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "circulation"
+        },
+        {
+          "label": "car",
+          "score": 0.371,
+          "bbox": [
+            358.9,
+            520.8,
+            28.3,
+            29.3
+          ],
+          "bbox_norm": [
+            0.23927,
+            0.34723,
+            0.01885,
+            0.01955
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "west"
+        },
+        {
+          "label": "car",
+          "score": 0.37,
+          "bbox": [
+            288.1,
+            1072.4,
+            39.8,
+            42.9
+          ],
+          "bbox_norm": [
+            0.19205,
+            0.71493,
+            0.02653,
+            0.0286
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "west"
+        },
+        {
+          "label": "car",
+          "score": 0.37,
+          "bbox": [
+            682.5,
+            611.8,
+            14.6,
+            16.2
+          ],
+          "bbox_norm": [
+            0.45503,
+            0.40786,
+            0.00971,
+            0.01082
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "west"
+        },
+        {
+          "label": "car",
+          "score": 0.368,
+          "bbox": [
+            744.8,
+            1225.5,
+            21.2,
+            25.8
+          ],
+          "bbox_norm": [
+            0.49655,
+            0.81703,
+            0.01411,
+            0.01718
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "south"
+        },
+        {
+          "label": "car",
+          "score": 0.367,
+          "bbox": [
+            1305.0,
+            564.5,
+            16.9,
+            14.0
+          ],
+          "bbox_norm": [
+            0.87,
+            0.37636,
+            0.01129,
+            0.00935
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "circulation"
+        },
+        {
+          "label": "car",
+          "score": 0.367,
+          "bbox": [
+            594.1,
+            497.3,
+            13.8,
+            16.3
+          ],
+          "bbox_norm": [
+            0.39607,
+            0.33154,
+            0.00921,
+            0.01086
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "west"
+        },
+        {
+          "label": "car",
+          "score": 0.363,
+          "bbox": [
+            305.4,
+            456.5,
+            35.8,
+            32.1
+          ],
+          "bbox_norm": [
+            0.2036,
+            0.30436,
+            0.02388,
+            0.02142
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "circulation"
+        },
+        {
+          "label": "car",
+          "score": 0.36,
+          "bbox": [
+            967.0,
+            1044.0,
+            20.9,
+            20.2
+          ],
+          "bbox_norm": [
+            0.64468,
+            0.696,
+            0.01396,
+            0.01344
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "front"
+        },
+        {
+          "label": "car",
+          "score": 0.357,
+          "bbox": [
+            887.0,
+            1027.1,
+            22.8,
+            24.1
+          ],
+          "bbox_norm": [
+            0.59133,
+            0.68475,
+            0.01517,
+            0.01609
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "front"
+        },
+        {
+          "label": "car",
+          "score": 0.357,
+          "bbox": [
+            782.9,
+            1135.8,
+            35.2,
+            33.4
+          ],
+          "bbox_norm": [
+            0.52193,
+            0.75717,
+            0.02345,
+            0.02226
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "south"
+        },
+        {
+          "label": "car",
+          "score": 0.352,
+          "bbox": [
+            713.8,
+            1194.0,
+            32.6,
+            29.4
+          ],
+          "bbox_norm": [
+            0.47584,
+            0.796,
+            0.02173,
+            0.01959
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "south"
+        },
+        {
+          "label": "car",
+          "score": 0.346,
+          "bbox": [
+            1154.2,
+            860.5,
+            29.0,
+            21.0
+          ],
+          "bbox_norm": [
+            0.76947,
+            0.57365,
+            0.01935,
+            0.01403
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "east"
+        },
+        {
+          "label": "car",
+          "score": 0.343,
+          "bbox": [
+            896.8,
+            1102.3,
+            18.7,
+            24.8
+          ],
+          "bbox_norm": [
+            0.59789,
+            0.73484,
+            0.01248,
+            0.01657
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "circulation"
+        },
+        {
+          "label": "car",
+          "score": 0.338,
+          "bbox": [
+            648.1,
+            883.6,
+            32.6,
+            27.4
+          ],
+          "bbox_norm": [
+            0.43205,
+            0.58905,
+            0.02174,
+            0.01824
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "west"
+        },
+        {
+          "label": "car",
+          "score": 0.333,
+          "bbox": [
+            680.5,
+            722.3,
+            14.4,
+            16.7
+          ],
+          "bbox_norm": [
+            0.45365,
+            0.48151,
+            0.00961,
+            0.01113
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "west"
+        },
+        {
+          "label": "car",
+          "score": 0.333,
+          "bbox": [
+            1015.5,
+            1079.8,
+            15.1,
+            15.0
+          ],
+          "bbox_norm": [
+            0.677,
+            0.71986,
+            0.01006,
+            0.01001
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "circulation"
+        },
+        {
+          "label": "car",
+          "score": 0.332,
+          "bbox": [
+            340.8,
+            861.5,
+            17.0,
+            17.1
+          ],
+          "bbox_norm": [
+            0.22721,
+            0.57432,
+            0.01137,
+            0.01138
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "west"
+        },
+        {
+          "label": "car",
+          "score": 0.332,
+          "bbox": [
+            368.3,
+            727.2,
+            25.3,
+            29.2
+          ],
+          "bbox_norm": [
+            0.2455,
+            0.48483,
+            0.01687,
+            0.01949
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "west"
+        },
+        {
+          "label": "car",
+          "score": 0.331,
+          "bbox": [
+            210.1,
+            923.8,
+            12.3,
+            14.1
+          ],
+          "bbox_norm": [
+            0.14007,
+            0.61584,
+            0.00817,
+            0.00943
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "west"
+        },
+        {
+          "label": "car",
+          "score": 0.331,
+          "bbox": [
+            592.8,
+            954.4,
+            21.9,
+            23.4
+          ],
+          "bbox_norm": [
+            0.39521,
+            0.63624,
+            0.01459,
+            0.0156
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "west"
+        },
+        {
+          "label": "car",
+          "score": 0.328,
+          "bbox": [
+            688.7,
+            976.6,
+            17.4,
+            15.4
+          ],
+          "bbox_norm": [
+            0.45911,
+            0.65106,
+            0.01159,
+            0.01023
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "west"
+        },
+        {
+          "label": "car",
+          "score": 0.325,
+          "bbox": [
+            674.0,
+            1341.4,
+            16.1,
+            16.2
+          ],
+          "bbox_norm": [
+            0.44932,
+            0.89426,
+            0.01074,
+            0.01082
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "south"
+        },
+        {
+          "label": "car",
+          "score": 0.324,
+          "bbox": [
+            1384.8,
+            551.3,
+            38.4,
+            39.7
+          ],
+          "bbox_norm": [
+            0.9232,
+            0.36757,
+            0.02559,
+            0.02649
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "circulation"
+        },
+        {
+          "label": "car",
+          "score": 0.319,
+          "bbox": [
+            472.8,
+            964.2,
+            15.9,
+            19.3
+          ],
+          "bbox_norm": [
+            0.31517,
+            0.64283,
+            0.01063,
+            0.01287
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "west"
+        },
+        {
+          "label": "car",
+          "score": 0.316,
+          "bbox": [
+            1116.6,
+            679.4,
+            16.9,
+            19.6
+          ],
+          "bbox_norm": [
+            0.74438,
+            0.45292,
+            0.01126,
+            0.01304
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "east"
+        },
+        {
+          "label": "truck/van",
+          "score": 0.314,
+          "bbox": [
+            590.0,
+            451.6,
+            49.8,
+            55.5
+          ],
+          "bbox_norm": [
+            0.39331,
+            0.30107,
+            0.03323,
+            0.03698
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "circulation"
+        },
+        {
+          "label": "car",
+          "score": 0.314,
+          "bbox": [
+            1089.6,
+            862.8,
+            19.4,
+            16.1
+          ],
+          "bbox_norm": [
+            0.72642,
+            0.57517,
+            0.01296,
+            0.01072
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "circulation"
+        },
+        {
+          "label": "car",
+          "score": 0.314,
+          "bbox": [
+            732.8,
+            997.9,
+            25.3,
+            14.0
+          ],
+          "bbox_norm": [
+            0.48853,
+            0.66525,
+            0.01687,
+            0.00931
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "circulation"
+        },
+        {
+          "label": "car",
+          "score": 0.313,
+          "bbox": [
+            843.4,
+            1115.3,
+            20.1,
+            22.4
+          ],
+          "bbox_norm": [
+            0.5623,
+            0.74351,
+            0.01341,
+            0.01492
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "circulation"
+        },
+        {
+          "label": "car",
+          "score": 0.312,
+          "bbox": [
+            631.3,
+            796.2,
+            16.6,
+            19.0
+          ],
+          "bbox_norm": [
+            0.42087,
+            0.53082,
+            0.01107,
+            0.01265
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "west"
+        },
+        {
+          "label": "car",
+          "score": 0.311,
+          "bbox": [
+            1040.0,
+            789.6,
+            35.9,
+            39.0
+          ],
+          "bbox_norm": [
+            0.69331,
+            0.52638,
+            0.02394,
+            0.026
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "circulation"
+        },
+        {
+          "label": "car",
+          "score": 0.31,
+          "bbox": [
+            741.5,
+            1069.3,
+            26.5,
+            33.2
+          ],
+          "bbox_norm": [
+            0.49433,
+            0.71288,
+            0.01769,
+            0.02212
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "circulation"
+        },
+        {
+          "label": "car",
+          "score": 0.309,
+          "bbox": [
+            1413.8,
+            595.8,
+            37.4,
+            38.1
+          ],
+          "bbox_norm": [
+            0.94253,
+            0.39723,
+            0.02493,
+            0.02537
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "east"
+        },
+        {
+          "label": "car",
+          "score": 0.308,
+          "bbox": [
+            846.6,
+            971.3,
+            29.0,
+            23.7
+          ],
+          "bbox_norm": [
+            0.56439,
+            0.64756,
+            0.01931,
+            0.01581
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "front"
+        },
+        {
+          "label": "car",
+          "score": 0.306,
+          "bbox": [
+            850.5,
+            1132.4,
+            16.4,
+            15.2
+          ],
+          "bbox_norm": [
+            0.567,
+            0.75495,
+            0.01091,
+            0.01016
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "circulation"
+        },
+        {
+          "label": "car",
+          "score": 0.305,
+          "bbox": [
+            485.4,
+            877.8,
+            28.5,
+            23.5
+          ],
+          "bbox_norm": [
+            0.32363,
+            0.5852,
+            0.01901,
+            0.01567
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "west"
+        },
+        {
+          "label": "car",
+          "score": 0.303,
+          "bbox": [
+            652.1,
+            917.6,
+            14.4,
+            14.6
+          ],
+          "bbox_norm": [
+            0.43471,
+            0.61174,
+            0.00957,
+            0.00971
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "west"
+        },
+        {
+          "label": "car",
+          "score": 0.303,
+          "bbox": [
+            1322.2,
+            569.1,
+            21.6,
+            19.1
+          ],
+          "bbox_norm": [
+            0.88145,
+            0.37938,
+            0.01441,
+            0.01273
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "circulation"
+        },
+        {
+          "label": "car",
+          "score": 0.3,
+          "bbox": [
+            1441.0,
+            890.7,
+            18.4,
+            21.9
+          ],
+          "bbox_norm": [
+            0.96064,
+            0.5938,
+            0.01224,
+            0.01458
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "east"
+        },
+        {
+          "label": "car",
+          "score": 0.297,
+          "bbox": [
+            1102.5,
+            786.8,
+            17.6,
+            18.5
+          ],
+          "bbox_norm": [
+            0.73501,
+            0.52454,
+            0.0117,
+            0.01236
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "east"
+        },
+        {
+          "label": "car",
+          "score": 0.297,
+          "bbox": [
+            982.2,
+            908.6,
+            23.3,
+            20.0
+          ],
+          "bbox_norm": [
+            0.65479,
+            0.60576,
+            0.01556,
+            0.01331
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "front"
+        },
+        {
+          "label": "car",
+          "score": 0.295,
+          "bbox": [
+            247.0,
+            490.9,
+            43.3,
+            36.3
+          ],
+          "bbox_norm": [
+            0.16467,
+            0.32727,
+            0.02886,
+            0.02421
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "west"
+        },
+        {
+          "label": "truck/van",
+          "score": 0.293,
+          "bbox": [
+            545.6,
+            679.5,
+            39.6,
+            56.7
+          ],
+          "bbox_norm": [
+            0.36372,
+            0.453,
+            0.0264,
+            0.03778
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "west"
+        },
+        {
+          "label": "car",
+          "score": 0.291,
+          "bbox": [
+            425.3,
+            915.9,
+            24.0,
+            29.8
+          ],
+          "bbox_norm": [
+            0.28354,
+            0.61058,
+            0.01597,
+            0.01985
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "west"
+        },
+        {
+          "label": "car",
+          "score": 0.291,
+          "bbox": [
+            1083.5,
+            907.0,
+            25.5,
+            18.5
+          ],
+          "bbox_norm": [
+            0.72231,
+            0.60465,
+            0.01699,
+            0.01231
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "circulation"
+        },
+        {
+          "label": "car",
+          "score": 0.289,
+          "bbox": [
+            837.1,
+            989.3,
+            12.2,
+            16.3
+          ],
+          "bbox_norm": [
+            0.55808,
+            0.65952,
+            0.00813,
+            0.01088
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "front"
+        },
+        {
+          "label": "car",
+          "score": 0.289,
+          "bbox": [
+            473.5,
+            765.8,
+            21.3,
+            23.1
+          ],
+          "bbox_norm": [
+            0.31564,
+            0.51055,
+            0.01419,
+            0.01538
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "west"
+        },
+        {
+          "label": "car",
+          "score": 0.287,
+          "bbox": [
+            1236.1,
+            888.7,
+            13.9,
+            17.1
+          ],
+          "bbox_norm": [
+            0.82406,
+            0.59244,
+            0.00927,
+            0.0114
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "east"
+        },
+        {
+          "label": "car",
+          "score": 0.286,
+          "bbox": [
+            723.5,
+            1255.8,
+            25.0,
+            22.6
+          ],
+          "bbox_norm": [
+            0.48234,
+            0.83722,
+            0.01665,
+            0.01507
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "south"
+        },
+        {
+          "label": "car",
+          "score": 0.285,
+          "bbox": [
+            980.9,
+            861.1,
+            27.6,
+            22.0
+          ],
+          "bbox_norm": [
+            0.65391,
+            0.5741,
+            0.01838,
+            0.01466
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "front"
+        },
+        {
+          "label": "car",
+          "score": 0.28,
+          "bbox": [
+            410.0,
+            937.5,
+            18.0,
+            19.5
+          ],
+          "bbox_norm": [
+            0.27332,
+            0.62502,
+            0.01198,
+            0.013
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "west"
+        },
+        {
+          "label": "car",
+          "score": 0.279,
+          "bbox": [
+            525.4,
+            859.9,
+            37.6,
+            23.3
+          ],
+          "bbox_norm": [
+            0.35027,
+            0.57324,
+            0.02503,
+            0.01551
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "west"
+        },
+        {
+          "label": "car",
+          "score": 0.278,
+          "bbox": [
+            412.2,
+            717.0,
+            15.1,
+            15.9
+          ],
+          "bbox_norm": [
+            0.27481,
+            0.47802,
+            0.01009,
+            0.01058
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "west"
+        },
+        {
+          "label": "car",
+          "score": 0.276,
+          "bbox": [
+            503.0,
+            714.8,
+            22.9,
+            28.2
+          ],
+          "bbox_norm": [
+            0.33536,
+            0.47653,
+            0.01528,
+            0.01881
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "west"
+        },
+        {
+          "label": "car",
+          "score": 0.275,
+          "bbox": [
+            902.2,
+            1095.7,
+            12.7,
+            13.4
+          ],
+          "bbox_norm": [
+            0.60145,
+            0.73046,
+            0.00845,
+            0.00896
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "circulation"
+        },
+        {
+          "label": "car",
+          "score": 0.274,
+          "bbox": [
+            357.2,
+            639.6,
+            25.5,
+            25.6
+          ],
+          "bbox_norm": [
+            0.23812,
+            0.42639,
+            0.01697,
+            0.01704
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "west"
+        },
+        {
+          "label": "car",
+          "score": 0.271,
+          "bbox": [
+            623.7,
+            902.7,
+            25.4,
+            25.8
+          ],
+          "bbox_norm": [
+            0.41579,
+            0.60177,
+            0.0169,
+            0.01719
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "west"
+        },
+        {
+          "label": "car",
+          "score": 0.27,
+          "bbox": [
+            400.4,
+            1050.6,
+            13.4,
+            15.5
+          ],
+          "bbox_norm": [
+            0.26695,
+            0.7004,
+            0.00895,
+            0.01035
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "west"
+        },
+        {
+          "label": "car",
+          "score": 0.267,
+          "bbox": [
+            1431.5,
+            621.6,
+            26.0,
+            17.9
+          ],
+          "bbox_norm": [
+            0.95433,
+            0.41439,
+            0.01731,
+            0.01193
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "east"
+        },
+        {
+          "label": "car",
+          "score": 0.266,
+          "bbox": [
+            665.5,
+            887.8,
+            16.2,
+            16.2
+          ],
+          "bbox_norm": [
+            0.44366,
+            0.59186,
+            0.01081,
+            0.01083
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "west"
+        },
+        {
+          "label": "car",
+          "score": 0.266,
+          "bbox": [
+            646.9,
+            787.4,
+            15.7,
+            16.7
+          ],
+          "bbox_norm": [
+            0.43127,
+            0.52492,
+            0.01045,
+            0.01113
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "west"
+        },
+        {
+          "label": "car",
+          "score": 0.264,
+          "bbox": [
+            1058.6,
+            861.1,
+            51.6,
+            39.6
+          ],
+          "bbox_norm": [
+            0.70572,
+            0.57406,
+            0.03442,
+            0.02643
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "circulation"
+        },
+        {
+          "label": "car",
+          "score": 0.263,
+          "bbox": [
+            515.7,
+            1030.2,
+            22.5,
+            28.8
+          ],
+          "bbox_norm": [
+            0.34378,
+            0.68679,
+            0.01497,
+            0.01918
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "west"
+        },
+        {
+          "label": "car",
+          "score": 0.26,
+          "bbox": [
+            892.3,
+            909.7,
+            21.5,
+            27.5
+          ],
+          "bbox_norm": [
+            0.59484,
+            0.60646,
+            0.01435,
+            0.01836
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "front"
+        },
+        {
+          "label": "car",
+          "score": 0.26,
+          "bbox": [
+            536.5,
+            739.0,
+            15.6,
+            18.7
+          ],
+          "bbox_norm": [
+            0.3577,
+            0.49268,
+            0.01041,
+            0.01247
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "west"
+        },
+        {
+          "label": "car",
+          "score": 0.259,
+          "bbox": [
+            503.4,
+            761.9,
+            15.9,
+            16.6
+          ],
+          "bbox_norm": [
+            0.33563,
+            0.50793,
+            0.01059,
+            0.01108
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "west"
+        },
+        {
+          "label": "car",
+          "score": 0.257,
+          "bbox": [
+            1065.5,
+            839.1,
+            25.0,
+            21.6
+          ],
+          "bbox_norm": [
+            0.71035,
+            0.55943,
+            0.01667,
+            0.01441
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "circulation"
+        },
+        {
+          "label": "car",
+          "score": 0.256,
+          "bbox": [
+            431.4,
+            652.4,
+            22.6,
+            27.0
+          ],
+          "bbox_norm": [
+            0.28759,
+            0.43496,
+            0.01507,
+            0.01802
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "west"
+        },
+        {
+          "label": "car",
+          "score": 0.256,
+          "bbox": [
+            675.9,
+            1377.3,
+            17.0,
+            21.9
+          ],
+          "bbox_norm": [
+            0.45062,
+            0.91818,
+            0.01132,
+            0.01462
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "south"
+        },
+        {
+          "label": "car",
+          "score": 0.256,
+          "bbox": [
+            1230.1,
+            915.4,
+            17.3,
+            15.7
+          ],
+          "bbox_norm": [
+            0.82007,
+            0.6103,
+            0.01151,
+            0.01044
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "east"
+        },
+        {
+          "label": "car",
+          "score": 0.254,
+          "bbox": [
+            525.5,
+            869.9,
+            13.1,
+            14.2
+          ],
+          "bbox_norm": [
+            0.35032,
+            0.5799,
+            0.00872,
+            0.00946
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "west"
+        },
+        {
+          "label": "car",
+          "score": 0.253,
+          "bbox": [
+            504.2,
+            812.9,
+            23.1,
+            27.6
+          ],
+          "bbox_norm": [
+            0.33611,
+            0.54191,
+            0.01539,
+            0.01841
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "west"
+        },
+        {
+          "label": "car",
+          "score": 0.253,
+          "bbox": [
+            165.3,
+            617.6,
+            13.3,
+            14.1
+          ],
+          "bbox_norm": [
+            0.11022,
+            0.41174,
+            0.00887,
+            0.00938
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "circulation"
+        },
+        {
+          "label": "car",
+          "score": 0.253,
+          "bbox": [
+            945.3,
+            860.0,
+            21.4,
+            13.7
+          ],
+          "bbox_norm": [
+            0.63018,
+            0.57332,
+            0.01428,
+            0.00915
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "front"
+        },
+        {
+          "label": "car",
+          "score": 0.253,
+          "bbox": [
+            554.8,
+            792.3,
+            15.7,
+            19.1
+          ],
+          "bbox_norm": [
+            0.3699,
+            0.52817,
+            0.01045,
+            0.01276
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "west"
+        },
+        {
+          "label": "car",
+          "score": 0.252,
+          "bbox": [
+            691.7,
+            583.4,
+            21.3,
+            29.7
+          ],
+          "bbox_norm": [
+            0.46111,
+            0.38895,
+            0.01418,
+            0.01982
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "west"
+        },
+        {
+          "label": "car",
+          "score": 0.251,
+          "bbox": [
+            1013.4,
+            805.9,
+            27.9,
+            22.0
+          ],
+          "bbox_norm": [
+            0.67558,
+            0.53728,
+            0.01859,
+            0.01465
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "circulation"
+        },
+        {
+          "label": "car",
+          "score": 0.25,
+          "bbox": [
+            330.9,
+            1127.8,
+            28.0,
+            23.1
+          ],
+          "bbox_norm": [
+            0.22058,
+            0.75187,
+            0.01869,
+            0.01537
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "south"
+        },
+        {
+          "label": "car",
+          "score": 0.25,
+          "bbox": [
+            474.0,
+            984.8,
+            11.7,
+            11.8
+          ],
+          "bbox_norm": [
+            0.31598,
+            0.65653,
+            0.0078,
+            0.00789
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "west"
+        },
+        {
+          "label": "car",
+          "score": 0.247,
+          "bbox": [
+            615.1,
+            886.2,
+            14.8,
+            17.9
+          ],
+          "bbox_norm": [
+            0.41008,
+            0.5908,
+            0.00987,
+            0.01193
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "west"
+        },
+        {
+          "label": "car",
+          "score": 0.247,
+          "bbox": [
+            1407.3,
+            580.0,
+            25.0,
+            23.0
+          ],
+          "bbox_norm": [
+            0.93818,
+            0.38669,
+            0.0167,
+            0.01536
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "east"
+        },
+        {
+          "label": "car",
+          "score": 0.247,
+          "bbox": [
+            568.2,
+            720.6,
+            18.0,
+            15.7
+          ],
+          "bbox_norm": [
+            0.37883,
+            0.48042,
+            0.01199,
+            0.01047
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "west"
+        },
+        {
+          "label": "car",
+          "score": 0.246,
+          "bbox": [
+            592.4,
+            1298.8,
+            16.8,
+            16.2
+          ],
+          "bbox_norm": [
+            0.39494,
+            0.86584,
+            0.01118,
+            0.01078
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "south"
+        },
+        {
+          "label": "car",
+          "score": 0.244,
+          "bbox": [
+            578.1,
+            1167.4,
+            10.1,
+            13.0
+          ],
+          "bbox_norm": [
+            0.38542,
+            0.77825,
+            0.00676,
+            0.00868
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "south"
+        },
+        {
+          "label": "car",
+          "score": 0.243,
+          "bbox": [
+            1258.9,
+            874.3,
+            16.2,
+            17.6
+          ],
+          "bbox_norm": [
+            0.83925,
+            0.58286,
+            0.01079,
+            0.0117
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "east"
+        },
+        {
+          "label": "car",
+          "score": 0.24,
+          "bbox": [
+            473.6,
+            661.4,
+            18.7,
+            24.9
+          ],
+          "bbox_norm": [
+            0.31575,
+            0.4409,
+            0.01245,
+            0.01663
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "west"
+        },
+        {
+          "label": "car",
+          "score": 0.239,
+          "bbox": [
+            431.0,
+            1018.2,
+            8.3,
+            10.5
+          ],
+          "bbox_norm": [
+            0.28733,
+            0.67879,
+            0.00551,
+            0.00698
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "west"
+        },
+        {
+          "label": "car",
+          "score": 0.237,
+          "bbox": [
+            589.6,
+            821.3,
+            18.1,
+            17.2
+          ],
+          "bbox_norm": [
+            0.39307,
+            0.54753,
+            0.01206,
+            0.01147
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "west"
+        },
+        {
+          "label": "car",
+          "score": 0.237,
+          "bbox": [
+            1338.5,
+            824.4,
+            18.3,
+            20.6
+          ],
+          "bbox_norm": [
+            0.89237,
+            0.5496,
+            0.01221,
+            0.01372
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "east"
+        },
+        {
+          "label": "car",
+          "score": 0.237,
+          "bbox": [
+            599.1,
+            805.9,
+            21.6,
+            22.8
+          ],
+          "bbox_norm": [
+            0.39937,
+            0.53724,
+            0.01441,
+            0.01519
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "west"
+        },
+        {
+          "label": "truck/van",
+          "score": 0.237,
+          "bbox": [
+            448.7,
+            1047.0,
+            49.1,
+            54.1
+          ],
+          "bbox_norm": [
+            0.29912,
+            0.69801,
+            0.03275,
+            0.03608
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "west"
+        },
+        {
+          "label": "car",
+          "score": 0.234,
+          "bbox": [
+            664.5,
+            1166.0,
+            22.9,
+            18.6
+          ],
+          "bbox_norm": [
+            0.443,
+            0.77731,
+            0.01528,
+            0.01242
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "south"
+        },
+        {
+          "label": "car",
+          "score": 0.231,
+          "bbox": [
+            999.5,
+            879.9,
+            22.5,
+            18.5
+          ],
+          "bbox_norm": [
+            0.66635,
+            0.58659,
+            0.01501,
+            0.01231
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "front"
+        },
+        {
+          "label": "car",
+          "score": 0.23,
+          "bbox": [
+            292.5,
+            1134.1,
+            17.7,
+            23.9
+          ],
+          "bbox_norm": [
+            0.19503,
+            0.75604,
+            0.01179,
+            0.01593
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "circulation"
+        },
+        {
+          "label": "car",
+          "score": 0.23,
+          "bbox": [
+            644.1,
+            1291.6,
+            25.3,
+            27.1
+          ],
+          "bbox_norm": [
+            0.42942,
+            0.86105,
+            0.01688,
+            0.01808
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "south"
+        },
+        {
+          "label": "car",
+          "score": 0.229,
+          "bbox": [
+            523.8,
+            963.8,
+            19.3,
+            24.6
+          ],
+          "bbox_norm": [
+            0.34919,
+            0.64254,
+            0.01284,
+            0.01638
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "west"
+        },
+        {
+          "label": "car",
+          "score": 0.227,
+          "bbox": [
+            251.5,
+            1016.5,
+            26.7,
+            19.4
+          ],
+          "bbox_norm": [
+            0.16766,
+            0.67769,
+            0.01783,
+            0.01294
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "west"
+        },
+        {
+          "label": "car",
+          "score": 0.224,
+          "bbox": [
+            384.0,
+            1023.8,
+            29.6,
+            42.2
+          ],
+          "bbox_norm": [
+            0.256,
+            0.68252,
+            0.01975,
+            0.02816
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "west"
+        },
+        {
+          "label": "car",
+          "score": 0.222,
+          "bbox": [
+            1112.9,
+            745.5,
+            22.7,
+            21.1
+          ],
+          "bbox_norm": [
+            0.74192,
+            0.49697,
+            0.01512,
+            0.01408
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "east"
+        },
+        {
+          "label": "car",
+          "score": 0.216,
+          "bbox": [
+            538.4,
+            940.2,
+            11.7,
+            15.2
+          ],
+          "bbox_norm": [
+            0.35892,
+            0.6268,
+            0.00778,
+            0.01012
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "west"
+        },
+        {
+          "label": "car",
+          "score": 0.215,
+          "bbox": [
+            965.1,
+            990.7,
+            26.1,
+            26.8
+          ],
+          "bbox_norm": [
+            0.6434,
+            0.66048,
+            0.01739,
+            0.0179
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "front"
+        },
+        {
+          "label": "car",
+          "score": 0.214,
+          "bbox": [
+            573.0,
+            817.5,
+            22.8,
+            27.8
+          ],
+          "bbox_norm": [
+            0.38198,
+            0.54499,
+            0.01519,
+            0.01853
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "west"
+        },
+        {
+          "label": "car",
+          "score": 0.214,
+          "bbox": [
+            1086.3,
+            756.6,
+            51.3,
+            45.0
+          ],
+          "bbox_norm": [
+            0.72423,
+            0.50442,
+            0.03422,
+            0.03
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "east"
+        },
+        {
+          "label": "car",
+          "score": 0.214,
+          "bbox": [
+            570.4,
+            1285.7,
+            36.8,
+            30.9
+          ],
+          "bbox_norm": [
+            0.38027,
+            0.85713,
+            0.02456,
+            0.0206
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "south"
+        },
+        {
+          "label": "car",
+          "score": 0.213,
+          "bbox": [
+            550.2,
+            1409.2,
+            28.7,
+            30.5
+          ],
+          "bbox_norm": [
+            0.36677,
+            0.93948,
+            0.01911,
+            0.02034
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "south"
+        },
+        {
+          "label": "car",
+          "score": 0.212,
+          "bbox": [
+            1048.7,
+            948.1,
+            17.8,
+            17.5
+          ],
+          "bbox_norm": [
+            0.69911,
+            0.63208,
+            0.01185,
+            0.01167
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "front"
+        },
+        {
+          "label": "car",
+          "score": 0.208,
+          "bbox": [
+            476.0,
+            795.9,
+            24.4,
+            25.0
+          ],
+          "bbox_norm": [
+            0.31732,
+            0.53061,
+            0.01626,
+            0.01665
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "west"
+        },
+        {
+          "label": "car",
+          "score": 0.206,
+          "bbox": [
+            527.9,
+            975.2,
+            10.0,
+            12.2
+          ],
+          "bbox_norm": [
+            0.35194,
+            0.65011,
+            0.00668,
+            0.00814
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "west"
+        },
+        {
+          "label": "car",
+          "score": 0.205,
+          "bbox": [
+            1112.0,
+            766.5,
+            27.3,
+            25.5
+          ],
+          "bbox_norm": [
+            0.74131,
+            0.51101,
+            0.01819,
+            0.017
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "east"
+        },
+        {
+          "label": "car",
+          "score": 0.205,
+          "bbox": [
+            170.4,
+            710.3,
+            32.5,
+            34.5
+          ],
+          "bbox_norm": [
+            0.11358,
+            0.47354,
+            0.02168,
+            0.02301
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "west"
+        },
+        {
+          "label": "car",
+          "score": 0.204,
+          "bbox": [
+            584.7,
+            481.4,
+            23.6,
+            32.1
+          ],
+          "bbox_norm": [
+            0.3898,
+            0.32095,
+            0.01573,
+            0.02142
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "west"
+        },
+        {
+          "label": "car",
+          "score": 0.203,
+          "bbox": [
+            554.4,
+            915.4,
+            18.0,
+            20.3
+          ],
+          "bbox_norm": [
+            0.36962,
+            0.6103,
+            0.01199,
+            0.01352
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "west"
+        },
+        {
+          "label": "car",
+          "score": 0.203,
+          "bbox": [
+            1373.0,
+            794.4,
+            39.7,
+            27.0
+          ],
+          "bbox_norm": [
+            0.91536,
+            0.52961,
+            0.02648,
+            0.01803
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "east"
+        },
+        {
+          "label": "car",
+          "score": 0.202,
+          "bbox": [
+            1392.9,
+            791.2,
+            21.3,
+            19.3
+          ],
+          "bbox_norm": [
+            0.92862,
+            0.52747,
+            0.01422,
+            0.01287
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "east"
+        },
+        {
+          "label": "truck/van",
+          "score": 0.2,
+          "bbox": [
+            236.1,
+            1100.8,
+            62.0,
+            50.0
+          ],
+          "bbox_norm": [
+            0.15739,
+            0.73386,
+            0.04132,
+            0.03336
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "circulation"
+        },
+        {
+          "label": "car",
+          "score": 0.2,
+          "bbox": [
+            1312.1,
+            712.1,
+            27.3,
+            27.1
+          ],
+          "bbox_norm": [
+            0.87474,
+            0.47472,
+            0.01822,
+            0.01806
+          ],
+          "source": "owlv2-base-patch16-ensemble",
+          "zone": "east"
+        }
+      ]
+    }
+  ],
+  "attribution": "Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community",
+  "summary": {
+    "site": "ASDA Leyton Mills Superstore",
+    "address": "1 Leyton Mills, Marshall Road, Leyton, London E10 5NH",
+    "lat": 51.55636,
+    "lng": -0.00901,
+    "bounds": {
+      "north": 51.557070801828274,
+      "south": 51.554569299041376,
+      "west": -0.0116729736328125,
+      "east": -0.007649660110473633
+    },
+    "vehicles": 167,
+    "car": 154,
+    "truck_van": 13,
+    "bays": 917,
+    "bays_method": "marked bay-grid area / 30 m\u00b2 per bay incl. aisles and tree islands (25 m\u00b2 overstates this spacious retail-park layout; 30 m\u00b2 also agrees with the published ~890 whole-park figure)",
+    "fill_pct": 18.2,
+    "attribution": "Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community"
+  }
+}
