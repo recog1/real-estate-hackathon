@@ -1,19 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { V7_WORKFLOW_URL } from "@/lib/v7";
 import {
-  V7_DOCS,
-  V7_SUMMARY,
-  V7_WORKFLOW_NAME,
-  V7_WORKFLOW_URL,
-} from "@/lib/v7";
+  COMPETITOR_DOCS,
+  COMPETITOR_V7_PIPELINE,
+  COMPETITOR_V7_WORKFLOW,
+  COMPETITOR_VERDICT,
+  OBSERVED_UTIL_PCT,
+  REPORTED_UTIL_PCT,
+} from "@/lib/competitor-claim";
 
-const PIPELINE = [
-  "5 PDFs",
-  "V7 Go extraction",
-  "Discrepancy flag",
-  "Underwriting finding",
-] as const;
+const PIPELINE = COMPETITOR_V7_PIPELINE;
 
 function V7Mark({ size = "md" }: { size?: "sm" | "md" }) {
   const box = size === "sm" ? "px-1 py-px text-[9px]" : "px-1.5 py-0.5 text-[10px]";
@@ -60,7 +58,7 @@ export function V7WorkflowPanel() {
             <span className="font-sans text-[10px] text-[var(--muted)]">Workflow</span>
           </div>
           <div className="mt-1 text-[13px] leading-snug text-[var(--ink)]">
-            {V7_WORKFLOW_NAME}
+            {COMPETITOR_V7_WORKFLOW}
           </div>
         </div>
         <a
@@ -116,21 +114,20 @@ export function V7WorkflowPanel() {
             Powered by V7 Go
           </span>
         </div>
-        <div className="font-sans text-[9px] text-[var(--muted)]">Occupancy discrepancy</div>
+        <div className="font-sans text-[9px] text-[var(--muted)]">Car park utilisation</div>
         <div className="mt-1 flex items-baseline gap-2 pr-24">
-          <span className="font-sans text-2xl text-[var(--ink)]">
-            {V7_SUMMARY.seller_claimed_occupancy_pct}%
-          </span>
-          <span className="font-sans text-[11px] text-[var(--muted)]">claimed</span>
+          <span className="font-sans text-2xl text-[var(--ink)]">{REPORTED_UTIL_PCT}%</span>
+          <span className="font-sans text-[11px] text-[var(--muted)]">reported</span>
           <span className="text-[var(--muted)]">→</span>
-          <span className="font-sans text-2xl text-[var(--danger)]">
-            {V7_SUMMARY.observed_occupancy_pct}%
-          </span>
+          <span className="font-sans text-2xl text-[var(--danger)]">{OBSERVED_UTIL_PCT}%</span>
           <span className="font-sans text-[11px] text-[var(--muted)]">observed</span>
         </div>
         <div className="mt-1.5 inline-block border border-[var(--danger)]/50 bg-[var(--danger)]/15 px-1.5 py-0.5 font-sans text-[9px] text-[var(--danger)]">
-          {V7_SUMMARY.flag} · {Math.abs(V7_SUMMARY.gap_pts)} pt
+          Traffic understated
         </div>
+        <p className="mt-2 font-sans text-[11px] leading-relaxed text-[var(--danger)]">
+          {COMPETITOR_VERDICT}
+        </p>
       </div>
 
       <div className={done ? "opacity-100 transition-opacity duration-500" : "opacity-40"}>
@@ -139,33 +136,24 @@ export function V7WorkflowPanel() {
           <thead>
             <tr className="border-b border-[var(--line)] font-sans text-[8px] text-[var(--muted)]">
               <th className="py-1 font-normal">Doc</th>
-              <th className="whitespace-nowrap py-1 font-normal">Claimed %</th>
+              <th className="whitespace-nowrap py-1 font-normal">Reported %</th>
               <th className="whitespace-nowrap py-1 font-normal">Observed %</th>
               <th className="whitespace-nowrap py-1 font-normal">Flag</th>
             </tr>
           </thead>
           <tbody>
-            {V7_DOCS.map((row) => {
-              const over = row.discrepancy_flag === "Material overstatement";
-              return (
-                <tr key={row.file} className="border-b border-[var(--line)]/80">
-                  <td className="py-1.5 pr-1 text-[10px] leading-tight">{row.document_type}</td>
-                  <td className="py-1.5 font-sans text-[10px]">{pct(row.seller_claimed_occupancy_pct)}</td>
-                  <td className="py-1.5 font-sans text-[10px]">{pct(row.observed_occupancy_pct)}</td>
+            {COMPETITOR_DOCS.map((row) => (
+                <tr key={row.id} className="border-b border-[var(--line)]/80">
+                  <td className="py-1.5 pr-1 text-[10px] leading-tight">{row.title}</td>
+                  <td className="py-1.5 font-sans text-[10px]">{pct(REPORTED_UTIL_PCT)}</td>
+                  <td className="py-1.5 font-sans text-[10px]">{pct(OBSERVED_UTIL_PCT)}</td>
                   <td className="py-1.5">
-                    <span
-                      className={
-                        over
-                          ? "inline-block whitespace-nowrap border border-[var(--danger)]/50 bg-[var(--danger)]/15 px-1 py-0.5 font-sans text-[8px] text-[var(--danger)]"
-                          : "inline-block whitespace-nowrap border border-[var(--line)] px-1 py-0.5 font-sans text-[8px] text-[var(--muted)]"
-                      }
-                    >
-                      {row.discrepancy_flag}
+                    <span className="inline-block whitespace-nowrap border border-[var(--danger)]/50 bg-[var(--danger)]/15 px-1 py-0.5 font-sans text-[8px] text-[var(--danger)]">
+                      Understated
                     </span>
                   </td>
                 </tr>
-              );
-            })}
+              ))}
           </tbody>
         </table>
       </div>

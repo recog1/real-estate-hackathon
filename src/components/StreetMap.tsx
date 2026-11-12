@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Map as MapLibreMap, Marker, setWorkerUrl } from "maplibre-gl";
-import { FITZROVIA, parcelRingForSite } from "@/lib/sites";
+import { ASDA_LEYTON, FITZROVIA, isAsdaSite, parcelRingForSite } from "@/lib/sites";
 import type { Site } from "@/lib/types";
 
 setWorkerUrl("/maplibre-gl-worker.mjs");
@@ -13,11 +13,18 @@ const ESRI_IMAGERY =
 const STREET_ATTRIBUTION = "© OpenFreeMap © OpenMapTiles © OpenStreetMap";
 const ESRI_ATTRIBUTION = "Esri, Maxar, Earthstar Geographics";
 
-const START = {
+const CLAIM_START = {
   center: [FITZROVIA.lon, FITZROVIA.lat] as [number, number],
   zoom: 14.05,
   pitch: 0,
   bearing: 0,
+};
+
+const COMPETITOR_VIEW = {
+  zoom: 17,
+  pitch: 0,
+  bearing: 0,
+  duration: 700,
 };
 
 type Props = {
@@ -51,11 +58,43 @@ function ringPolygon(site: Site): number[][] {
   return coords;
 }
 
+function cameraFor(site: Site, satellite: boolean) {
+  const competitor = satellite || isAsdaSite(site);
+  const zoom = competitor ? COMPETITOR_VIEW.zoom : SITE_VIEW.zoom;
+  const center: [number, number] = competitor && isAsdaSite(site)
+    ? [ASDA_LEYTON.lon, ASDA_LEYTON.lat]
+    : [site.lon, site.lat];
+  return {
+    center,
+    zoom,
+    pitch: 0,
+    bearing: 0,
+    duration: competitor ? COMPETITOR_VIEW.duration : SITE_VIEW.duration,
+  };
+}
+
+function openingView(site: Site | null, satellite: boolean) {
+  if (site) {
+    const cam = cameraFor(site, satellite);
+    return { center: cam.center, zoom: cam.zoom, pitch: 0, bearing: 0 };
+  }
+  if (satellite) {
+    return {
+      center: [ASDA_LEYTON.lon, ASDA_LEYTON.lat] as [number, number],
+      zoom: COMPETITOR_VIEW.zoom,
+      pitch: 0,
+      bearing: 0,
+    };
+  }
+  return CLAIM_START;
+}
+
 function applySiteOnMap(
   map: MapLibreMap,
   markerRef: { current: Marker | null },
   site: Site,
   animate: boolean,
+  satellite: boolean,
 ) {
   const source = map.getSource("hawk-site");
   if (source && "setData" in source) {
@@ -72,17 +111,30 @@ function applySiteOnMap(
   markerRef.current = new Marker({ element: el, anchor: "bottom" })
     .setLngLat([site.lon, site.lat])
     .addTo(map);
-  const view = {
-    center: [site.lon, site.lat] as [number, number],
-    zoom: SITE_VIEW.zoom,
-    pitch: SITE_VIEW.pitch,
-    bearing: SITE_VIEW.bearing,
-  };
-  if (animate) {
+  const view = cameraFor(site, satellite);
+  const here = map.getCenter();
+  const already =
+    Math.abs(here.lat - view.center[1]) < 1e-4 &&
+    Math.abs(here.lng - view.center[0]) < 1e-4 &&
+    Math.abs(map.getZoom() - view.zoom) < 0.15 &&
+    Math.abs(map.getPitch()) < 1;
+  if (animate && !already) {
     map.stop();
-    map.easeTo({ ...view, duration: SITE_VIEW.duration, essential: true });
+    map.easeTo({
+      center: view.center,
+      zoom: view.zoom,
+      pitch: view.pitch,
+      bearing: view.bearing,
+      duration: view.duration,
+      essential: true,
+    });
   } else {
-    map.jumpTo(view);
+    map.jumpTo({
+      center: view.center,
+      zoom: view.zoom,
+      pitch: view.pitch,
+      bearing: view.bearing,
+    });
   }
 }
 
@@ -369,7 +421,7 @@ export function StreetMap({
   const siteRef = useRef(site);
   const departingRef = useRef(departing);
   const [satellite, setSatellite] = useState(forceSatellite);
-  const satRef = useRef(false);
+  const satRef = useRef(forceSatellite);
   pickRef.current = onPickSite;
   departedRef.current = onDeparted;
   siteRef.current = site;
@@ -407,13 +459,14 @@ export function StreetMap({
       await waitForSize();
       if (cancelled || !hostRef.current) return;
 
+      const opening = openingView(siteRef.current, satRef.current);
       const ml = new MapLibreMap({
         container: host,
         style: STYLE_URL,
-        center: START.center,
-        zoom: START.zoom,
-        pitch: START.pitch,
-        bearing: START.bearing,
+        center: opening.center,
+        zoom: opening.zoom,
+        pitch: opening.pitch,
+        bearing: opening.bearing,
         minZoom: 9,
         maxZoom: 19,
         maxPitch: 60,
@@ -437,7 +490,7 @@ export function StreetMap({
         addOverlays(ml, satRef.current);
         const current = siteRef.current;
         if (current && !departingRef.current) {
-          applySiteOnMap(ml, markerRef, current, false);
+          applySiteOnMap(ml, markerRef, current, false, satRef.current);
         }
         host.setAttribute("data-map-ready", "1");
       });
@@ -504,8 +557,8 @@ export function StreetMap({
       return;
     }
     if (!followSite || departing) return;
-    applySiteOnMap(map, markerRef, site, true);
-  }, [site, departing, followSite]);
+    applySiteOnMap(map, markerRef, site, true, satRef.current);
+  }, [site, departing, followSite, satellite]);
 
   useEffect(() => {
     const map = mapRef.current;
