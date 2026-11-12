@@ -102,25 +102,15 @@ function launchOrbit(
   const pose = framedCameraPose(Cesium, site, viewer);
   host?.removeAttribute("data-orbit-settled");
   viewer.camera.cancelFlight();
+  // Pre-frame on London so the street-map cross-fade reveals an already-set
+  // orbital view instead of cutting to a 160 km jump.
   viewer.camera.setView({
-    destination: Cesium.Cartesian3.fromDegrees(site.lon, site.lat, 160_000),
-    orientation: {
-      heading: Cesium.Math.toRadians(ORBIT_HEADING),
-      pitch: Cesium.Math.toRadians(-70),
-      roll: 0,
-    },
-  });
-  viewer.camera.flyTo({
     destination: pose.destination,
     orientation: { direction: pose.direction, up: pose.up },
-    duration: 5.4,
-    easingFunction: Cesium.EasingFunction.CUBIC_IN_OUT,
-    complete: () => {
-      holdFramedView(viewer, Cesium, site);
-      viewer.clock.multiplier = 8;
-      host?.setAttribute("data-orbit-settled", "1");
-    },
   });
+  holdFramedView(viewer, Cesium, site);
+  viewer.clock.multiplier = 8;
+  host?.setAttribute("data-orbit-settled", "1");
 }
 
 function holdFramedView(viewer: Viewer, Cesium: CesiumNS, site: Site) {
@@ -145,6 +135,14 @@ declare global {
     CESIUM_BASE_URL?: string;
     __hawkHeight?: () => number;
     __hawkCam?: () => { lon: number; lat: number; h: number };
+    __hawkGlobeBox?: () => {
+      w: number;
+      h: number;
+      top: number;
+      left: number;
+      vw: number;
+      vh: number;
+    };
     __hawkDebug?: () => {
       pendingTiles: number;
       tilesLoaded: boolean;
@@ -180,8 +178,9 @@ export function GlobeView({
     const host = hostRef.current;
     if (!host) return;
     let cancelled = false;
-    let handler: { destroy: () => void } | null = null;
+    let handler: InstanceType<CesiumNS["ScreenSpaceEventHandler"]> | null = null;
     let resizeObs: ResizeObserver | null = null;
+    let onResize: (() => void) | null = null;
 
     const waitForSize = (el: HTMLElement) =>
       new Promise<void>((resolve) => {
@@ -206,7 +205,11 @@ export function GlobeView({
       if (cancelled || !hostRef.current) return;
       cesiumRef.current = Cesium;
       Cesium.Ion.defaultAccessToken = "";
-      Cesium.buildModuleUrl.setBaseUrl("/cesium/");
+      (
+        Cesium.buildModuleUrl as typeof Cesium.buildModuleUrl & {
+          setBaseUrl: (url: string) => void;
+        }
+      ).setBaseUrl("/cesium/");
 
       const satellite = new Cesium.UrlTemplateImageryProvider({
         url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
@@ -251,7 +254,8 @@ export function GlobeView({
       viewer.scene.globe.maximumScreenSpaceError = 2;
       viewer.scene.globe.enableLighting = false;
       viewer.scene.globe.showGroundAtmosphere = true;
-      viewer.scene.skyAtmosphere.show = true;
+      const skyAtmosphere = viewer.scene.skyAtmosphere;
+      if (skyAtmosphere) skyAtmosphere.show = true;
       viewer.scene.globe.baseColor = Cesium.Color.BLACK;
       viewer.scene.backgroundColor = Cesium.Color.BLACK;
       viewer.scene.fog.enabled = true;
@@ -314,7 +318,7 @@ export function GlobeView({
         for (let i = 0; i <= samples; i++) {
           const t = new Date(now.getTime() + (i / samples) * periodMin * 60 * 1000);
           const pv = propagate(rec, t);
-          if (!pv.position) continue;
+          if (!pv?.position) continue;
           const gd = eciToGeodetic(pv.position, gstime(t));
           orbit.push(
             Cesium.Cartesian3.fromDegrees(
@@ -338,7 +342,7 @@ export function GlobeView({
         viewer.entities.add({
           id: `sat-${spec.id}`,
           name: spec.name,
-          position: new Cesium.CallbackProperty((time) => {
+          position: new Cesium.CallbackPositionProperty((time) => {
             const date = Cesium.JulianDate.toDate(time ?? viewer.clock.currentTime);
             const g = geodeticAt(spec, date);
             if (!g) return undefined;
@@ -376,13 +380,31 @@ export function GlobeView({
         }
       }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
 
-      const resize = () => {
+      onResize = () => {
         viewer.resize();
         viewer.scene.requestRender();
+        const box = hostRef.current?.getBoundingClientRect();
+        if (box) {
+          hostRef.current?.setAttribute("data-globe-w", String(Math.round(box.width)));
+          hostRef.current?.setAttribute("data-globe-h", String(Math.round(box.height)));
+        }
       };
-      resizeObs = new ResizeObserver(resize);
+      resizeObs = new ResizeObserver(onResize);
       resizeObs.observe(hostRef.current);
-      requestAnimationFrame(resize);
+      window.addEventListener("resize", onResize);
+      requestAnimationFrame(onResize);
+      window.setTimeout(onResize, 80);
+      window.__hawkGlobeBox = () => {
+        const box = hostRef.current?.getBoundingClientRect();
+        return {
+          w: box?.width ?? 0,
+          h: box?.height ?? 0,
+          top: box?.top ?? 0,
+          left: box?.left ?? 0,
+          vw: window.innerWidth,
+          vh: window.innerHeight,
+        };
+      };
       if (pending && lastFly.current !== pending.id) {
         lastFly.current = pending.id;
         launchOrbit(viewer, Cesium, pending, hostRef.current);
@@ -393,10 +415,33 @@ export function GlobeView({
       cancelled = true;
       handler?.destroy();
       resizeObs?.disconnect();
+      if (onResize) window.removeEventListener("resize", onResize);
       viewerRef.current?.destroy();
       viewerRef.current = null;
     };
   }, []);
+
+  useEffect(() => {
+    const viewer = viewerRef.current;
+    const host = hostRef.current;
+    if (!viewer || !host) return;
+    const run = () => {
+      viewer.resize();
+      viewer.scene.requestRender();
+      const box = host.getBoundingClientRect();
+      host.setAttribute("data-globe-w", String(Math.round(box.width)));
+      host.setAttribute("data-globe-h", String(Math.round(box.height)));
+    };
+    run();
+    const a = requestAnimationFrame(run);
+    const t = window.setTimeout(run, 60);
+    const t2 = window.setTimeout(run, 320);
+    return () => {
+      cancelAnimationFrame(a);
+      window.clearTimeout(t);
+      window.clearTimeout(t2);
+    };
+  }, [phase]);
 
   useEffect(() => {
     const viewer = viewerRef.current;
@@ -426,7 +471,15 @@ export function GlobeView({
     <div
       ref={hostRef}
       className="globe-host"
-      style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
+      data-globe-full="1"
+      style={{
+        position: "absolute",
+        inset: 0,
+        width: "100vw",
+        height: "100vh",
+        minWidth: "100vw",
+        minHeight: "100vh",
+      }}
     />
   );
 }
