@@ -283,10 +283,6 @@ export function CommandApp() {
               </div>
             </div>
           </div>
-          <div className="hidden max-w-xl text-center text-[11px] leading-snug text-[var(--muted)] md:block">
-            Occupancy underpins value. If you cannot fill it, what is it worth?
-            Underwrite from orbit before you ask the seller for a single document.
-          </div>
           <div className="flex items-center gap-4">
             <Clock />
             <span className="font-sans text-[11px] text-[var(--gold)]">LONDON</span>
