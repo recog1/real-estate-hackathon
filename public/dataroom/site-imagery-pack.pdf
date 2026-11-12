@@ -9,7 +9,7 @@ endobj
 << /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R /F2 6 0 R >> >> >>
 endobj
 4 0 obj
-<< /Length 1270 >>
+<< /Length 1299 >>
 stream
 0.83 0.63 0.29 rg
 0 760 612 32 re f
@@ -26,33 +26,33 @@ BT
 (Site Imagery Pack) Tj
 /F1 10 Tf
 0.15 0.16 0.18 rg
--20 Td
+0 -20 Td
 (Four nadir tiles tasked over the selected London multifamily. Footage is) Tj
--14 Td
+0 -14 Td
 (demonstration-grade aerial loops \(Pexels, transcoded 720p\) standing in for a VHR strip.) Tj
--14 Td
+0 -14 Td
 () Tj
--14 Td
+0 -14 Td
 (Tile Z-N  North courtyard   /videos/zone-a.mp4   Pexels 31210490) Tj
--14 Td
+0 -14 Td
 (Tile Z-E  East street grid  /videos/zone-b.mp4   Pexels 31061104) Tj
--14 Td
+0 -14 Td
 (Tile Z-W  West terrace      /videos/zone-c.mp4   Pexels 5597032) Tj
--14 Td
+0 -14 Td
 (Tile Z-S  South car park    /videos/zone-d.mp4   Pexels 36721611) Tj
--14 Td
+0 -14 Td
 () Tj
--14 Td
+0 -14 Td
 (VLM overlay classes: house \(gold\), car \(cyan\), person \(signal red\).) Tj
--14 Td
+0 -14 Td
 (House footprints are stable \(detector + heuristic\). Cars and people are tracked per frame) Tj
--14 Td
+0 -14 Td
 (with interpolation.) Tj
--14 Td
+0 -14 Td
 () Tj
--14 Td
+0 -14 Td
 (This pack is timestamped to the collection. It is not seller marketing imagery. Revisit) Tj
--14 Td
+0 -14 Td
 (windows: next SSO morning pass + weekend evening.) Tj
 ET
 0.07 0.08 0.10 rg
@@ -76,10 +76,10 @@ xref
 0000000058 00000 n 
 0000000115 00000 n 
 0000000251 00000 n 
-0000001573 00000 n 
-0000001645 00000 n 
+0000001601 00000 n 
+0000001673 00000 n 
 trailer
 << /Size 7 /Root 1 0 R >>
 startxref
-1716
+1744
 %%EOF
