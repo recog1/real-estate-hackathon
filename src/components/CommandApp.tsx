@@ -102,12 +102,12 @@ export function CommandApp() {
       data-departing={departing ? "1" : "0"}
       data-site={site?.id ?? ""}
       data-space={space ? "1" : "0"}
-      className="relative h-dvh w-dvw overflow-hidden bg-[var(--bg)] text-[var(--ink)]"
+      className="relative h-full w-full overflow-hidden bg-[var(--bg)] text-[var(--ink)]"
     >
       <div
         data-stage="viewport"
-        className="absolute inset-0 z-0 h-dvh w-dvw"
-        style={{ width: "100vw", height: "100vh" }}
+        className="absolute inset-0 z-0 h-full w-full"
+        style={{ width: "100%", height: "100%" }}
       >
         {site && (
           <GlobeView
