@@ -1,6 +1,7 @@
 "use client";
 
 import { aerialTotals } from "@/lib/aerial";
+import { COMPS_PIPELINE_LINE } from "@/lib/comps";
 import { useCompetitorSite } from "@/lib/competitor";
 import { V7_SUMMARY, V7_WORKFLOW_NAME, V7_WORKFLOW_URL } from "@/lib/v7";
 import type { Phase } from "@/lib/types";
@@ -29,7 +30,17 @@ function competitorActive(phase: Phase): number {
   return 0;
 }
 
-export function PipelineStrip({ mode, phase }: { mode: WatchMode; phase: Phase }) {
+export function PipelineStrip({
+  mode,
+  phase,
+  selectedStep,
+  onPickStep,
+}: {
+  mode: WatchMode;
+  phase: Phase;
+  selectedStep?: string | null;
+  onPickStep?: (id: string) => void;
+}) {
   const totals = aerialTotals();
   const competitor = useCompetitorSite();
   const fill =
@@ -64,9 +75,9 @@ export function PipelineStrip({ mode, phase }: { mode: WatchMode; phase: Phase }
           {
             id: "comps",
             n: "5",
-            title: "Comps and area data",
-            tool: "Peers",
-            output: "Capacity from marked bays",
+            title: "Area data and comps",
+            tool: "Oxford Circus",
+            output: COMPS_PIPELINE_LINE,
           },
           {
             id: "verdict",
@@ -109,9 +120,9 @@ export function PipelineStrip({ mode, phase }: { mode: WatchMode; phase: Phase }
           {
             id: "comps",
             n: "5",
-            title: "Comps and area data",
-            tool: "Area / peers",
-            output: "London plot, 142 units",
+            title: "Area data and comps",
+            tool: "Oxford Circus",
+            output: COMPS_PIPELINE_LINE,
           },
           {
             id: "verdict",
@@ -140,15 +151,17 @@ export function PipelineStrip({ mode, phase }: { mode: WatchMode; phase: Phase }
       <ol className="m-0 flex min-w-0 flex-1 list-none flex-row gap-1 p-0">
         {steps.map((step, i) => {
           const lit = i <= current;
-          const active = i === current;
+          const active = i === current || selectedStep === step.id;
           const wide = step.span === 2 ? " min-w-0 flex-[2]" : " min-w-0 flex-1";
+          const pickable = step.id === "comps";
           return (
             <li
               key={step.id}
               data-pipeline-step={step.id}
               data-lit={lit ? "1" : "0"}
               data-active={active ? "1" : "0"}
-              className={`pipeline-step overflow-hidden${wide}${lit ? " is-lit" : ""}${active ? " is-active" : ""}`}
+              className={`pipeline-step overflow-hidden${wide}${lit ? " is-lit" : ""}${active ? " is-active" : ""}${pickable ? " cursor-pointer" : ""}`}
+              onClick={pickable ? () => onPickStep?.(step.id) : undefined}
             >
               <div className="flex items-baseline gap-1">
                 <span className="font-sans text-[9px] text-[var(--muted)]">{step.n}</span>
@@ -161,6 +174,14 @@ export function PipelineStrip({ mode, phase }: { mode: WatchMode; phase: Phase }
                   >
                     {step.title}
                   </a>
+                ) : pickable ? (
+                  <button
+                    type="button"
+                    className="truncate text-left font-sans text-[10px] text-[var(--ink)] underline decoration-[var(--line)] underline-offset-2"
+                    onClick={() => onPickStep?.(step.id)}
+                  >
+                    {step.title}
+                  </button>
                 ) : (
                   <span className="truncate font-sans text-[10px] text-[var(--ink)]">
                     {step.title}

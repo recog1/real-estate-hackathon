@@ -8,6 +8,7 @@ import { IntelStage } from "@/components/IntelStage";
 import { Site3DView } from "@/components/Site3DView";
 import { ModeToggle } from "@/components/ModeToggle";
 import { PipelineStrip } from "@/components/PipelineStrip";
+import { CompsPanel } from "@/components/CompsPanel";
 import { CLAIM_HEADLINE, type WatchMode } from "@/lib/watch";
 import { SATELLITES, getSatellite } from "@/lib/satellites";
 import { FITZROVIA, siteFromClick } from "@/lib/sites";
@@ -39,6 +40,7 @@ export function CommandApp() {
   const [departing, setDeparting] = useState(false);
   const [inspect3d, setInspect3d] = useState(false);
   const [mode, setMode] = useState<WatchMode>("claim");
+  const [focusStep, setFocusStep] = useState<string | null>(null);
   const phaseRef = useRef(phase);
   phaseRef.current = phase;
 
@@ -255,7 +257,13 @@ export function CommandApp() {
 
       {intel && site && sat && (
         <div className="absolute inset-0 z-20 flex flex-col bg-[var(--bg)] pt-28">
-          <IntelStage site={site} sat={sat} mode={mode} />
+          <IntelStage
+            site={site}
+            sat={sat}
+            mode={mode}
+            focusStep={focusStep}
+            onFocusStep={setFocusStep}
+          />
         </div>
       )}
 
@@ -267,7 +275,12 @@ export function CommandApp() {
 
       {!inspect3d && (
         <div className="absolute inset-x-0 top-14 z-40 border-b border-[var(--line)] bg-[var(--panel)]">
-          <PipelineStrip mode={mode} phase={phase} />
+          <PipelineStrip
+            mode={mode}
+            phase={phase}
+            selectedStep={focusStep}
+            onPickStep={setFocusStep}
+          />
         </div>
       )}
 
@@ -312,6 +325,25 @@ export function CommandApp() {
           )}
         </div>
       </header>
+
+      {focusStep === "comps" && !(intel && mode === "claim") && (
+        <div
+          data-comps-overlay="1"
+          className={`absolute bottom-3 right-3 top-[7.75rem] z-40 w-[420px] overflow-y-auto p-3 ${floatPanel}`}
+        >
+          <div className="mb-2 flex items-center justify-between">
+            <span className="font-sans text-[10px] text-[var(--muted)]">Step 5</span>
+            <button
+              type="button"
+              onClick={() => setFocusStep(null)}
+              className="font-sans text-[11px] text-[var(--ink)]"
+            >
+              Close
+            </button>
+          </div>
+          <CompsPanel />
+        </div>
+      )}
 
       {space && (
         <aside className={`absolute bottom-3 right-3 top-[7.75rem] z-30 w-[260px] overflow-y-auto ${floatPanel}`}>

@@ -7,6 +7,7 @@ import { V7SourceChip, V7WorkflowPanel } from "@/components/V7WorkflowPanel";
 import { AerialGrid } from "@/components/AerialGrid";
 import { CompetitorCapture } from "@/components/CompetitorCapture";
 import { CompetitorPanel } from "@/components/CompetitorPanel";
+import { CompsPanel } from "@/components/CompsPanel";
 import { buildLogScript } from "@/lib/terminal";
 import { AERIAL_MODEL_LINE, aerialTotals } from "@/lib/aerial";
 import { useCompetitorSite } from "@/lib/competitor";
@@ -135,17 +136,25 @@ export function IntelStage({
   site,
   sat,
   mode,
+  focusStep,
+  onFocusStep,
 }: {
   site: Site;
   sat: SatelliteSpec;
   mode: WatchMode;
+  focusStep?: string | null;
+  onFocusStep?: (id: string | null) => void;
 }) {
   const logs = useMemo(() => buildLogScript(site, sat), [site, sat]);
   const [visible, setVisible] = useState(1);
   const [doc, setDoc] = useState<DataDoc | null>(null);
-  const [roomTab, setRoomTab] = useState<"v7" | "files">("v7");
+  const [roomTab, setRoomTab] = useState<"v7" | "files" | "comps">("v7");
   const totals = useMemo(() => aerialTotals(), []);
   const competitor = useCompetitorSite();
+
+  useEffect(() => {
+    if (focusStep === "comps") setRoomTab("comps");
+  }, [focusStep]);
 
   useEffect(() => {
     const iv = setInterval(() => {
@@ -195,12 +204,17 @@ export function IntelStage({
         className="flex w-[420px] shrink-0 flex-col border-l border-[var(--line)] bg-[var(--panel)]"
       >
         <div className="flex items-center justify-between border-b border-[var(--line)] px-3 py-2">
-          <div className="font-sans text-[12px] text-[var(--ink)]">Data room</div>
+          <div className="font-sans text-[12px] text-[var(--ink)]">
+            {roomTab === "comps" ? "Area data" : "Data room"}
+          </div>
           <div className="flex gap-1">
             <button
               type="button"
               data-room-tab="files"
-              onClick={() => setRoomTab("files")}
+              onClick={() => {
+                setRoomTab("files");
+                onFocusStep?.(null);
+              }}
               className={
                 roomTab === "files"
                   ? "border border-[var(--accent)] px-2 py-0.5 font-sans text-[10px] text-[var(--ink)]"
@@ -212,7 +226,10 @@ export function IntelStage({
             <button
               type="button"
               data-room-tab="v7"
-              onClick={() => setRoomTab("v7")}
+              onClick={() => {
+                setRoomTab("v7");
+                onFocusStep?.(null);
+              }}
               className={
                 roomTab === "v7"
                   ? "border border-[var(--accent)] bg-white/10 px-2 py-0.5 font-sans text-[10px] text-[var(--ink)]"
@@ -221,11 +238,30 @@ export function IntelStage({
             >
               V7 Go
             </button>
+            <button
+              type="button"
+              data-room-tab="comps"
+              onClick={() => {
+                setRoomTab("comps");
+                onFocusStep?.("comps");
+              }}
+              className={
+                roomTab === "comps"
+                  ? "border border-[var(--accent)] bg-white/10 px-2 py-0.5 font-sans text-[10px] text-[var(--ink)]"
+                  : "border border-[var(--line)] px-2 py-0.5 font-sans text-[10px] text-[var(--muted)]"
+              }
+            >
+              Area data
+            </button>
           </div>
         </div>
         {roomTab === "v7" ? (
           <div className="min-h-0 flex-[1.4] overflow-y-auto border-b border-[var(--line)] px-3 py-2">
             <V7WorkflowPanel />
+          </div>
+        ) : roomTab === "comps" ? (
+          <div className="min-h-0 flex-1 overflow-y-auto px-3 py-2">
+            <CompsPanel />
           </div>
         ) : (
           <div className="min-h-0 max-h-[42%] overflow-y-auto border-b border-[var(--line)] px-3 py-2">
@@ -257,7 +293,7 @@ export function IntelStage({
             )}
           </div>
         )}
-        <AgentPanel onOpenV7={() => setRoomTab("v7")} />
+        {roomTab !== "comps" && <AgentPanel onOpenV7={() => setRoomTab("v7")} />}
       </aside>
       )}
     </div>
