@@ -7,7 +7,7 @@ import { StreetMap } from "@/components/StreetMap";
 import { IntelStage } from "@/components/IntelStage";
 import { Site3DView } from "@/components/Site3DView";
 import { SATELLITES, getSatellite } from "@/lib/satellites";
-import { asdaSite, siteFromClick } from "@/lib/sites";
+import { asdaSite, isAsdaSite, nearAsda, siteFromClick } from "@/lib/sites";
 import { formatEta, formatPassClock, nextPass } from "@/lib/orbits";
 import type { Phase, SatelliteId, Site } from "@/lib/types";
 
@@ -28,12 +28,13 @@ const TASK_STEPS = [
 
 export function CommandApp() {
   const [phase, setPhase] = useState<Phase>("survey");
-  const [site, setSite] = useState<Site | null>(() => asdaSite());
+  const [site, setSite] = useState<Site | null>(null);
   const [satId, setSatId] = useState<SatelliteId | null>(null);
   const [taskStep, setTaskStep] = useState(0);
   const [departing, setDeparting] = useState(false);
   const [inspect3d, setInspect3d] = useState(false);
   const phaseRef = useRef(phase);
+  const intelTimer = useRef<number | null>(null);
   phaseRef.current = phase;
   const mode = "competitor" as const;
 
@@ -51,12 +52,14 @@ export function CommandApp() {
 
   useEffect(() => {
     window.__hawkSkipToIntel = () => {
+      if (intelTimer.current != null) window.clearTimeout(intelTimer.current);
       setSite(asdaSite());
       setSatId("wv3");
       setDeparting(false);
       setPhase("intel");
     };
     return () => {
+      if (intelTimer.current != null) window.clearTimeout(intelTimer.current);
       delete window.__hawkSkipToIntel;
     };
   }, []);
@@ -78,8 +81,22 @@ export function CommandApp() {
 
   function pickSite(lat: number, lon: number) {
     if (departing) return;
-    const next = siteFromClick(lat, lon);
-    setSite(next);
+    if (intelTimer.current != null) {
+      window.clearTimeout(intelTimer.current);
+      intelTimer.current = null;
+    }
+    if (nearAsda(lat, lon)) {
+      setSite(asdaSite());
+      setSatId("wv3");
+      setDeparting(false);
+      setPhase("survey");
+      intelTimer.current = window.setTimeout(() => {
+        setPhase("intel");
+        intelTimer.current = null;
+      }, 780) as unknown as number;
+      return;
+    }
+    setSite(siteFromClick(lat, lon));
     setSatId(null);
     setDeparting(false);
     if (phase !== "survey") setPhase("survey");
@@ -158,10 +175,21 @@ export function CommandApp() {
             }}
           />
         </div>
-        {phase === "survey" && !site && (
-          <div className="pointer-events-none absolute bottom-5 left-1/2 z-20 -translate-x-1/2 border border-[var(--line)] bg-black/70 px-3 py-1 font-sans text-[11px] text-[var(--ink)]">
-            Scroll, zoom, click anywhere to select a site
-          </div>
+        {phase === "survey" && (
+          <aside
+            data-watch-panel={site && isAsdaSite(site) ? "asda" : "empty"}
+            className="absolute bottom-0 right-0 top-14 z-20 flex w-[420px] flex-col border-l border-[var(--line)] bg-[var(--panel)]"
+          >
+            <div className="m-auto max-w-[17rem] px-6 text-center">
+              <div className="font-sans text-[15px] leading-snug text-[var(--ink)]">
+                Click an asset on the map to watch it
+              </div>
+              <div className="mt-2 font-sans text-[11px] leading-relaxed text-[var(--muted)]">
+                Select a supermarket, office, or car park. Clicks near ASDA Leyton Mills open the
+                occupancy file.
+              </div>
+            </div>
+          </aside>
         )}
         {phase === "orbit" && (
           <div className="pointer-events-none absolute bottom-5 left-1/2 z-20 -translate-x-1/2 border border-[var(--line)] bg-black/70 px-3 py-1 font-sans text-[11px] text-[var(--ink)]">
@@ -295,12 +323,13 @@ export function CommandApp() {
             <button
               type="button"
               onClick={() => setInspect3d(true)}
-              className="border border-[var(--ink)] px-4 py-2 font-sans text-[12px] text-[var(--ink)]"
+              disabled={!site}
+              className="border border-[var(--ink)] px-4 py-2 font-sans text-[12px] text-[var(--ink)] disabled:opacity-40"
             >
               3D view
             </button>
           )}
-          {phase === "survey" && site && !inspect3d && (
+          {phase === "survey" && site && !isAsdaSite(site) && !inspect3d && (
             <button
               type="button"
               disabled={departing}

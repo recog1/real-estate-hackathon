@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Map as MapLibreMap, Marker, setWorkerUrl } from "maplibre-gl";
-import { ASDA_LEYTON, FITZROVIA, isAsdaSite, parcelRingForSite } from "@/lib/sites";
+import { ASDA_LEYTON, LEYTON_OVERVIEW, isAsdaSite, parcelRingForSite } from "@/lib/sites";
 import type { Site } from "@/lib/types";
 
 setWorkerUrl("/maplibre-gl-worker.mjs");
@@ -13,9 +13,9 @@ const ESRI_IMAGERY =
 const STREET_ATTRIBUTION = "© OpenFreeMap © OpenMapTiles © OpenStreetMap";
 const ESRI_ATTRIBUTION = "Esri, Maxar, Earthstar Geographics";
 
-const CLAIM_START = {
-  center: [FITZROVIA.lon, FITZROVIA.lat] as [number, number],
-  zoom: 14.05,
+const OVERVIEW_START = {
+  center: [LEYTON_OVERVIEW.lon, LEYTON_OVERVIEW.lat] as [number, number],
+  zoom: LEYTON_OVERVIEW.zoom,
   pitch: 0,
   bearing: 0,
 };
@@ -58,35 +58,31 @@ function ringPolygon(site: Site): number[][] {
   return coords;
 }
 
-function cameraFor(site: Site, satellite: boolean) {
-  const competitor = satellite || isAsdaSite(site);
-  const zoom = competitor ? COMPETITOR_VIEW.zoom : SITE_VIEW.zoom;
-  const center: [number, number] = competitor && isAsdaSite(site)
-    ? [ASDA_LEYTON.lon, ASDA_LEYTON.lat]
-    : [site.lon, site.lat];
-  return {
-    center,
-    zoom,
-    pitch: 0,
-    bearing: 0,
-    duration: competitor ? COMPETITOR_VIEW.duration : SITE_VIEW.duration,
-  };
-}
-
-function openingView(site: Site | null, satellite: boolean) {
-  if (site) {
-    const cam = cameraFor(site, satellite);
-    return { center: cam.center, zoom: cam.zoom, pitch: 0, bearing: 0 };
-  }
-  if (satellite) {
+function cameraFor(site: Site) {
+  if (isAsdaSite(site)) {
     return {
       center: [ASDA_LEYTON.lon, ASDA_LEYTON.lat] as [number, number],
       zoom: COMPETITOR_VIEW.zoom,
       pitch: 0,
       bearing: 0,
+      duration: COMPETITOR_VIEW.duration,
     };
   }
-  return CLAIM_START;
+  return {
+    center: [site.lon, site.lat] as [number, number],
+    zoom: SITE_VIEW.zoom,
+    pitch: 0,
+    bearing: 0,
+    duration: SITE_VIEW.duration,
+  };
+}
+
+function openingView(site: Site | null) {
+  if (site) {
+    const cam = cameraFor(site);
+    return { center: cam.center, zoom: cam.zoom, pitch: 0, bearing: 0 };
+  }
+  return OVERVIEW_START;
 }
 
 function applySiteOnMap(
@@ -94,7 +90,6 @@ function applySiteOnMap(
   markerRef: { current: Marker | null },
   site: Site,
   animate: boolean,
-  satellite: boolean,
 ) {
   const source = map.getSource("hawk-site");
   if (source && "setData" in source) {
@@ -111,7 +106,7 @@ function applySiteOnMap(
   markerRef.current = new Marker({ element: el, anchor: "bottom" })
     .setLngLat([site.lon, site.lat])
     .addTo(map);
-  const view = cameraFor(site, satellite);
+  const view = cameraFor(site);
   const here = map.getCenter();
   const already =
     Math.abs(here.lat - view.center[1]) < 1e-4 &&
@@ -459,7 +454,7 @@ export function StreetMap({
       await waitForSize();
       if (cancelled || !hostRef.current) return;
 
-      const opening = openingView(siteRef.current, satRef.current);
+      const opening = openingView(siteRef.current);
       const ml = new MapLibreMap({
         container: host,
         style: STYLE_URL,
@@ -490,7 +485,7 @@ export function StreetMap({
         addOverlays(ml, satRef.current);
         const current = siteRef.current;
         if (current && !departingRef.current) {
-          applySiteOnMap(ml, markerRef, current, false, satRef.current);
+          applySiteOnMap(ml, markerRef, current, false);
         }
         host.setAttribute("data-map-ready", "1");
       });
@@ -557,7 +552,7 @@ export function StreetMap({
       return;
     }
     if (!followSite || departing) return;
-    applySiteOnMap(map, markerRef, site, true, satRef.current);
+    applySiteOnMap(map, markerRef, site, true);
   }, [site, departing, followSite, satellite]);
 
   useEffect(() => {

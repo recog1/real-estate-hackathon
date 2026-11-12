@@ -8,6 +8,12 @@ export const FITZROVIA = { lon: -0.142, lat: 51.5155 };
 /** ASDA Leyton Mills Superstore — competitor-watch demo. */
 export const ASDA_LEYTON = { lon: -0.00901, lat: 51.55636 };
 
+/** Opening view: Leyton / Stratford, no parcel selected. */
+export const LEYTON_OVERVIEW = { lon: -0.012, lat: 51.556, zoom: 14.5 };
+
+/** Click-snap radius onto the ASDA car park. */
+export const ASDA_SNAP_M = 400;
+
 export const SAMPLE_PARCELS: Site[] = [
   {
     id: "cubitt",
@@ -78,11 +84,18 @@ export const DEMO_INTEL = {
   claimedRentRoll: "£3.42m TTM",
 } as const;
 
+export function nearAsda(lat: number, lon: number, radiusM = ASDA_SNAP_M): boolean {
+  const dLat = (lat - ASDA_LEYTON.lat) * 111_320;
+  const dLon =
+    (lon - ASDA_LEYTON.lon) * 111_320 * Math.cos((ASDA_LEYTON.lat * Math.PI) / 180);
+  return Math.hypot(dLat, dLon) <= radiusM;
+}
+
 export function siteFromClick(lat: number, lon: number): Site {
+  if (nearAsda(lat, lon)) return asdaSite();
   const demo =
     Math.abs(lat - FITZROVIA.lat) < 1e-4 && Math.abs(lon - FITZROVIA.lon) < 1e-4;
-  const asda =
-    Math.abs(lat - ASDA_LEYTON.lat) < 5e-4 && Math.abs(lon - ASDA_LEYTON.lon) < 5e-4;
+  const asda = isAsdaSite({ lat, lon });
   return {
     id: `site-${lat.toFixed(4)}-${lon.toFixed(4)}`,
     name: asda
@@ -107,7 +120,16 @@ export function isAsdaSite(site: Pick<Site, "lat" | "lon">): boolean {
 }
 
 export function asdaSite(): Site {
-  return siteFromClick(ASDA_LEYTON.lat, ASDA_LEYTON.lon);
+  return {
+    id: "site-asda-leyton-mills",
+    name: "ASDA Leyton Mills Superstore",
+    borough: "Waltham Forest",
+    lat: ASDA_LEYTON.lat,
+    lon: ASDA_LEYTON.lon,
+    units: DEMO_INTEL.units,
+    sellerOccupancy: DEMO_INTEL.sellerOccupancy,
+    claimedRentRoll: DEMO_INTEL.claimedRentRoll,
+  };
 }
 
 /** Axis-aligned square matching the Oxford Circus capture (~300 m). */
