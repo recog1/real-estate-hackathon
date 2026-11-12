@@ -39,7 +39,7 @@ export const SATELLITES: SatelliteSpec[] = [
     band: "VHR optical",
     tle1: "1 41601U 16040C   26316.29138269  .00009590  00000+0  25446-3 0  9997",
     tle2: "2 41601  96.9437 340.0982 0002351 151.6239 208.5136 15.38489061580627",
-    color: "#7ee0d6",
+    color: "#a1a1aa",
     vhr: true,
   },
   {
@@ -52,7 +52,7 @@ export const SATELLITES: SatelliteSpec[] = [
     band: "VHR optical",
     tle1: "1 39418U 13066C   26316.10560736  .00002654  00000+0  15032-3 0  9997",
     tle2: "2 39418  97.3624   0.7005 0021711 157.8647 202.3527 15.13665481710852",
-    color: "#5ec4b8",
+    color: "#737373",
     vhr: true,
   },
   {
@@ -65,7 +65,7 @@ export const SATELLITES: SatelliteSpec[] = [
     band: "Wide-area MSI",
     tle1: "1 40697U 15028A   26315.62715235  .00000295  00000+0  12902-3 0  9992",
     tle2: "2 40697  98.5619  28.3134 0001181  97.1672 262.9645 14.30821442594810",
-    color: "#8b9cff",
+    color: "#9ca3af",
     vhr: false,
   },
   {

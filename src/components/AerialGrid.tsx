@@ -1,9 +1,15 @@
 "use client";
 
-import { AERIAL_MODEL_LINE, AERIAL_TILES, aerialTotals, detStyle } from "@/lib/aerial";
-import type { AerialDetection, AerialImage } from "@/lib/aerial";
+import {
+  AERIAL_ATTRIBUTION,
+  AERIAL_HERO,
+  AERIAL_MODEL_LINE,
+  aerialTotals,
+  detStyle,
+} from "@/lib/aerial";
+import type { AerialDetection } from "@/lib/aerial";
 
-function DetectionMark({
+export function DetectionMark({
   d,
   width,
   height,
@@ -60,26 +66,17 @@ function DetectionMark({
   );
 }
 
-function AerialTile({
-  code,
-  label,
-  src,
-  image,
-}: {
-  code: string;
-  label: string;
-  src: string;
-  image: AerialImage;
-}) {
+export function AerialGrid() {
+  const { image, src, label } = AERIAL_HERO;
   const n = image.detections.length;
-  const { car, "truck/van": trucks, "house/building": dwellings } = image.counts;
+  const { cars, trucks, buildings } = aerialTotals();
 
   return (
-    <div className="relative min-h-0 overflow-hidden border border-[var(--line)] bg-black">
+    <div data-aerial-grid="1" className="relative flex min-h-0 flex-1 flex-col bg-black">
       <svg
         viewBox={`0 0 ${image.width} ${image.height}`}
         className="h-full w-full"
-        preserveAspectRatio="xMidYMid meet"
+        preserveAspectRatio="xMidYMid slice"
         role="img"
         aria-label={`${label} detections`}
       >
@@ -90,54 +87,17 @@ function AerialTile({
             d={d}
             width={image.width}
             height={image.height}
-            delayMs={n > 1 ? (i / (n - 1)) * 1000 : 0}
+            delayMs={n > 1 ? (i / (n - 1)) * 800 : 0}
           />
         ))}
       </svg>
-      <div className="pointer-events-none absolute inset-x-0 top-0 bg-gradient-to-b from-black/70 to-transparent px-2 pb-6 pt-2">
-        <div className="flex items-center gap-2 font-sans text-[10px] tracking-[0.16em] text-[var(--accent)]">
-          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--cyan)]" />
-          {code} · {label}
-        </div>
-        <div className="mt-1 font-sans text-[10px] leading-snug text-[var(--ink)]">
-          Cars {car} · Trucks/vans {trucks} · Dwellings {dwellings} · Vehicles/dwelling{" "}
-          {image.cars_per_dwelling.toFixed(2)}
-        </div>
-        <div className="font-sans text-[9px] tracking-[0.08em] text-[var(--cyan)]">
-          {AERIAL_MODEL_LINE}
+      <div className="pointer-events-none absolute inset-x-0 top-0 bg-gradient-to-b from-black/70 to-transparent px-3 py-2">
+        <div className="font-sans text-[11px] text-[var(--ink)]">
+          Cars {cars}, Trucks/vans {trucks}, Building segments {buildings} · {AERIAL_MODEL_LINE}
         </div>
       </div>
-    </div>
-  );
-}
-
-export function AerialGrid() {
-  const totals = aerialTotals();
-  const vpd = totals.dwellings
-    ? (totals.cars + totals.trucks) / totals.dwellings
-    : 0;
-
-  return (
-    <div data-aerial-grid="1" className="flex min-h-0 flex-1 flex-col">
-      <div className="flex shrink-0 items-center justify-between border-b border-[var(--line)] bg-[var(--panel)] px-3 py-1.5">
-        <div className="font-sans text-[10px] tracking-[0.16em] text-[var(--accent)]">
-          ILLUSTRATIVE DETECTION RUN (REAL MODEL OUTPUT, SAMPLE IMAGERY)
-        </div>
-        <div className="font-sans text-[9px] text-[var(--muted)]">
-          CARS {totals.cars} · TRUCKS/VANS {totals.trucks} · DWELLINGS {totals.dwellings} · V/D{" "}
-          {vpd.toFixed(2)}
-        </div>
-      </div>
-      <div className="grid min-h-0 flex-1 grid-cols-2 grid-rows-2 gap-px bg-[var(--line)]">
-        {AERIAL_TILES.map((tile) => (
-          <AerialTile
-            key={tile.id}
-            code={tile.code}
-            label={tile.label}
-            src={tile.src}
-            image={tile.image}
-          />
-        ))}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent px-3 py-1.5">
+        <div className="font-sans text-[10px] text-white/70">{AERIAL_ATTRIBUTION}</div>
       </div>
     </div>
   );

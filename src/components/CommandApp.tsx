@@ -1,12 +1,17 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { HawkMark } from "@/components/HawkMark";
 import { GlobeView } from "@/components/GlobeView";
 import { StreetMap } from "@/components/StreetMap";
 import { IntelStage } from "@/components/IntelStage";
+import { Site3DView } from "@/components/Site3DView";
+import { ModeToggle } from "@/components/ModeToggle";
+import { PipelineStrip } from "@/components/PipelineStrip";
+import { CompsPanel } from "@/components/CompsPanel";
+import { CLAIM_HEADLINE, type WatchMode } from "@/lib/watch";
 import { SATELLITES, getSatellite } from "@/lib/satellites";
-import { FITZROVIA, siteFromClick } from "@/lib/sites";
+import { asdaSite, FITZROVIA, siteFromClick } from "@/lib/sites";
 import { formatEta, formatPassClock, nextPass } from "@/lib/orbits";
 import type { Phase, SatelliteId, Site } from "@/lib/types";
 
@@ -17,20 +22,29 @@ declare global {
 }
 
 const TASK_STEPS = [
-  "UPLINK ESTABLISHED",
-  "TASKING WINDOW LOCKED",
-  "SLEWING PAYLOAD",
-  "ACQUISITION",
-  "KA-BAND DOWNLINK",
-  "VLM INFERENCE",
+  "Uplink established",
+  "Tasking window locked",
+  "Slewing payload",
+  "Acquisition",
+  "Ka-band downlink",
+  "VLM inference",
 ];
 
 export function CommandApp() {
   const [phase, setPhase] = useState<Phase>("survey");
-  const [site, setSite] = useState<Site | null>(null);
+  const [site, setSite] = useState<Site | null>(() =>
+    siteFromClick(FITZROVIA.lat, FITZROVIA.lon),
+  );
   const [satId, setSatId] = useState<SatelliteId | null>(null);
   const [taskStep, setTaskStep] = useState(0);
   const [departing, setDeparting] = useState(false);
+  const [inspect3d, setInspect3d] = useState(false);
+  const [mode, setMode] = useState<WatchMode>("claim");
+  const [focusStep, setFocusStep] = useState<string | null>(null);
+  const phaseRef = useRef(phase);
+  const modeRef = useRef(mode);
+  phaseRef.current = phase;
+  modeRef.current = mode;
 
   const sat = satId ? getSatellite(satId) : null;
   const pass = useMemo(() => {
@@ -46,7 +60,11 @@ export function CommandApp() {
 
   useEffect(() => {
     window.__hawkSkipToIntel = () => {
-      setSite(siteFromClick(FITZROVIA.lat, FITZROVIA.lon));
+      setSite(
+        modeRef.current === "competitor"
+          ? asdaSite()
+          : siteFromClick(FITZROVIA.lat, FITZROVIA.lon),
+      );
       setSatId("wv3");
       setDeparting(false);
       setPhase("intel");
@@ -87,14 +105,45 @@ export function CommandApp() {
 
   function pickSat(id: SatelliteId) {
     setSatId(id);
-    setPhase("confirm");
+  }
+
+  function setWatchMode(next: WatchMode) {
+    setMode(next);
+    setFocusStep(null);
+    setDeparting(false);
+    if (next === "competitor") {
+      setSite(asdaSite());
+      if (phase === "intel") {
+        if (!satId) setSatId("wv3");
+      } else {
+        setSatId(null);
+        setPhase("survey");
+      }
+      return;
+    }
+    setSite(siteFromClick(FITZROVIA.lat, FITZROVIA.lon));
+    if (phase !== "intel") {
+      setSatId(null);
+      setPhase("survey");
+    }
+  }
+
+  function runCapture() {
+    if (phase === "survey") {
+      beginAscent();
+      return;
+    }
+    setSite(mode === "competitor" ? asdaSite() : siteFromClick(FITZROVIA.lat, FITZROVIA.lon));
+    setSatId("wv3");
+    setDeparting(false);
+    setPhase("intel");
   }
 
   const confirmOpen = phase === "confirm" && sat && site;
   const intel = phase === "intel" && site && sat;
   const space = phase === "orbit" || phase === "confirm" || phase === "tasking";
   const floatPanel =
-    "border border-[var(--line)] bg-[var(--panel)]/82 backdrop-blur-md shadow-[0_12px_40px_rgba(0,0,0,0.45)]";
+    "border border-[var(--line)] bg-[var(--panel)]/92 backdrop-blur-md shadow-[0_12px_40px_rgba(0,0,0,0.45)]";
 
   return (
     <div
@@ -102,6 +151,8 @@ export function CommandApp() {
       data-departing={departing ? "1" : "0"}
       data-site={site?.id ?? ""}
       data-space={space ? "1" : "0"}
+      data-inspect3d={inspect3d ? "1" : "0"}
+      data-mode={mode}
       className="relative h-dvh w-dvw overflow-hidden bg-[var(--bg)] text-[var(--ink)]"
     >
       <div
@@ -116,6 +167,9 @@ export function CommandApp() {
             selectedSat={satId}
             onPickSite={pickSite}
             onPickSatellite={pickSat}
+            onNadirLocked={() => {
+              if (phaseRef.current === "orbit") setPhase("confirm");
+            }}
           />
         )}
         <div
@@ -130,6 +184,7 @@ export function CommandApp() {
             site={site}
             departing={departing}
             followSite={phase === "survey"}
+            forceSatellite={mode === "competitor"}
             onPickSite={pickSite}
             onDeparted={() => {
               setDeparting(false);
@@ -138,44 +193,30 @@ export function CommandApp() {
           />
         </div>
         {phase === "survey" && !site && (
-          <div className="pointer-events-none absolute bottom-5 left-1/2 z-20 -translate-x-1/2 border border-[var(--accent)]/40 bg-black/60 px-3 py-1 font-sans text-[10px] tracking-[0.18em] text-[var(--accent)]">
-            SCROLL · ZOOM · CLICK ANYWHERE TO SELECT A SITE
-          </div>
-        )}
-        {phase === "survey" && site && (
-          <div className="absolute bottom-5 left-1/2 z-30 -translate-x-1/2">
-            <button
-              type="button"
-              disabled={departing}
-              onClick={beginAscent}
-              className="bg-[var(--accent)] px-4 py-2 font-sans text-[11px] tracking-[0.18em] text-black shadow-[0_8px_24px_rgba(0,0,0,0.45)] disabled:opacity-60"
-            >
-              {departing ? "ASCENDING…" : "TASK SATELLITE"}
-            </button>
+          <div className="pointer-events-none absolute bottom-5 left-1/2 z-20 -translate-x-1/2 border border-[var(--line)] bg-black/70 px-3 py-1 font-sans text-[11px] text-[var(--ink)]">
+            Scroll, zoom, click anywhere to select a site
           </div>
         )}
         {phase === "orbit" && (
-          <div className="pointer-events-none absolute bottom-5 left-1/2 z-20 -translate-x-1/2 border border-[var(--cyan)]/40 bg-black/55 px-3 py-1 font-sans text-[10px] tracking-[0.18em] text-[var(--cyan)]">
-            DRAG TO ORBIT · CLICK A SATELLITE TO TASK
+          <div className="pointer-events-none absolute bottom-5 left-1/2 z-20 -translate-x-1/2 border border-[var(--line)] bg-black/70 px-3 py-1 font-sans text-[11px] text-[var(--ink)]">
+            Click a satellite to task
           </div>
         )}
         {confirmOpen && sat && site && (
-          <div className={`absolute right-[18.5rem] top-20 z-40 w-80 p-4 ${floatPanel} border-[var(--accent)]`}>
-            <div className="font-sans text-[11px] tracking-[0.22em] text-[var(--accent)]">
-              TASK CONFIRM
-            </div>
+          <div className={`absolute right-[18.5rem] top-[7.75rem] z-40 w-80 p-4 ${floatPanel}`}>
+            <div className="font-sans text-[12px] text-[var(--ink)]">Task confirm</div>
             <div className="mt-1 text-lg">{sat.name}</div>
             <dl className="mt-3 space-y-1 font-sans text-[11px] text-[var(--muted)]">
               <div className="flex justify-between">
-                <dt>RESOLUTION</dt>
+                <dt>Resolution</dt>
                 <dd className="text-[var(--ink)]">{sat.resolution}</dd>
               </div>
               <div className="flex justify-between">
-                <dt>BAND</dt>
+                <dt>Band</dt>
                 <dd className="text-[var(--ink)]">{sat.band}</dd>
               </div>
               <div className="flex justify-between">
-                <dt>NEXT PASS</dt>
+                <dt>Next pass</dt>
                 <dd className="text-[var(--ink)]">
                   {pass ? formatEta(pass.time) : "—"}
                 </dd>
@@ -187,13 +228,13 @@ export function CommandApp() {
                 </dd>
               </div>
               <div className="flex justify-between">
-                <dt>OFF-NADIR</dt>
+                <dt>Off-nadir</dt>
                 <dd className="text-[var(--ink)]">
                   {pass ? `${pass.offNadirDeg.toFixed(1)}°` : "—"}
                 </dd>
               </div>
               <div className="flex justify-between">
-                <dt>SITE</dt>
+                <dt>Site</dt>
                 <dd className="max-w-[9rem] truncate text-[var(--ink)]">{site.name}</dd>
               </div>
             </dl>
@@ -201,9 +242,9 @@ export function CommandApp() {
               <button
                 type="button"
                 onClick={() => setPhase("tasking")}
-                className="flex-1 bg-[var(--accent)] py-2 font-sans text-[12px] tracking-[0.2em] text-black"
+                className="flex-1 bg-[var(--accent)] py-2 font-sans text-[12px] text-black"
               >
-                TASK SATELLITE
+                Task satellite
               </button>
               <button
                 type="button"
@@ -211,28 +252,26 @@ export function CommandApp() {
                   setSatId(null);
                   setPhase("orbit");
                 }}
-                className="px-3 font-sans text-[10px] text-[var(--muted)]"
+                className="px-3 font-sans text-[12px] text-[var(--muted)]"
               >
-                ABORT
+                Abort
               </button>
             </div>
           </div>
         )}
         {phase === "tasking" && (
           <div className="absolute inset-0 z-40 flex items-center justify-center bg-black/45">
-            <div className={`w-96 p-5 ${floatPanel} border-[var(--cyan)]`}>
-              <div className="font-sans tracking-[0.22em] text-[var(--cyan)]">
-                COLLECTION IN FLIGHT
-              </div>
+            <div className={`w-96 p-5 ${floatPanel}`}>
+              <div className="font-sans text-[var(--ink)]">Collection in flight</div>
               <div className="mt-4 space-y-2">
                 {TASK_STEPS.map((s, i) => (
                   <div key={s} className="flex items-center gap-3 font-sans text-[11px]">
                     <span
                       className={
                         i < taskStep
-                          ? "text-[var(--accent)]"
+                          ? "text-[var(--ink)]"
                           : i === taskStep
-                            ? "text-[var(--cyan)]"
+                            ? "text-[var(--ink)]"
                             : "text-[var(--muted)]"
                       }
                     >
@@ -246,7 +285,7 @@ export function CommandApp() {
               </div>
               <div className="mt-4 h-1 bg-[var(--line)]">
                 <div
-                  className="h-full bg-[var(--cyan)] transition-all duration-500"
+                  className="h-full bg-[var(--accent)] transition-all duration-500"
                   style={{ width: `${(taskStep / TASK_STEPS.length) * 100}%` }}
                 />
               </div>
@@ -256,32 +295,103 @@ export function CommandApp() {
       </div>
 
       {intel && site && sat && (
-        <div className="absolute inset-0 z-20 flex flex-col bg-[var(--bg)] pt-14">
-          <IntelStage site={site} sat={sat} />
+        <div className="absolute inset-0 z-20 flex flex-col bg-[var(--bg)] pt-28">
+          <IntelStage
+            site={site}
+            sat={sat}
+            mode={mode}
+            focusStep={focusStep}
+            onFocusStep={setFocusStep}
+            onRunCapture={runCapture}
+          />
         </div>
       )}
 
-      <header className="pointer-events-none absolute inset-x-0 top-0 z-30 p-3">
-        <div className={`pointer-events-auto flex items-center justify-between px-4 py-2 ${floatPanel}`}>
-          <div className="flex items-center gap-3">
-            <HawkMark className="h-8 w-8" />
-            <div>
-              <div className="font-sans text-xl leading-none tracking-[0.18em] text-[var(--accent)]">
-                ASSET HAWK
-              </div>
-              <div className="font-sans text-[10px] tracking-[0.22em] text-[var(--muted)]">
-                ORBITAL OCCUPANCY INTELLIGENCE
-              </div>
+      {inspect3d && (
+        <div className="absolute inset-x-0 bottom-0 top-14 z-40 bg-[var(--bg)]">
+          <Site3DView site={site} onClose={() => setInspect3d(false)} />
+        </div>
+      )}
+
+      {!inspect3d && (
+        <div className="absolute inset-x-0 top-14 z-40 border-b border-[var(--line)] bg-[var(--panel)]">
+          <PipelineStrip
+            mode={mode}
+            phase={phase}
+            selectedStep={focusStep}
+            onPickStep={setFocusStep}
+          />
+        </div>
+      )}
+
+      <header className="absolute inset-x-0 top-0 z-50 flex h-14 items-center justify-between border-b border-[var(--line)] bg-[var(--panel)] px-4">
+        <div className="flex items-center gap-3">
+          <HawkMark className="h-8 w-8" />
+          <div>
+            <div className="font-sans text-lg leading-none text-[var(--ink)]">Asset Hawk</div>
+            <div className="mt-0.5 font-sans text-[10px] text-[var(--muted)]">
+              {mode === "competitor" ? "Watch a competitor" : CLAIM_HEADLINE}
             </div>
           </div>
         </div>
+        <ModeToggle mode={mode} onChange={setWatchMode} />
+        <div className="flex items-center gap-2">
+          {inspect3d ? (
+            <button
+              type="button"
+              onClick={() => setInspect3d(false)}
+              className="border border-[var(--ink)] px-4 py-2 font-sans text-[12px] text-[var(--ink)]"
+            >
+              Back to map
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setInspect3d(true)}
+              className="border border-[var(--ink)] px-4 py-2 font-sans text-[12px] text-[var(--ink)]"
+            >
+              3D view
+            </button>
+          )}
+          {phase === "survey" && site && !inspect3d && (
+            <button
+              type="button"
+              disabled={departing}
+              onClick={beginAscent}
+              className="bg-[var(--accent)] px-4 py-2 font-sans text-[12px] text-black disabled:opacity-60"
+            >
+              {departing
+                ? "Ascending…"
+                : mode === "competitor"
+                  ? "Run capture"
+                  : "Task satellite"}
+            </button>
+          )}
+        </div>
       </header>
 
-      {space && (
-        <aside className={`absolute bottom-3 right-3 top-16 z-30 w-[260px] overflow-y-auto ${floatPanel}`}>
-          <div className="px-3 py-3 font-sans text-[11px] tracking-[0.22em] text-[var(--accent)]">
-            CONSTELLATION
+      {focusStep === "comps" && mode === "claim" && !intel && (
+        <div
+          data-comps-overlay="1"
+          className={`absolute bottom-3 right-3 top-[7.75rem] z-40 w-[420px] overflow-y-auto p-3 ${floatPanel}`}
+        >
+          <div className="mb-2 flex items-center justify-between">
+            <span className="font-sans text-[10px] text-[var(--muted)]">Step 5</span>
+            <button
+              type="button"
+              onClick={() => setFocusStep(null)}
+              className="font-sans text-[11px] text-[var(--ink)]"
+            >
+              Close
+            </button>
           </div>
+          <CompsPanel />
+        </div>
+      )}
+
+      {space && (
+        <aside className={`absolute bottom-3 right-3 top-[7.75rem] z-30 w-[260px] overflow-y-auto ${floatPanel}`}>
+          <div className="px-3 py-3 font-sans text-[12px] text-[var(--ink)]">Constellation</div>
           {SATELLITES.map((s) => {
             const p = catalogPasses[s.id] ?? null;
             return (
@@ -297,7 +407,7 @@ export function CommandApp() {
                     {s.resolution} · {s.operator}
                   </div>
                 </div>
-                <div className="font-sans text-[10px] text-[var(--cyan)]">
+                <div className="font-sans text-[10px] text-[var(--muted)]">
                   {p ? formatEta(p.time) : "—"}
                 </div>
               </button>

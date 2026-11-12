@@ -1,0 +1,47 @@
+{
+  "site": {
+    "name": "ASDA Leyton Mills Superstore",
+    "retail_park": "Leyton Mills Retail Park",
+    "address": "1 Leyton Mills, Marshall Road, Leyton, London E10 5NH",
+    "lat": 51.55636,
+    "lng": -0.00901,
+    "coord_source": "OpenStreetMap Nominatim shop node (51.5563628, -0.0090093); address confirmed on the ASDA store locator (Marshall Road, Leyton E10 5NH). Open-air/surface car park confirmed by AccessAble."
+  },
+  "bounds": {
+    "north": 51.557070801828274,
+    "south": 51.554569299041376,
+    "west": -0.0116729736328125,
+    "east": -0.007649660110473633
+  },
+  "imagery": {
+    "size_m": 278.5,
+    "attribution": "Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community",
+    "date": "unknown (Esri mosaic; capture date not published on the XYZ tiles)"
+  },
+  "images": [
+    {
+      "file_annotated": "annotated.jpg",
+      "width": 1500,
+      "height": 1500,
+      "counts": {
+        "car": 154,
+        "truck/van": 13,
+        "vehicles": 167,
+        "vehicles_in_marked_bays": 139,
+        "vehicles_on_circulation": 28
+      },
+      "bays": {
+        "estimate": 917,
+        "method": "Four marked bay-grid polygons were traced on the z19 mosaic: the west tree-island lot (including the close-in bays along the store's west facade), the south marked lot, the east lot between the store and the adjacent retail shed, and the short-stay bays south of the store. Arterial/spine roads, the central roundabout and the neighbouring shed roof were excluded. Total marked area 27496 m² ÷ 30 m² per bay = 917 bays (west 11352 m² → 378; south 7232 m² → 241; east 6536 m² → 218; front 2375 m² → 79). 30 m² per bay (including aisles and tree islands) is used rather than the 25 m² efficient-lot rule of thumb because this retail-park layout has large tree islands and wide aisles; 25 m² would imply 1100 bays, above the published figure of roughly 890 spaces for the whole Leyton Mills Retail Park (shared by ASDA, TK Maxx and other units; carparkcheck.co.uk, not independently verified). 917 bays is consistent with that published figure, given that this frame covers the main shared surface lots and not every peripheral service space.",
+        "m2_per_bay": 30
+      },
+      "occupancy": {
+        "vehicles": 167,
+        "bays": 917,
+        "fill_pct": 18.2,
+        "fill_pct_rounded": 18,
+        "definition": "vehicles inside the customer car-park polygon / estimated bays. A small number of vehicles sit on internal aisles or the spine road rather than in a marked stall."
+      }
+    }
+  ]
+}

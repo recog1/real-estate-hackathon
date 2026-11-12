@@ -1,6 +1,6 @@
-import raw from "@/data/detections.json";
+import raw from "@/data/site-detections.json";
 
-export type AerialLabel = "car" | "truck/van" | "house/building" | "person";
+export type AerialLabel = "car" | "truck/van" | "building" | "person";
 
 export type AerialDetection = {
   label: string;
@@ -16,20 +16,31 @@ export type AerialImage = {
   file_bw: string;
   width: number;
   height: number;
+  bounds?: {
+    north: number;
+    south: number;
+    east: number;
+    west: number;
+  };
+  center?: [number, number];
+  size_m?: number;
   models_used: string[];
   counts: {
     car: number;
     "truck/van": number;
     person: number;
-    "house/building": number;
+    building: number;
   };
-  cars_per_dwelling: number;
+  cars_per_building?: number;
   detections: AerialDetection[];
 };
 
 export type AerialRun = {
-  generated: string;
   models: Record<string, string>;
+  imagery?: {
+    source: string;
+    attribution: string;
+  };
   images: AerialImage[];
 };
 
@@ -37,24 +48,25 @@ export const AERIAL_RUN = raw as unknown as AerialRun;
 
 export const AERIAL_MODEL_LINE = "YOLO11m-OBB (DOTA) + OWLv2";
 
-export const AERIAL_TILES = AERIAL_RUN.images.map((image, index) => ({
-  id: ["a", "b", "c", "d"][index] as "a" | "b" | "c" | "d",
-  code: `T-${index + 1}`,
-  label: `Aerial ${index + 1}`,
-  src: `/intel/${image.file_bw}`,
-  image,
-}));
+export const AERIAL_ATTRIBUTION = "Imagery: Esri, Maxar, Earthstar Geographics";
+
+const heroImage = AERIAL_RUN.images[0]!;
+
+export const AERIAL_HERO = {
+  id: "oxford" as const,
+  code: "T-1",
+  label: "Oxford Circus",
+  src: `/intel/${heroImage.file_bw}`,
+  image: heroImage,
+};
 
 export function aerialTotals() {
-  return AERIAL_TILES.reduce(
-    (acc, tile) => {
-      acc.cars += tile.image.counts.car;
-      acc.trucks += tile.image.counts["truck/van"];
-      acc.dwellings += tile.image.counts["house/building"];
-      return acc;
-    },
-    { cars: 0, trucks: 0, dwellings: 0 },
-  );
+  const { counts } = AERIAL_HERO.image;
+  return {
+    cars: counts.car,
+    trucks: counts["truck/van"],
+    buildings: counts.building,
+  };
 }
 
 export function detStyle(label: string): {
