@@ -8,7 +8,7 @@ import { AerialGrid } from "@/components/AerialGrid";
 import { CompetitorCapture } from "@/components/CompetitorCapture";
 import { CompetitorPanel } from "@/components/CompetitorPanel";
 import { CompsPanel } from "@/components/CompsPanel";
-import { buildCompetitorLog, buildLogScript } from "@/lib/terminal";
+import { buildLogScript } from "@/lib/terminal";
 import { AERIAL_MODEL_LINE, aerialTotals } from "@/lib/aerial";
 import { useCompetitorSite } from "@/lib/competitor";
 import type { WatchMode } from "@/lib/watch";
@@ -153,11 +153,8 @@ export function IntelStage({
   const totals = useMemo(() => aerialTotals(), []);
   const competitor = useCompetitorSite();
   const logs = useMemo(
-    () =>
-      mode === "competitor"
-        ? buildCompetitorLog(site, sat, competitor.site)
-        : buildLogScript(site, sat),
-    [site, sat, mode, competitor.site],
+    () => (mode === "competitor" ? [] : buildLogScript(site, sat)),
+    [site, sat, mode],
   );
 
   useEffect(() => {
@@ -165,12 +162,13 @@ export function IntelStage({
   }, [focusStep]);
 
   useEffect(() => {
+    if (mode === "competitor") return;
     setVisible(1);
     const iv = setInterval(() => {
       setVisible((n) => Math.min(logs.length, n + 1));
     }, 380);
     return () => clearInterval(iv);
-  }, [logs]);
+  }, [logs, mode]);
 
   return (
     <div className="flex min-h-0 flex-1">
@@ -184,30 +182,23 @@ export function IntelStage({
         ) : (
           <AerialGrid />
         )}
-        <div className="terminal-log h-[7.5rem] shrink-0 overflow-hidden border-t border-[var(--line)] bg-black text-[11px] leading-5 text-[var(--muted)]">
-          <div className="flex items-center justify-between border-b border-[var(--line)] px-3 py-1 text-[10px] text-[var(--ink)]">
-            <span>
-              {mode === "competitor" ? "Collection log · ASDA Leyton Mills" : "Collection log"}
-            </span>
-            <span className="text-[var(--muted)]">
-              {mode === "competitor"
-                ? competitor.site?.vehicles != null &&
-                  competitor.site.cars != null &&
-                  competitor.site.trucks != null &&
-                  competitor.site.bays != null &&
-                  competitor.site.fillPct != null
-                  ? `${competitor.site.vehicles} vehicles · ${competitor.site.cars} cars · ${competitor.site.trucks} vans · ~${competitor.site.bays} bays · fill ${Math.round(competitor.site.fillPct)}%`
-                  : "Run capture"
-                : `Cars ${totals.cars} · Trucks/vans ${totals.trucks} · Building segments ${totals.buildings} · ${AERIAL_MODEL_LINE}`}
-            </span>
+        {mode !== "competitor" && (
+          <div className="terminal-log h-[7.5rem] shrink-0 overflow-hidden border-t border-[var(--line)] bg-black text-[11px] leading-5 text-[var(--muted)]">
+            <div className="flex items-center justify-between border-b border-[var(--line)] px-3 py-1 text-[10px] text-[var(--ink)]">
+              <span>Collection log</span>
+              <span className="text-[var(--muted)]">
+                Cars {totals.cars} · Trucks/vans {totals.trucks} · Building segments{" "}
+                {totals.buildings} · {AERIAL_MODEL_LINE}
+              </span>
+            </div>
+            <div className="h-full overflow-hidden px-3 py-1">
+              {logs.slice(Math.max(0, visible - 6), visible).map((line, i) => (
+                <div key={`${visible}-${i}`}>{line}</div>
+              ))}
+              <div className="animate-pulse">▍</div>
+            </div>
           </div>
-          <div className="h-full overflow-hidden px-3 py-1">
-            {logs.slice(Math.max(0, visible - 6), visible).map((line, i) => (
-              <div key={`${visible}-${i}`}>{line}</div>
-            ))}
-            <div className="animate-pulse">▍</div>
-          </div>
-        </div>
+        )}
       </div>
       {mode === "competitor" ? (
         <aside className="flex w-[420px] shrink-0 flex-col border-l border-[var(--line)] bg-[var(--panel)]">
