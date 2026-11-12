@@ -8,6 +8,8 @@ import { geodeticAt, satrecOf } from "@/lib/orbits";
 import { propagate, gstime, eciToGeodetic, degreesLat, degreesLong } from "satellite.js";
 import type { Phase, SatelliteId, Site } from "@/lib/types";
 
+type CesiumNS = typeof import("cesium");
+
 type Props = {
   phase: Phase;
   site: Site | null;
@@ -15,6 +17,71 @@ type Props = {
   onPickSite: (lat: number, lon: number) => void;
   onPickSatellite: (id: SatelliteId) => void;
 };
+
+const ORBIT_HEADING = 42;
+const ORBIT_PITCH = -60;
+const ORBIT_RANGE_MIN = 6_000_000;
+const ORBIT_RANGE_MAX = 9_000_000;
+
+function framedCameraPose(Cesium: CesiumNS, site: Site, viewer: Viewer) {
+  const sitePos = Cesium.Cartesian3.fromDegrees(site.lon, site.lat, 0);
+  const now = Cesium.JulianDate.toDate(viewer.clock.currentTime);
+  const pts = [sitePos];
+  for (const spec of SATELLITES) {
+    const g = geodeticAt(spec, now);
+    if (!g) continue;
+    pts.push(Cesium.Cartesian3.fromDegrees(g.lon, g.lat, g.heightKm * 1000));
+  }
+  const sphere = Cesium.BoundingSphere.fromPoints(pts);
+  const range = Cesium.Math.clamp(
+    Math.max(ORBIT_RANGE_MIN, sphere.radius * 1.15),
+    ORBIT_RANGE_MIN,
+    ORBIT_RANGE_MAX,
+  );
+  const heading = Cesium.Math.toRadians(ORBIT_HEADING);
+  const pitch = Cesium.Math.toRadians(ORBIT_PITCH);
+  const enu = Cesium.Transforms.eastNorthUpToFixedFrame(sitePos);
+  const local = new Cesium.Cartesian3(
+    range * Math.cos(pitch) * Math.sin(heading),
+    range * Math.cos(pitch) * Math.cos(heading),
+    -range * Math.sin(pitch),
+  );
+  const destination = Cesium.Matrix4.multiplyByPoint(
+    enu,
+    local,
+    new Cesium.Cartesian3(),
+  );
+  const direction = Cesium.Cartesian3.normalize(
+    Cesium.Cartesian3.subtract(sitePos, destination, new Cesium.Cartesian3()),
+    new Cesium.Cartesian3(),
+  );
+  const right = Cesium.Cartesian3.normalize(
+    Cesium.Cartesian3.cross(direction, Cesium.Cartesian3.UNIT_Z, new Cesium.Cartesian3()),
+    new Cesium.Cartesian3(),
+  );
+  const up = Cesium.Cartesian3.normalize(
+    Cesium.Cartesian3.cross(right, direction, new Cesium.Cartesian3()),
+    new Cesium.Cartesian3(),
+  );
+  return { destination, direction, up, range };
+}
+
+function holdFramedView(viewer: Viewer, Cesium: CesiumNS, site: Site) {
+  viewer.trackedEntity = undefined;
+  viewer.selectedEntity = undefined;
+  viewer.camera.cancelFlight();
+  viewer.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
+  const pose = framedCameraPose(Cesium, site, viewer);
+  viewer.camera.setView({
+    destination: pose.destination,
+    orientation: { direction: pose.direction, up: pose.up },
+  });
+  const ctrl = viewer.scene.screenSpaceCameraController;
+  ctrl.inertiaSpin = 0;
+  ctrl.inertiaTranslate = 0;
+  ctrl.inertiaZoom = 0;
+  ctrl.enableCollisionDetection = false;
+}
 
 declare global {
   interface Window {
@@ -50,8 +117,25 @@ export function GlobeView({
     let handler: { destroy: () => void } | null = null;
     let resizeObs: ResizeObserver | null = null;
 
+    const waitForSize = (el: HTMLElement) =>
+      new Promise<void>((resolve) => {
+        if (el.clientWidth > 8 && el.clientHeight > 8) {
+          resolve();
+          return;
+        }
+        const ro = new ResizeObserver(() => {
+          if (el.clientWidth > 8 && el.clientHeight > 8) {
+            ro.disconnect();
+            resolve();
+          }
+        });
+        ro.observe(el);
+      });
+
     (async () => {
       window.CESIUM_BASE_URL = "/cesium/";
+      await waitForSize(host);
+      if (cancelled) return;
       const Cesium = await import("cesium");
       if (cancelled || !hostRef.current) return;
       cesiumRef.current = Cesium;
@@ -112,6 +196,13 @@ export function GlobeView({
       viewer.clock.shouldAnimate = true;
       viewer.clock.multiplier = 1;
       viewer.clock.currentTime = Cesium.JulianDate.now();
+      viewer.trackedEntity = undefined;
+      viewer.screenSpaceEventHandler.removeInputAction(
+        Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK,
+      );
+      viewer.scene.preUpdate.addEventListener(() => {
+        if (viewer.trackedEntity) viewer.trackedEntity = undefined;
+      });
 
       viewer.camera.setView({
         destination: Cesium.Cartesian3.fromDegrees(LONDON.lon, LONDON.lat, 14000),
@@ -204,6 +295,7 @@ export function GlobeView({
         const picked = viewer.scene.pick(click.position as never);
         const id: string | undefined = picked?.id?.id;
         if (id?.startsWith("sat-") && phaseRef.current !== "survey") {
+          viewer.trackedEntity = undefined;
           pickSat.current(id.replace("sat-", "") as SatelliteId);
           return;
         }
@@ -220,8 +312,13 @@ export function GlobeView({
         );
       }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
 
-      resizeObs = new ResizeObserver(() => viewer.resize());
+      const resize = () => {
+        viewer.resize();
+        viewer.scene.requestRender();
+      };
+      resizeObs = new ResizeObserver(resize);
       resizeObs.observe(hostRef.current);
+      requestAnimationFrame(resize);
     })();
 
     return () => {
@@ -261,18 +358,25 @@ export function GlobeView({
       if (sat) sat.show = true;
     }
 
-    viewer.clock.multiplier = 48;
+    viewer.trackedEntity = undefined;
+    viewer.selectedEntity = undefined;
+    viewer.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
+    viewer.clock.multiplier = 8;
     viewer.clock.shouldAnimate = true;
 
+    const pose = framedCameraPose(Cesium, site, viewer);
+    hostRef.current?.removeAttribute("data-orbit-settled");
+    viewer.camera.cancelFlight();
     viewer.camera.flyTo({
-      destination: Cesium.Cartesian3.fromDegrees(site.lon, site.lat, 9_800_000),
-      orientation: {
-        heading: Cesium.Math.toRadians(18),
-        pitch: Cesium.Math.toRadians(-38),
-        roll: 0,
-      },
+      destination: pose.destination,
+      orientation: { direction: pose.direction, up: pose.up },
       duration: 5.4,
       easingFunction: Cesium.EasingFunction.CUBIC_IN_OUT,
+      complete: () => {
+        holdFramedView(viewer, Cesium, site);
+        viewer.clock.multiplier = 8;
+        hostRef.current?.setAttribute("data-orbit-settled", "1");
+      },
     });
   }, [site]);
 
@@ -291,5 +395,11 @@ export function GlobeView({
     }
   }, [selectedSat]);
 
-  return <div ref={hostRef} className="globe-host h-full w-full" />;
+  return (
+    <div
+      ref={hostRef}
+      className="globe-host"
+      style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
+    />
+  );
 }
